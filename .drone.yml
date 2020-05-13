@@ -1,0 +1,26 @@
+---
+kind: pipeline
+type: docker
+name: cron
+
+steps:
+  - name: daily-update
+    image: alpine/git:latest
+    environment:
+      GH_TOKEN:
+        from_secret: github_token
+    commands:
+      - git remote set-url origin https://$GH_TOKEN@github.com/joxcat/stopcovid-mirror.git
+      - git pull origin master
+      - rm -rf accueil stopcovid-robertsdk-android stopcovid-robertsdk-ios
+      - git clone https://gitlab.inria.fr/stopcovid19/accueil.git
+      - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-android.git
+      - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-ios.git
+      - rm */.git
+      - git add .
+      - git diff-index --quiet HEAD || git commit -m "Mirroring $(date +"%Y-%m-%d")" && git push --set-upstream origin master
+
+trigger:
+  event:
+    - cron
+    - push
