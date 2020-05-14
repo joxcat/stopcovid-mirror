@@ -1,0 +1,23 @@
+Implementation modalities -- Change Log
+
+
+* Concerning section 4 on Generation of the Ephemeral Bluetooth Identifiers of [1]
+Change in the implementation:
+For the EBIDA,i (”Ephemeral Bluetooth IDentifier for A”), the 64-bit identifier generated for the epoch i as: EBIDA,i = ENC(KS,i | IDA)
+where ENC is a block-cipher with 64-bit block size. The choice made is skinny-cipher64 instead of 3-key TripleDES.
+
+
+* Concerning section 6.1 on the Upload Mechanism of [1]
+Current version:
+The LocalProximityList and the token given as a proof of the diagnostic, is upload in one upload/batch to the server. In order to guard against the possibility of reconstruction of the social graph, as specified in the security recommandation [2] provided by ANSSI, we have set up :
+	* a reverse proxy for all the APIs;
+	* a strict segmentation of the backend into several zones.  (Ref 2 in [2])
+	* a strict clean of meta-data (IP address, port, authentification token) in the frontend of the server. (Ref 4 in [2])
+TODO: implement a multiplexing queue with random delays in order to mix the treatment of LocalProximityList elements.
+
+* Concerning section 7 on the Exposure Status Request (ESR) of [1]
+Change in the implementation. 
+A application that receive a positive result after an ESR, will continue to do ESR, once a day. The EBIDs that where used in the computation of the risk received will not be take into consideration in oncoming ESRs. The privacy impact is the same as stopping to do ESR ans uninstalling/reinstalling an App.
+
+[1] ROBERT: ROBust and privacy-presERving proximity Tracing, PRIVATICS team, Inria, France Fraunhofer AISEC, Germany April 19, 2020 v1.0
+[2] Recommandations de l'ANSSI pour la sécurisation de StopCovid

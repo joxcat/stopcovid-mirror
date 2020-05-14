@@ -18,7 +18,7 @@ Le projet repose sur l’implémentation d’un protocole, ROBERT, qui a donné 
 * Les mises à jour de l’application seront disponibles au fur et à mesure.
 
 # Principe général de publication 
-Pour permettre aux différentes communautés de développeurs et de spécialistes d’expertiser les algorithmes implémentés et la façon dont cette application est programmée, en particulier si elle met en œuvre correctement le protocole ROBERT, le code source est publié sur [https://gitlab.inria.fr/stopcovid19/accueil](https://gitlab.inria.fr/stopcovid19/accueil). Le code source présenté est le résultat d’un processus de développement collaboratif impliquant de nombreuses personnes et organisations au sein de l’équipe-projet StopCovid.
+Pour permettre aux différentes communautés de développeurs et de spécialistes d’expertiser les algorithmes implémentés et la façon dont cette application est programmée, en particulier si elle met en œuvre correctement le protocole ROBERT, le code source est publié sur [https://gitlab.inria.fr/stopcovid19/](https://gitlab.inria.fr/stopcovid19/). Le code source présenté est le résultat d’un processus de développement collaboratif impliquant de nombreuses personnes et organisations au sein de l’équipe-projet StopCovid.
 
 Ce processus de développement collaboratif, qui a été contraint par l’agenda du projet, va s’ouvrir progressivement pour permettre de proposer des évolutions à l’application, de signaler des bugs, de proposer des changements pour la documentation et de suivre la prise en compte ou non de ces propositions. Pour ce faire, le choix de la plateforme Gitlab d’Inria a été retenu.
 
