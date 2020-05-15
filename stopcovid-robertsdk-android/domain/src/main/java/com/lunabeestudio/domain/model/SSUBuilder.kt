@@ -11,6 +11,7 @@
 package com.lunabeestudio.domain.model
 
 import android.util.Base64
+import com.lunabeestudio.domain.extension.safeDestroy
 import com.lunabeestudio.domain.extension.unixTimeMsToNtpTimeS
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -20,11 +21,10 @@ class SSUBuilder(
     private val ephemeralBluetoothIdentifier: EphemeralBluetoothIdentifier,
     key: ByteArray
 ) {
-    private val mac: Mac
+    private val secretKeySpec = SecretKeySpec(key, settings.algorithm)
+    private val mac: Mac = Mac.getInstance(settings.algorithm)
 
     init {
-        val secretKeySpec = SecretKeySpec(key, settings.algorithm)
-        mac = Mac.getInstance(settings.algorithm)
         mac.init(secretKeySpec)
     }
 
@@ -46,6 +46,8 @@ class SSUBuilder(
 
         val message = ephemeralBluetoothIdentifier.ebid + timeByteArray
         val macByteArray = mac.doFinal(byteArrayOf(settings.prefix) + message)
+
+        secretKeySpec.safeDestroy()
 
         val ebid = Base64.encodeToString(ephemeralBluetoothIdentifier.ebid, Base64.NO_WRAP)
         val time = Base64.encodeToString(timeByteArray, Base64.NO_WRAP)

@@ -17,3 +17,9 @@ fun ByteArray.randomize() {
         set(i, SecureRandom().nextInt().toByte())
     }
 }
+
+fun <T> ByteArray.use(block: (ByteArray) -> T): T {
+    val res = block(this)
+    this.randomize()
+    return res
+}

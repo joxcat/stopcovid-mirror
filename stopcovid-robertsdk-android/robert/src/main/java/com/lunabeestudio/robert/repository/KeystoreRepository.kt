@@ -10,40 +10,17 @@
 
 package com.lunabeestudio.robert.repository
 
+import com.lunabeestudio.domain.model.ClientFilteringAlgorithmConfiguration
 import com.lunabeestudio.robert.datasource.LocalKeystoreDataSource
-import com.lunabeestudio.robert.extension.randomize
-import com.lunabeestudio.robert.model.NoSharedKeyException
-import com.lunabeestudio.robert.model.RobertResultData
 
 internal class KeystoreRepository(
     private val keystoreDataSource: LocalKeystoreDataSource) {
 
-    private var cachedSharedKey: ByteArray? = null
-
-    fun saveSharedKey(sharedKey: ByteArray) {
-        clearCachedKey()
-        keystoreDataSource.saveSharedKey(sharedKey)
-    }
-
-    fun getSharedKey(): RobertResultData<ByteArray> {
-        if (cachedSharedKey == null) {
-            val result = keystoreDataSource.getSharedKey()
-            when (result) {
-                is RobertResultData.Success -> cachedSharedKey = result.data
-                is RobertResultData.Failure -> return result
-
-            }
+    var sharedKey: ByteArray?
+        get() = keystoreDataSource.sharedKey
+        set(value) {
+            keystoreDataSource.sharedKey = value
         }
-
-        cachedSharedKey?.let {
-            return RobertResultData.Success(it)
-        } ?: return RobertResultData.Failure(NoSharedKeyException("cachedSharedKey unexpectedly null"))
-    }
-
-    fun removeSharedKey() {
-        clearCachedKey()
-        keystoreDataSource.removeSharedKey()
-    }
 
     var timeStart: Long?
         get() = keystoreDataSource.timeStart
@@ -75,8 +52,9 @@ internal class KeystoreRepository(
             keystoreDataSource.isSick = value
         }
 
-    private fun clearCachedKey() {
-        cachedSharedKey?.randomize()
-        cachedSharedKey = null
-    }
+    var filteringInfo: List<ClientFilteringAlgorithmConfiguration>?
+        get() = keystoreDataSource.filteringInfo
+        set(value) {
+            keystoreDataSource.filteringInfo = value
+        }
 }

@@ -10,6 +10,7 @@
 
 package com.lunabeestudio.domain.model
 
+import com.lunabeestudio.domain.extension.safeDestroy
 import com.lunabeestudio.domain.extension.unixTimeMsToNtpTimeS
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -19,31 +20,43 @@ class HelloBuilder(
     private val ephemeralBluetoothIdentifier: EphemeralBluetoothIdentifier,
     key: ByteArray
 ) {
-    private val mac: Mac
+    val isValidUntil: Long = ephemeralBluetoothIdentifier.ntpEndTimeS
+
+    private val secretKeySpec: SecretKeySpec = SecretKeySpec(key, settings.algorithm)
+    private val mac: Mac = Mac.getInstance(settings.algorithm)
 
     init {
-        val secretKeySpec = SecretKeySpec(key, settings.algorithm)
-        mac = Mac.getInstance(settings.algorithm)
         mac.init(secretKeySpec)
+    }
+
+    private fun isValid(time: Long): Boolean {
+        return ephemeralBluetoothIdentifier.ntpStartTimeS <= time && time < ephemeralBluetoothIdentifier.ntpEndTimeS
     }
 
     /**
      * Build an [Hello] with the given timestamp
      *
      * @param currentTimeMillis Unix timestamp in millis
-     * @return A complete [Hello] ready to send
+     * @return A complete [Hello] ready to send or null if the builder is not valid for the [currentTimeMillis]
+     * @throws IllegalArgumentException if the [currentTimeMillis] does not match the ephemeralBluetoothIdentifier validity frame
      */
     fun build(currentTimeMillis: Long = System.currentTimeMillis()): Hello {
         val time = currentTimeMillis.unixTimeMsToNtpTimeS()
 
-        val timeByteArray = byteArrayOf(
-            (time shr 8).toByte(),
-            time.toByte()
-        )
+        return if (isValid(time)) {
+            val timeByteArray = byteArrayOf(
+                (time shr 8).toByte(),
+                time.toByte()
+            )
 
-        val message = ephemeralBluetoothIdentifier.ecc + ephemeralBluetoothIdentifier.ebid + timeByteArray
-        val mac = mac.doFinal(byteArrayOf(settings.prefix) + message).copyOfRange(0, 5)
+            val message = ephemeralBluetoothIdentifier.ecc + ephemeralBluetoothIdentifier.ebid + timeByteArray
+            val mac = mac.doFinal(byteArrayOf(settings.prefix) + message).copyOfRange(0, 5)
 
-        return Hello(ephemeralBluetoothIdentifier.ecc, ephemeralBluetoothIdentifier.ebid, timeByteArray, mac)
+            secretKeySpec.safeDestroy()
+
+            Hello(ephemeralBluetoothIdentifier.ecc, ephemeralBluetoothIdentifier.ebid, timeByteArray, mac)
+        } else {
+            throw IllegalArgumentException("The provided time is not valid for the ebid.")
+        }
     }
 }

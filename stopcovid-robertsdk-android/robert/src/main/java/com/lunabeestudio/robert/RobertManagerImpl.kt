@@ -19,7 +19,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.lunabeestudio.domain.RobertConstant
 import com.lunabeestudio.domain.extension.unixTimeMsToNtpTimeS
-import com.lunabeestudio.domain.model.Hello
 import com.lunabeestudio.domain.model.HelloBuilder
 import com.lunabeestudio.domain.model.HelloSettings
 import com.lunabeestudio.domain.model.LocalProximity
@@ -30,6 +29,8 @@ import com.lunabeestudio.robert.datasource.LocalEphemeralBluetoothIdentifierData
 import com.lunabeestudio.robert.datasource.LocalKeystoreDataSource
 import com.lunabeestudio.robert.datasource.LocalLocalProximityDataSource
 import com.lunabeestudio.robert.datasource.RemoteServiceDataSource
+import com.lunabeestudio.robert.extension.use
+import com.lunabeestudio.robert.model.NoEphemeralBluetoothIdentifierFound
 import com.lunabeestudio.robert.model.NoEphemeralBluetoothIdentifierFoundForEpoch
 import com.lunabeestudio.robert.model.RobertResult
 import com.lunabeestudio.robert.model.RobertResultData
@@ -66,7 +67,7 @@ class RobertManagerImpl(
     }
 
     override val isRegistered: Boolean
-        get() = keystoreRepository.getSharedKey() is RobertResultData.Success
+        get() = keystoreRepository.sharedKey != null
 
     override val isProximityActive: Boolean
         get() = keystoreRepository.proximityActive ?: false
@@ -82,15 +83,16 @@ class RobertManagerImpl(
 
     override suspend fun register(application: RobertApplication, captcha: String): RobertResult {
         ephemeralBluetoothIdentifierRepository.removeAll()
-        keystoreRepository.removeSharedKey()
+        keystoreRepository.sharedKey = null
         keystoreRepository.timeStart = null
 
         val result = remoteServiceRepository.register(captcha)
         return when (result) {
             is RobertResultData.Success -> {
                 ephemeralBluetoothIdentifierRepository.save(*result.data.ephemeralBluetoothIdentifierList.toTypedArray())
-                keystoreRepository.saveSharedKey(Base64.decode(result.data.key, Base64.NO_WRAP))
+                keystoreRepository.sharedKey = Base64.decode(result.data.key, Base64.NO_WRAP)
                 keystoreRepository.timeStart = result.data.timeStart
+                keystoreRepository.filteringInfo = result.data.filterings
                 startStatusWorker(application.getAppContext())
                 activateProximity(application)
                 RobertResult.Success()
@@ -156,37 +158,27 @@ class RobertManagerImpl(
 
     private fun getSSU(prefix: Byte): RobertResultData<ServerStatusUpdate> {
         val ephemeralBluetoothIdentifier = ephemeralBluetoothIdentifierRepository.getAll().lastOrNull()
-        val sharedKeyResult = keystoreRepository.getSharedKey()
 
-        return when {
-            sharedKeyResult is RobertResultData.Success && ephemeralBluetoothIdentifier != null -> {
-                val ssuBuilder = SSUBuilder(SSUSettings(prefix = prefix),
-                    ephemeralBluetoothIdentifier,
-                    sharedKeyResult.data)
-                val ssu = ssuBuilder.build()
-                RobertResultData.Success(ssu)
-            }
-            sharedKeyResult is RobertResultData.Failure -> RobertResultData.Failure(sharedKeyResult.error)
-            ephemeralBluetoothIdentifier == null -> RobertResultData.Failure(NoEphemeralBluetoothIdentifierFoundForEpoch())
-            else -> RobertResultData.Failure(RobertUnknownException())
+        return if (ephemeralBluetoothIdentifier != null) {
+            keystoreRepository.sharedKey?.use { key ->
+                val ssuBuilder = SSUBuilder(SSUSettings(prefix = prefix), ephemeralBluetoothIdentifier, key)
+                RobertResultData.Success(ssuBuilder.build())
+            } ?: RobertResultData.Failure(RobertUnknownException())
+        } else {
+            RobertResultData.Failure(NoEphemeralBluetoothIdentifierFound())
         }
     }
 
-    override fun getCurrentHello(): RobertResultData<Hello> {
+    override fun getCurrentHelloBuilder(): RobertResultData<HelloBuilder> {
         val ephemeralBluetoothIdentifier = ephemeralBluetoothIdentifierRepository.getForTime()
-        val sharedKeyResult = keystoreRepository.getSharedKey()
 
-        return when {
-            sharedKeyResult is RobertResultData.Success && ephemeralBluetoothIdentifier != null -> {
-                val helloBuilder = HelloBuilder(HelloSettings(),
-                    ephemeralBluetoothIdentifier,
-                    sharedKeyResult.data)
-                val hello = helloBuilder.build()
-                RobertResultData.Success(hello)
-            }
-            sharedKeyResult is RobertResultData.Failure -> RobertResultData.Failure(sharedKeyResult.error)
-            ephemeralBluetoothIdentifier == null -> RobertResultData.Failure(NoEphemeralBluetoothIdentifierFoundForEpoch())
-            else -> RobertResultData.Failure(RobertUnknownException())
+        return if (ephemeralBluetoothIdentifier != null) {
+            keystoreRepository.sharedKey?.use { key ->
+                val helloBuilder = HelloBuilder(HelloSettings(), ephemeralBluetoothIdentifier, key)
+                RobertResultData.Success(helloBuilder)
+            } ?: RobertResultData.Failure(RobertUnknownException())
+        } else {
+            RobertResultData.Failure(NoEphemeralBluetoothIdentifierFoundForEpoch())
         }
     }
 
@@ -226,7 +218,7 @@ class RobertManagerImpl(
                         deactivateProximity(application)
                         ephemeralBluetoothIdentifierRepository.removeAll()
                         localProximityRepository.removeAll()
-                        keystoreRepository.removeSharedKey()
+                        keystoreRepository.sharedKey = null
                         keystoreRepository.timeStart = null
                         keystoreRepository.atRisk = null
                         keystoreRepository.lastExposureTimeframe = null

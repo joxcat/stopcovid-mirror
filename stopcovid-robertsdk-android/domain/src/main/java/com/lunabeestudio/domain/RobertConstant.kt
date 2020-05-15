@@ -12,6 +12,7 @@ package com.lunabeestudio.domain
 
 object RobertConstant {
     const val EPOCH_DURATION_S: Int = 15 * 60
+    const val HELLO_REFRESH_MAX_DELAY_MS: Long = 3 * 60 * 1000
 
     object PREFIX {
         const val C1: Byte = 0b00000001

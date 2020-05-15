@@ -10,17 +10,14 @@
 
 package com.lunabeestudio.robert.datasource
 
-import com.lunabeestudio.robert.model.RobertResultData
+import com.lunabeestudio.domain.model.ClientFilteringAlgorithmConfiguration
 
 interface LocalKeystoreDataSource {
-
-    fun saveSharedKey(value: ByteArray)
-    fun getSharedKey(): RobertResultData<ByteArray>
-    fun removeSharedKey()
-
+    var sharedKey: ByteArray?
     var timeStart: Long?
     var atRisk: Boolean?
     var lastExposureTimeframe: Int?
     var proximityActive: Boolean?
     var isSick: Boolean?
+    var filteringInfo: List<ClientFilteringAlgorithmConfiguration>?
 }

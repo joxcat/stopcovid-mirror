@@ -19,7 +19,6 @@ import com.lunabeestudio.domain.model.HelloBuilder
 import com.lunabeestudio.domain.model.HelloSettings
 import org.junit.runner.RunWith
 import java.nio.ByteBuffer
-import java.util.Base64
 
 @RunWith(ZohhakRunner::class)
 class HelloBuilderTest {
@@ -32,7 +31,7 @@ class HelloBuilderTest {
         ebid: String,
         key: String,
         currentTimeMillis: Long,
-        expected: Hello) {
+        expected: Hello?) {
 
         val buffer = ByteBuffer
             .allocate(8)
@@ -41,7 +40,10 @@ class HelloBuilderTest {
         buffer.flip()
 
         val builder = HelloBuilder(HelloSettings(),
-            EphemeralBluetoothIdentifier(0, 0, byteArrayOf(ecc.toByte(16)), buffer.array()),
+            EphemeralBluetoothIdentifier(ntpStartTimeS = 6485025595,
+                ntpEndTimeS = 6485025596,
+                ecc = byteArrayOf(ecc.toByte(16)),
+                ebid = buffer.array()),
             key.toByteArray(Charsets.UTF_8))
 
         val hello = builder.build(currentTimeMillis)
@@ -52,25 +54,35 @@ class HelloBuilderTest {
     @TestWith(
         coercers = [DomainCoercion::class],
         value = [
-            "eg==, HivsWMEbkHo=, I5lqt1XfQKstC8TYw6YOVhzfwvsTnJPfHLbwj3HZzTw=, 1588752561000, 122.30.43.-20.88.-63.27.-112.122.-17.49.-99.46.14.-13.80"]
+            "46, 53544F50434F5631, string, 4276036796200",
+            "46, 53544F50434F5631, string, 4276036794200"]
     )
-    fun `build given ecc64, ebid64, key64 and time should return expected`(
-        ecc64: String,
-        ebid64: String,
-        key64: String,
-        currentTimeMillis: Long,
-        expected: Hello) {
+    fun `build given ecc, ebid, key and bad time should throw IllegalArgumentException`(ecc: String,
+        ebid: String,
+        key: String,
+        currentTimeMillis: Long) {
+
+        val buffer = ByteBuffer
+            .allocate(8)
+            .putLong(ebid.toLong(16))
+
+        buffer.flip()
 
         val builder = HelloBuilder(HelloSettings(),
-            EphemeralBluetoothIdentifier(
-                ntpStartTimeS = 0,
-                ntpEndTimeS = 0,
-                ecc = Base64.getDecoder().decode(ecc64),
-                ebid = Base64.getDecoder().decode(ebid64)),
-            key = Base64.getDecoder().decode(key64))
+            EphemeralBluetoothIdentifier(ntpStartTimeS = 6485025595,
+                ntpEndTimeS = 6485025596,
+                ecc = byteArrayOf(ecc.toByte(16)),
+                ebid = buffer.array()),
+            key.toByteArray(Charsets.UTF_8))
 
-        val hello = builder.build(currentTimeMillis)
+        var error: Exception? = null
+        try {
+            builder.build(currentTimeMillis)
+        } catch (e: Exception) {
+            error = e
+        }
 
-        assertThat(hello).isEqualTo(expected)
+        assertThat(error).isNotNull()
+        assertThat(error).isInstanceOf(IllegalArgumentException::class.java)
     }
 }

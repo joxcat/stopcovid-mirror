@@ -11,6 +11,7 @@
 package com.lunabeestudio.robert
 
 import com.lunabeestudio.domain.model.Hello
+import com.lunabeestudio.domain.model.HelloBuilder
 import com.lunabeestudio.domain.model.LocalProximity
 import com.lunabeestudio.robert.model.RobertResult
 import com.lunabeestudio.robert.model.RobertResultData
@@ -41,7 +42,7 @@ interface RobertManager {
 
     suspend fun storeLocalProximity(vararg localProximity: LocalProximity)
 
-    fun getCurrentHello(): RobertResultData<Hello>
+    fun getCurrentHelloBuilder(): RobertResultData<HelloBuilder>
 
     suspend fun eraseLocalHistory(): RobertResult
 
