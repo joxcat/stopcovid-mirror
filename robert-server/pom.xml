@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<licenses>
+		<license>
+			<name>Mozilla Public License, Version 2.0</name>
+			<url>https://www.mozilla.org/en-US/MPL/2.0/</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.6.RELEASE</version>
+		<relativePath />
+	</parent>
+
+	<groupId>fr.gouv.stopc</groupId>
+	<artifactId>robert-server</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>robert-server</name>
+	<packaging>pom</packaging>
+	<description>Projet principal</description>
+
+	<modules>
+		<module>robert-server-ws-rest</module>
+		<module>robert-server-batch</module>
+		<module>robert-server-database</module>
+		<module>robert-server-crypto</module>
+		<module>robert-server-common</module>
+		<module>robert-crypto-grpc-server</module>
+		<module>robert-crypto-grpc-server-messaging</module>
+	</modules>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.jar.plugin.version>3.1.1</maven.jar.plugin.version>
+		<javax-rs.version>2.1.1</javax-rs.version>
+		<grpc.version>1.29.0</grpc.version>
+		<protobuf.version>3.11.0</protobuf.version>
+		<error_prone_annotations.version>2.3.4</error_prone_annotations.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-batch</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-test</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>javax.inject</groupId>
+				<artifactId>javax.inject</artifactId>
+				<version>1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>2.0.1.Final</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.ws.rs</groupId>
+				<artifactId>javax.ws.rs-api</artifactId>
+				<version>${javax-rs.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-bom</artifactId>
+				<version>${grpc.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java-util</artifactId>
+				<version>${protobuf.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.errorprone</groupId>
+				<artifactId>error_prone_annotations</artifactId>
+				<version>${error_prone_annotations.version}</version>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.liquibase</groupId>
+					<artifactId>liquibase-maven-plugin</artifactId>
+					<version>${liquibase.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+				</plugin>
+				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.6.0.1398</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>${maven.jar.plugin.version}</version>
+				</plugin>
+
+				<plugin>
+					<groupId>pl.project13.maven</groupId>
+					<artifactId>git-commit-id-plugin</artifactId>
+					<version>2.2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.4</version>
+					<executions>
+						<execution>
+							<id>pre-unit-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>post-unit-test</id>
+							<phase>test</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>pre-integration-tests</id>
+							<goals>
+								<goal>prepare-agent-integration</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>post-integration-test</id>
+							<goals>
+								<goal>report-integration</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>merge</id>
+							<goals>
+								<goal>merge</goal>
+							</goals>
+							<configuration>
+								<fileSets>
+									<fileSet
+										implementation="org.apache.maven.shared.model.fileset.FileSet">
+										<directory>${project.basedir}</directory>
+										<includes>
+											<include>**/*.exec</include>
+										</includes>
+									</fileSet>
+								</fileSets>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<!-- Disabled because fails when not executed from each module's directory -->
+			<!--
+            <plugin>
+                <groupId>org.complykit</groupId>
+                <artifactId>license-check-maven-plugin</artifactId>
+                <version>0.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>os-check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <blacklist>
+                        <param>agpl-3.0</param>
+                        <param>gpl-2.0</param>
+                        <param>gpl-3.0</param>
+                    </blacklist>
+					<excludes>
+					</excludes>
+                </configuration>
+            </plugin>
+			-->
+		</plugins>
+	</build>
+
+	<reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>5.3.2</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+
+	<profiles>
+		<profile>
+			<id>report</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- desactivation de l'erreur fatale lors de la release à cause de la 
+			javadoc érronée -->
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<!-- <jdk>[1.8,)</jdk> -->
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<doclint>none</doclint>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+	</profiles>
+
+	<distributionManagement>
+		<repository>
+			<id>robert-repository</id>
+			<name>Releases</name>
+			<url>http://nexus:8081/repository/maven-releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>robert-repository</id>
+			<name>Snapshot</name>
+			<url>http://nexus:8081/repository/maven-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+</project>
