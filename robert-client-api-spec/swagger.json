@@ -1,0 +1,458 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "#STOPCOVID, Robert Proximity Tracing Client API",
+        "version": "1.0.0",
+        "title": "#STOPCOVID, Robert Proximity Tracing",
+        "termsOfService": "https://github.com/ROBERT-proximity-tracing/",
+        "contact": {
+            "email": "stopcovid@inria.fr"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "host": "yourrobertserver.org",
+    "basePath": "/v1",
+    "tags": [],
+    "schemes": [
+        "https"
+    ],
+    "paths": {
+        "/register": {
+            "post": {
+                "tags": [
+                ],
+                "summary": "Register app",
+                "description": "Register the app to the ROBERT service.\n\nRequires a CAPTCHA resolution token that will be verified by the server.\n\nTo be called once during app first startup.",
+                "operationId": "register",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"                
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "req",
+                        "schema": {
+                            "$ref": "#/definitions/RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/RegisterSuccessResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "bad captcha"
+                    },
+                    "400": {
+                        "description": "bad request"
+                    }
+                },
+                "security": [
+                ]
+            }
+        },
+        "/status": {
+            "post": {
+                "tags": [
+                ],
+                "summary": "Exposure Status Request",
+                "description": "App requests if its user has been exposed\n\nThe request is a POST even if no information is contributed to the server because parameters should not be passed as queryparams.\n\nApp should continue to send ESR requests even after having been notified of a risk, in case new risks are detected.\n\nThis request must the '0x02' salt when creating its MAC digest",
+                "operationId": "ESR",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "res",
+                        "schema":{
+                            "$ref": "#/definitions/AuthentifiedRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns whether the app user was exposed to a risk. The app must display associated hardcoded content accordingly and send local notification.",
+                        "schema": {
+                            "$ref": "#/definitions/ExposureStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request"
+                    },
+                    "401": {
+                        "description": "invalid authentication"
+                    }
+                }
+            }
+        },
+        "/report": {
+            "post": {
+                "tags": [
+                ],
+                "summary": "Report contact history",
+                "description": "Report contacts from the last X days stored by the app once user has been diagnosed as infected by a healthcare professional.\n\nRequires a code provided by a healthcare professional or a healthcare institution (e.g. lab).\n\nOnce the app has successfully reported its data, it should call the /unregister endpoint to remove its id from the server.",
+                "operationId": "ReportBatch",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"                
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "req",
+                        "schema":{
+                            "$ref": "#/definitions/ReportBatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ReportBatchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request"
+                    },
+                    "401": {
+                        "description": "invalid authentication"
+                    }
+                },
+                "security": [
+                ]
+            }
+        },
+        "/unregister": {
+            "post": {
+                "tags": [
+                ],
+                "summary": "Unregister app",
+                "description": "User wants to stop using the ROBERT service. Delete all data related to this user from the server.\n\nThis request must use the '0x03' salt when creating its MAC digest",
+                "operationId": "unregister",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "req",
+                        "schema":{
+                            "$ref": "#/definitions/AuthentifiedRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns whether unregistering was successful",
+                        "schema": {
+                            "$ref": "#/definitions/UnregisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request"
+                    },
+                    "401": {
+                        "description": "invalid authentication"
+                    }
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+    },
+    "definitions": {
+        "UnregisterResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "success"
+            ]
+        },
+        "AuthentifiedRequest": {
+            "type": "object",
+            "properties": {
+                "ebid": {
+                    "description": "Any EBID from the local store valid for this epoch as 64-bit, Base64 encoded\n\nRaw content must be 64 bits. Base64 string must be 12 chars.",
+                    "type": "string",
+                    "format": "byte"
+                },
+                "time": {
+                    "description": "The current time as 32-bit timestamp, Base64 encoded\n\nRaw content must be 32 bits. Base64 string must be 8 chars.",
+                    "type": "string",
+                    "format": "byte"
+                },
+                "mac": {
+                    "description": "The MAC digest for this request, Base64 encodedn\n\nRaw content must be 256 bits. Base64 string must be 44 chars.",
+                    "type": "string",
+                    "format": "byte"
+                }
+            },
+            "required": [
+                "ebid",
+                "time",
+                "mac"
+            ]
+        },
+        "ExposureStatusResponse": {
+            "type": "object",
+            "properties": {
+                "atRisk": {
+                    "type": "boolean",
+                    "description": "True if was exposed at risk. If already notified of a risk exposure, means exposed to a new risk since."
+                },
+                "lastExposureTimeframe": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Optional. Provided only if atRisk=true. The timeframe during which the user was exposed. In days. Resolution of 2 days (e.g. 2 => user was exposed during the last 2 days, 4 => user was exposed during the last 4 days...)"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "idsForEpochs": {
+                    "$ref": "#/definitions/IdList"
+                },
+                "filteringAlgoConfig": {
+                    "$ref": "#/definitions/ClientFilteringAlgorithmConfiguration"
+                }
+            },
+            "required": [
+                "atRisk",
+                "idsForEpochs",
+                "filteringAlgoConfig"
+            ]
+        },
+        "RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "captcha": {
+                    "description": "The CAPTCHA resolution token obtained by the app. Required to complete the user registration process",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "captcha"
+            ]
+        },
+        "RegisterSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "format": "byte",
+                    "description": "Base64 encoded"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "idsForEpochs": {
+                    "$ref": "#/definitions/IdList"
+                },
+                "timeStart": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "The time from which epochs were started for the ROBERT service"
+                },
+                "filteringAlgoConfig": {
+                    "$ref": "#/definitions/ClientFilteringAlgorithmConfiguration"
+                }
+            },
+            "required": [
+                "timeStart",
+                "key",
+                "idsForEpochs",
+                "filteringAlgoConfig"
+            ]
+        },
+        "ReportBatchRequest": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "description": "UUID v4 or short 6-char token provided by healthcare professional",
+                    "type": "string"
+                },
+                "contacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Contact"
+                    },
+                    "description": "Optional (either 'contacts' or 'contactsAsBinary' must be provided).\n\nThe list of contacts stored in the LocalProximityList (local contacts DB)"
+                },
+                "contactsAsBinary": {
+                    "description": "WIP - DO NOT USE. Optional (either 'contacts' or 'contactsAsBinary' must be provided).\n\nA protobuf containing the same data as the 'contacts' parameter. Encoded as Base64",
+                    "type": "string",
+                    "format": "byte"
+                }
+            },
+            "required": [
+                "token"
+            ]
+        },
+        "ReportBatchResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                }
+            },
+            "description": "Upon success, app should unregister.",
+            "required": [
+                "success"
+            ]
+        },
+        "KeyPair": {
+            "type": "object",
+            "properties": {
+                "ebid": {
+                    "type": "string",
+                    "format": "byte",
+                    "description": "Encrypted Bluetooth IDentifier.\n\nRaw content must be 64 bits. Base64 string must be 12 chars."
+                },
+                "ecc": {
+                    "type": "string",
+                    "format": "byte",
+                    "description": "Encrypted Country Code.\n\nRaw content must be 8 bits. Base64 string must be 4 chars."
+                }
+            },
+            "required": [
+                "ebid",
+                "ecc"
+            ]
+        },
+        "Contact": {
+            "type": "object",
+            "properties": {
+                "ebid": {
+                    "type": "string",
+                    "format": "byte",
+                    "description": "Encrypted Bluetooth IDentifier.\n\nRaw content must be 64 bits. Base64 string must be 12 chars."
+                },
+                "ecc": {
+                    "type": "string",
+                    "format": "byte",
+                    "description": "Encrypted Country Code.\n\nRaw content must be 8 bits. Base64 string must be 4 chars."
+                },
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/HelloMessageDetail"
+                    },
+                    "description": "List of (time_device, time_hello, MAC) tuples"
+                }
+            },
+            "required": [
+                "ids",
+                "ecc",
+                "ebid"
+            ],
+            "description": "All keys encountered for an epoch for an identical EBID (a \"contact\"). Reported keys must be removed LocalProximityHistory DB upon success of this request"
+        },
+        "HelloMessageDetail": {
+            "type": "object",
+            "properties": {
+                "timeCollectedOnDevice": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "Timestamp at which the current device collected the HELLO messages"
+                },
+                "timeFromHelloMessage": {
+                    "type": "integer",
+                    "format": "int16",
+                    "description": "Timestamp included in the HELLO message"
+                },
+                "mac": {
+                    "type": "string",
+                    "format": "byte",
+                    "description": "MAC digest for validation of ebid and ecc to prevent forging.\n\nRaw content must be 40 bits. Base64 string must be 8 chars."
+                },
+                "rssiRaw": {
+                    "type": "integer",
+                    "description": "RSSI (as 8-bit) measured when HELLO message was received"
+                },
+                "rssiCalibrated": {
+                    "type": "integer",
+                    "description": "Calibrated RSSI (as 8-bit) measured when HELLO message was received, then normalized by client app filtering algorithm"
+                }
+            },
+            "required": [
+                "timeFromHelloMessage",
+                "timeCollectedOnDevice",
+                "mac",
+                "rssiCalibrated"
+            ]
+        },
+        "IdList": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "epochId": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Epoch identifier for which the accompagnying ids are generated"
+                    },
+                    "key": {
+                        "$ref": "#/definitions/KeyPair"
+                    }
+                }
+            },
+            "description": "Identifiers to be broadcast by the app during the next M epochs. Provided as (EBID, ECC, epochid) tuples."
+        },
+        "ClientFilteringAlgorithmConfiguration": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ConfigurationProperty"
+            },
+            "description": "A list of configuration properties for the filtering algorithm executed by the client"
+        },
+        "ConfigurationProperty": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of the configuration property"
+                },
+                "value": {
+                    "type": "object",
+                    "description": "The value of the configurtion property an object"
+                }
+            },
+            "required": [
+                "name",
+                "value"
+            ]
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about ROBERT",
+        "url": "https://github.com/ROBERT-proximity-tracing/"
+    }
+}

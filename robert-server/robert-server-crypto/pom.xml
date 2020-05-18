@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<licenses>
+		<license>
+			<name>Mozilla Public License, Version 2.0</name>
+			<url>https://www.mozilla.org/en-US/MPL/2.0/</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<parent>
+		<groupId>fr.gouv.stopc</groupId>
+		<artifactId>robert-server</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>robert-server-crypto</artifactId>
+	<packaging>jar</packaging>
+	<name>robert-server-crypto</name>
+	<description>Cryptography library module. Do not use directly except for tests and from crypto server</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>robert-server-common</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Disabled because fails when not executed from each module's directory -->
+			<!--
+			<plugin>
+				<groupId>org.complykit</groupId>
+				<artifactId>license-check-maven-plugin</artifactId>
+				<version>0.5.3</version>
+				<executions>
+					<execution>
+						<phase>verify</phase>
+						<goals>
+							<goal>os-check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<blacklist>
+						<param>agpl-3.0</param>
+						<param>gpl-2.0</param>
+						<param>gpl-3.0</param>
+					</blacklist>
+					<excludes>
+					</excludes>
+				</configuration>
+			</plugin>
+			-->
+		</plugins>
+	</build>
+</project>
