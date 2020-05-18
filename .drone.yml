@@ -16,6 +16,8 @@ steps:
       - git clone https://gitlab.inria.fr/stopcovid19/accueil.git
       - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-android.git
       - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-ios.git
+      - git clone https://gitlab.inria.fr/stopcovid19/robert-client-api-spec.git
+      - git clone https://gitlab.inria.fr/stopcovid19/robert-server.git
       - rm -rf */.git
       - git add .
       - git diff-index --quiet HEAD || git commit -m "Mirroring $(date +"%Y-%m-%d")" && git push --set-upstream origin master
