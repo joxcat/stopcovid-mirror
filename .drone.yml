@@ -12,7 +12,7 @@ steps:
     commands:
       - git remote set-url origin https://$GH_TOKEN@github.com/joxcat/stopcovid-mirror.git
       - git pull origin master
-      - rm -rf accueil stopcovid-robertsdk-android stopcovid-robertsdk-ios
+      - rm -rf accueil stopcovid-robertsdk-android stopcovid-robertsdk-ios robert-client-api-spec robert-server
       - git clone https://gitlab.inria.fr/stopcovid19/accueil.git
       - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-android.git
       - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-ios.git
