@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptEBIDRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptEBIDRequest;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
@@ -90,7 +90,7 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
             System.arraycopy(decrytedEbid, epochId.length - 1, idA, 0, idA.length);
             ByteBuffer wrapped = ByteBuffer.wrap(epochId);
             int epoch = wrapped.getInt();
-
+            
             // Step #4: Get record from database
             Optional<Registration> record = this.registrationService.findById(idA);
 

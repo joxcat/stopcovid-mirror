@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,17 +22,18 @@ import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.impl.CryptoServerGrpcClient;
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.impl.CryptoServerGrpcClient.TestHelper;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptCountryCodeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptEBIDRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.EphemeralTupleRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacEsrValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacHelloValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacValidationForTypeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.DecryptCountryCodeResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EBIDResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.MacValidationResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptEBIDRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EBIDResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacEsrValidationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloValidationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationForTypeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.Tuple;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
@@ -79,11 +80,16 @@ public class CryptoServerGrpcClientTest {
 				.setNumberOfEpochsToGenerate(1)
 				.build();
 
+		Tuple tuple = Tuple
+	              .newBuilder()
+	              .setEbid(ByteString.copyFrom("12345678".getBytes()))
+	              .setEcc(ByteString.copyFrom("1".getBytes()))
+	              .setEpochId(2102)
+	              .build();
+
 		EphemeralTupleResponse response = EphemeralTupleResponse
 				.newBuilder()
-				.setEbid(ByteString.copyFrom(generateKey(8)))
-				.setEcc(ByteString.copyFrom(generateKey(1)))
-				.setEpochId(2102)
+				.addAllTuple(Arrays.asList(tuple))
 				.build();
 
 		CryptoGrpcServiceImplImplBase generateEphemeralTuple = new CryptoGrpcServiceImplImplBase() {
@@ -102,10 +108,11 @@ public class CryptoServerGrpcClientTest {
 		serviceRegistry.addService(generateEphemeralTuple);
 
 		// When
-		List<EphemeralTupleResponse> ephTuples = client.generateEphemeralTuple(request);
+		Optional<EphemeralTupleResponse> ephemeralTuple = client.generateEphemeralTuple(request);
 
 		// Then
-		assertFalse(CollectionUtils.isEmpty(ephTuples));
+		assertTrue(ephemeralTuple.isPresent());
+		assertFalse(CollectionUtils.isEmpty(ephemeralTuple.get().getTupleList()));
 		verify(testHelper).onMessage(response);
 	}
 

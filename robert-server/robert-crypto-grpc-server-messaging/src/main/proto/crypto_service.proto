@@ -15,7 +15,7 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "fr.gouv.stopc.robert.crypto.grpc.server.service.others";
+option java_package = "fr.gouv.stopc.robert.crypto.grpc.server.messaging";
 option java_outer_classname = "CryptoGrpcService";
 option objc_class_prefix = "";
 
@@ -24,7 +24,7 @@ package robert.server.crypto;
 // The greeting service definition.
 service CryptoGrpcServiceImpl {
   // Streams a many greetings
-  rpc generateEphemeralTuple (EphemeralTupleRequest) returns (stream EphemeralTupleResponse) {}
+  rpc generateEphemeralTuple (EphemeralTupleRequest) returns (EphemeralTupleResponse) {}
   rpc generateEBID(GenerateEBIDRequest) returns (EBIDResponse){}
   rpc decryptEBID(DecryptEBIDRequest) returns (EBIDResponse){}
   rpc encryptCountryCode(EncryptCountryCodeRequest) returns (EncryptCountryCodeResponse){}
@@ -54,11 +54,15 @@ message EphemeralTupleRequest {
 	// int epochId;
 	// byte[] ebid;
 	// byte[] ecc;
+	repeated Tuple tuple = 1;
+}
+
+message Tuple {
+
 	int32 epochId = 1;
 	bytes ebid = 2;
 	bytes ecc = 3;
 }
-
 message GenerateEBIDRequest {
 	// byte[] IDA of Registration
 	// int currentEpochID

@@ -40,8 +40,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.google.protobuf.ByteString;
+
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.Tuple;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robertserver.database.model.Registration;
@@ -189,11 +192,20 @@ public class RegisterControllerWsRestTest {
 				.build())
 		.build();
 
+		Tuple tuple = Tuple
+              .newBuilder()
+              .setEbid(ByteString.copyFrom("12345678".getBytes()))
+              .setEcc(ByteString.copyFrom("1".getBytes()))
+              .setEpochId(2102)
+              .build();
+
 		Registration reg = Registration.builder().permanentIdentifier(id).exposedEpochs(new ArrayList<>())
 				.isNotified(false).sharedKey(key).atRisk(false).build();
 
-		when(this.cryptoServerClient.generateEphemeralTuple(any())).thenReturn(Arrays.asList( EphemeralTupleResponse
-				.newBuilder().build()));
+		when(this.cryptoServerClient.generateEphemeralTuple(any())).thenReturn(Optional.of(EphemeralTupleResponse
+				.newBuilder()
+				.addAllTuple(Arrays.asList(tuple))
+				.build()));
 		when(this.epochKeyBundleDtoMapper.convert(anyList())).thenReturn(Arrays.asList(epochKeyDto));
 		
 		when(this.registrationService.createRegistration()).thenReturn(Optional.of(reg));

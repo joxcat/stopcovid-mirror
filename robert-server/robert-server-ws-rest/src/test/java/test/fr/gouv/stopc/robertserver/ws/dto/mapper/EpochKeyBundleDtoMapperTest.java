@@ -16,13 +16,12 @@ import java.util.Optional;
 import org.bson.internal.Base64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.CollectionUtils;
 
 import com.google.protobuf.ByteString;
 
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.Tuple;
 import fr.gouv.stopc.robertserver.ws.dto.EpochKeyBundleDto;
 import fr.gouv.stopc.robertserver.ws.dto.mapper.EpochKeyBundleDtoMapper;
 
@@ -34,7 +33,7 @@ public class EpochKeyBundleDtoMapperTest {
 	@Test
 	public void testConvertWhenIsNull() {
 		// Given
-		EphemeralTupleResponse ephemeralTupleResponse = null;
+		Tuple ephemeralTupleResponse = null;
 
 		// When 
 		Optional<EpochKeyBundleDto> dto = this.mapper.convert(ephemeralTupleResponse);
@@ -48,7 +47,7 @@ public class EpochKeyBundleDtoMapperTest {
 		int epochId = 1200;
 
 		// Given
-		EphemeralTupleResponse ephemeralTupleResponse = EphemeralTupleResponse
+		Tuple ephemeralTupleResponse = Tuple
 				.newBuilder()
 				.setEbid(ByteString.copyFrom(generate(8)))
 				.setEbid(ByteString.copyFrom(generate(1)))
@@ -73,7 +72,7 @@ public class EpochKeyBundleDtoMapperTest {
 	public void testConvertListWhenIsNull() {
 
 		// Given
-		List<EphemeralTupleResponse> response = null;
+		List<Tuple> response = null;
 
 		// When
 		List<EpochKeyBundleDto> epochKeyBundleDtos = this.mapper.convert(response);
@@ -86,7 +85,7 @@ public class EpochKeyBundleDtoMapperTest {
 	public void testConvertListWhenIsEmpty() {
 
 		// Given
-		List<EphemeralTupleResponse> response = Collections.emptyList();
+		List<Tuple> response = Collections.emptyList();
 
 		// When
 		List<EpochKeyBundleDto> epochKeyBundleDtos = this.mapper.convert(response);
@@ -100,7 +99,7 @@ public class EpochKeyBundleDtoMapperTest {
 		int epochId = 1200;
 
 		// Given
-		EphemeralTupleResponse ephemeralTupleResponse = EphemeralTupleResponse
+		Tuple ephemeralTupleResponse = Tuple
 				.newBuilder()
 				.setEbid(ByteString.copyFrom(generate(8)))
 				.setEbid(ByteString.copyFrom(generate(1)))
@@ -110,7 +109,7 @@ public class EpochKeyBundleDtoMapperTest {
 		String expectedEbid = Base64.encode(ephemeralTupleResponse.getEbid().toByteArray());
 		String expectedEcc = Base64.encode(ephemeralTupleResponse.getEcc().toByteArray());
 
-		List<EphemeralTupleResponse> response = new ArrayList<>();
+		List<Tuple> response = new ArrayList<>();
 		response.add(ephemeralTupleResponse);
 
 		// When

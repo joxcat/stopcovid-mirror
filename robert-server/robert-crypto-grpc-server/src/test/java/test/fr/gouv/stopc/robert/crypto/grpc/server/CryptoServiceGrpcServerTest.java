@@ -1,15 +1,17 @@
 package test.fr.gouv.stopc.robert.crypto.grpc.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
-import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,27 +22,29 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.CryptoServiceGrpcServer;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptCountryCodeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptEBIDRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.EncryptCountryCodeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.EphemeralTupleRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.GenerateEBIDRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacEsrValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacHelloGenerationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacHelloValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacValidationForTypeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.DecryptCountryCodeResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EBIDResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EncryptCountryCodeResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.MacHelloGenerationResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.MacValidationResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplStub;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptEBIDRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EBIDResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EncryptCountryCodeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EncryptCountryCodeResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GenerateEBIDRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacEsrValidationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloGenerationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloGenerationResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloValidationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationForTypeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationResponse;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.ICryptoServerConfigurationService;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoGrpcServiceBaseImpl;
-import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoGrpcServiceImplGrpc;
-import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
-import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplStub;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoServerConfigurationServiceImpl;
+import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
+import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
 import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
 import fr.gouv.stopc.robert.server.crypto.service.impl.CryptoServiceImpl;
 import io.grpc.ManagedChannel;
@@ -48,9 +52,7 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ExtendWith(SpringExtension.class)

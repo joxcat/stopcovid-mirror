@@ -1,35 +1,38 @@
 package fr.gouv.stopc.robert.crypto.grpc.server.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
 
-import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
-import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.google.protobuf.ByteString;
 
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptCountryCodeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptEBIDRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.EncryptCountryCodeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.EphemeralTupleRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.GenerateEBIDRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacEsrValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacHelloGenerationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacHelloValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacValidationForTypeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.DecryptCountryCodeResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EBIDResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EncryptCountryCodeResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.MacHelloGenerationResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.MacValidationResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptEBIDRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EBIDResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EncryptCountryCodeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EncryptCountryCodeResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GenerateEBIDRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacEsrValidationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloGenerationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloGenerationResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloValidationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationForTypeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.Tuple;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.ICryptoServerConfigurationService;
-import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
+import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robert.server.crypto.callable.TupleGenerator;
+import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import fr.gouv.stopc.robert.server.crypto.model.EphemeralTuple;
 import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.Crypto3DES;
@@ -67,17 +70,20 @@ public class CryptoGrpcServiceBaseImpl extends CryptoGrpcServiceImplImplBase {
                     request.getCountryCode().byteAt(0)
             );
             tupleGenerator.stop();
-
+            
             if (!CollectionUtils.isEmpty(ephemeralTuples)) {
 
+                List<Tuple> tuples = new ArrayList<>();
                 ephemeralTuples.stream()
-                        .map(tuple -> EphemeralTupleResponse
+                        .map(tuple -> Tuple
                                 .newBuilder()
                                 .setEbid(ByteString.copyFrom(tuple.getEbid()))
                                 .setEcc(ByteString.copyFrom(tuple.getEncryptedCountryCode()))
                                 .setEpochId(tuple.getEpoch())
                                 .build())
-                        .forEach(response -> responseObserver.onNext(response));
+                        .forEach(response -> tuples.add(response));
+
+                responseObserver.onNext(EphemeralTupleResponse.newBuilder().addAllTuple(tuples).build());
 
             }
             responseObserver.onCompleted();

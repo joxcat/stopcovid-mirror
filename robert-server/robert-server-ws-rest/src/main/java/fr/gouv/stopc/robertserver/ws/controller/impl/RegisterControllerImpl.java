@@ -16,8 +16,8 @@ import org.springframework.util.CollectionUtils;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.EphemeralTupleRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robertserver.database.model.ApplicationConfigurationModel;
@@ -32,10 +32,7 @@ import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
 import fr.gouv.stopc.robertserver.ws.service.CaptchaService;
 import fr.gouv.stopc.robertserver.ws.utils.MessageConstants;
 import fr.gouv.stopc.robertserver.ws.vo.RegisterVo;
-import io.micrometer.core.instrument.util.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 public class RegisterControllerImpl implements IRegisterController {
 
@@ -50,7 +47,7 @@ public class RegisterControllerImpl implements IRegisterController {
     private final EpochKeyBundleDtoMapper epochKeyBundleDtoMapper;
 
     private  final ICryptoServerGrpcClient cryptoServerClient;
-
+ 
     @Inject
     public RegisterControllerImpl(final IRegistrationService registrationService,
                                   final IServerConfigurationService serverConfigurationService,
@@ -82,6 +79,7 @@ public class RegisterControllerImpl implements IRegisterController {
 
         Optional<Registration> registration = this.registrationService.createRegistration();
 
+ 
         if (registration.isPresent()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(processRegistration(registration.get()));
         }
@@ -106,7 +104,7 @@ public class RegisterControllerImpl implements IRegisterController {
         final int numberOfEpochs = 4 * 24 * 4;
 
         final int currentEpochId = TimeUtils.getCurrentEpochFrom(tpstStart);
-
+        
         registerResponseDto.setTimeStart(tpstStart);
 
         EphemeralTupleRequest request = EphemeralTupleRequest.newBuilder()
@@ -116,16 +114,14 @@ public class RegisterControllerImpl implements IRegisterController {
                 .setNumberOfEpochsToGenerate(numberOfEpochs)
                 .build();
 
+        Optional<EphemeralTupleResponse> tupleResponse = this.cryptoServerClient.generateEphemeralTuple(request);
 
-        List<EphemeralTupleResponse> ephTuples = this.cryptoServerClient.generateEphemeralTuple(request);
-
-        if (CollectionUtils.isEmpty(ephTuples)) {
-            log.warn("Could not generate (EBID, ECC) tuples");
+        if (!tupleResponse.isPresent() || CollectionUtils.isEmpty(tupleResponse.get().getTupleList())) {
             throw new RobertServerException(MessageConstants.ERROR_OCCURED);
         }
 
         registerResponseDto.setIdsForEpochs(
-                this.epochKeyBundleDtoMapper.convert(ephTuples));
+                this.epochKeyBundleDtoMapper.convert(tupleResponse.get().getTupleList()));
 
         registerResponseDto.setKey(Base64.encode(registration.getSharedKey()));
         return registerResponseDto;

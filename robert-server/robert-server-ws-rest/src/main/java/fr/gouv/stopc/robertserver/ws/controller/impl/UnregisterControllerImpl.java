@@ -1,8 +1,17 @@
 package fr.gouv.stopc.robertserver.ws.controller.impl;
 
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.google.protobuf.ByteString;
+
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacValidationForTypeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationForTypeRequest;
 import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
@@ -10,12 +19,6 @@ import fr.gouv.stopc.robertserver.ws.controller.IUnregisterController;
 import fr.gouv.stopc.robertserver.ws.dto.UnregisterResponseDto;
 import fr.gouv.stopc.robertserver.ws.service.AuthRequestValidationService;
 import fr.gouv.stopc.robertserver.ws.vo.UnregisterRequestVo;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.Objects;
-import java.util.Optional;
 
 
 @Service

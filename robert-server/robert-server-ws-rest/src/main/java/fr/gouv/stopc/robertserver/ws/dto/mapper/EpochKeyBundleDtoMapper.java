@@ -11,36 +11,36 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.protobuf.ByteString;
 
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.Tuple;
 import fr.gouv.stopc.robertserver.ws.dto.EpochKeyBundleDto;
 import fr.gouv.stopc.robertserver.ws.dto.EpochKeyDto;
 
 @Component
 public class EpochKeyBundleDtoMapper {
 
-	public Optional<EpochKeyBundleDto> convert(EphemeralTupleResponse ephemeralTupleResponse) {
+	public Optional<EpochKeyBundleDto> convert(Tuple tuple) {
 
-		return Optional.ofNullable(ephemeralTupleResponse)
-				.map(response -> {
+		return Optional.ofNullable(tuple)
+				.map(item -> {
 
 					return EpochKeyBundleDto.builder()
-							.epochId(ephemeralTupleResponse.getEpochId())
+							.epochId(item.getEpochId())
 							.key(EpochKeyDto.builder()
-							     .ebid(encode(ephemeralTupleResponse.getEbid()))
-							     .ecc(encode(ephemeralTupleResponse.getEcc()))
+							     .ebid(encode(item.getEbid()))
+							     .ecc(encode(item.getEcc()))
 							     .build())
 							.build();
 				});
 	}
 
-	public List<EpochKeyBundleDto> convert(List<EphemeralTupleResponse> ephemeralTupleResponses){
+	public List<EpochKeyBundleDto> convert(List<Tuple> tuples){
 
-		if (CollectionUtils.isEmpty(ephemeralTupleResponses)) {
+		if (CollectionUtils.isEmpty(tuples)) {
 
 			return Collections.emptyList();
 		}
 
-		return ephemeralTupleResponses.stream()
+		return tuples.stream()
 				.map(this::convert)
 				.filter(Optional::isPresent)
 				.map(Optional::get)

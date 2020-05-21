@@ -14,9 +14,9 @@ import org.springframework.util.CollectionUtils;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptCountryCodeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.DecryptEBIDRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacHelloValidationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptEBIDRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloValidationRequest;
 import fr.gouv.stopc.robert.server.batch.exception.RobertScoringException;
 import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacValidationForTypeRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationForTypeRequest;
 import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;

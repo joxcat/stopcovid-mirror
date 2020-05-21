@@ -1,48 +1,15 @@
 package test.fr.gouv.stopc.robertserver.ws;
 
-import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
-import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
-import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
-import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
-import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
-import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.Crypto3DES;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
-import fr.gouv.stopc.robertserver.database.model.EpochExposition;
-import fr.gouv.stopc.robertserver.database.model.Registration;
-import fr.gouv.stopc.robertserver.database.service.IApplicationConfigService;
-import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
-import fr.gouv.stopc.robertserver.ws.RobertServerWsRestApplication;
-import fr.gouv.stopc.robertserver.ws.dto.EpochKeyBundleDto;
-import fr.gouv.stopc.robertserver.ws.dto.EpochKeyDto;
-import fr.gouv.stopc.robertserver.ws.dto.StatusResponseDto;
-import fr.gouv.stopc.robertserver.ws.dto.mapper.EpochKeyBundleDtoMapper;
-import fr.gouv.stopc.robertserver.ws.utils.UriConstants;
-import fr.gouv.stopc.robertserver.ws.vo.StatusVo;
-import lombok.extern.slf4j.Slf4j;
-import org.bson.internal.Base64;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.util.UriComponentsBuilder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import javax.crypto.KeyGenerator;
-import javax.inject.Inject;
 import java.net.URI;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -52,10 +19,52 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import javax.crypto.KeyGenerator;
+import javax.inject.Inject;
+
+import org.bson.internal.Base64;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.Tuple;
+import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
+import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
+import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
+import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
+import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.Crypto3DES;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
+import fr.gouv.stopc.robertserver.database.model.EpochExposition;
+import fr.gouv.stopc.robertserver.database.model.Registration;
+import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
+import fr.gouv.stopc.robertserver.ws.RobertServerWsRestApplication;
+import fr.gouv.stopc.robertserver.ws.dto.EpochKeyBundleDto;
+import fr.gouv.stopc.robertserver.ws.dto.EpochKeyDto;
+import fr.gouv.stopc.robertserver.ws.dto.StatusResponseDto;
+import fr.gouv.stopc.robertserver.ws.dto.mapper.EpochKeyBundleDtoMapper;
+import fr.gouv.stopc.robertserver.ws.utils.UriConstants;
+import fr.gouv.stopc.robertserver.ws.vo.StatusVo;
+import lombok.extern.slf4j.Slf4j;
 
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
@@ -95,9 +104,11 @@ public class StatusControllerWsRestTest {
 
 	private int currentEpoch;
 
+	private Tuple tuple = Tuple.newBuilder().build();
+
 	@BeforeEach
 	public void before() {
-		MockitoAnnotations.initMocks(this);
+
 		assert (this.restTemplate != null);
 		this.headers = new HttpHeaders();
 		this.headers.setContentType(MediaType.APPLICATION_JSON);
@@ -181,8 +192,10 @@ public class StatusControllerWsRestTest {
 
 		doReturn(true).when(this.cryptoServerClient).validateMacEsr(any());
 
-		doReturn(Arrays.asList( EphemeralTupleResponse
-				.newBuilder().build())).when(this.cryptoServerClient).generateEphemeralTuple(any());
+		doReturn(Optional.of(EphemeralTupleResponse
+				.newBuilder()
+				.addAllTuple(Arrays.asList(this.tuple))
+				.build())).when(this.cryptoServerClient).generateEphemeralTuple(any());
 		doReturn(true).when(this.cryptoServerClient).validateMacEsr(any());
 
 		doReturn(Arrays.asList(epochKeyDto)). when(this.epochKeyBundleDtoMapper).convert(anyList());
@@ -483,7 +496,6 @@ public class StatusControllerWsRestTest {
 
 		this.requestEntity = new HttpEntity<>(this.statusBody, this.headers);
 
-
 		EpochKeyBundleDto epochKeyDto = EpochKeyBundleDto.builder()
 				.epochId(120L)
 				.key(EpochKeyDto.builder()
@@ -494,8 +506,10 @@ public class StatusControllerWsRestTest {
 						.build())
 				.build();
 
-		doReturn(Arrays.asList( EphemeralTupleResponse
-				.newBuilder().build())).when(this.cryptoServerClient).generateEphemeralTuple(any());
+		doReturn(Optional.of(EphemeralTupleResponse
+				.newBuilder()
+				.addAllTuple(Arrays.asList(this.tuple))
+				.build())).when(this.cryptoServerClient).generateEphemeralTuple(any());
 
 		doReturn(Arrays.asList(epochKeyDto)).when(this.epochKeyBundleDtoMapper).convert(anyList());
 
@@ -550,8 +564,10 @@ public class StatusControllerWsRestTest {
 						.build())
 				.build();
 
-		when(this.cryptoServerClient.generateEphemeralTuple(any())).thenReturn(Arrays.asList( EphemeralTupleResponse
-				.newBuilder().build()));
+		when(this.cryptoServerClient.generateEphemeralTuple(any())).thenReturn(Optional.of(EphemeralTupleResponse
+				.newBuilder()
+				.addAllTuple(Arrays.asList(this.tuple))
+				.build()));
 		when(this.epochKeyBundleDtoMapper.convert(anyList())).thenReturn(Arrays.asList(epochKeyDto));
 
 		// When
@@ -673,8 +689,10 @@ public class StatusControllerWsRestTest {
 						.build())
 				.build();
 
-		doReturn(Arrays.asList( EphemeralTupleResponse
-				.newBuilder().build())).when(this.cryptoServerClient).generateEphemeralTuple(any());
+		doReturn(Optional.of(EphemeralTupleResponse
+				.newBuilder()
+				.addAllTuple(Arrays.asList(this.tuple))
+				.build())).when(this.cryptoServerClient).generateEphemeralTuple(any());
 		doReturn(Arrays.asList(epochKeyDto)).when(this.epochKeyBundleDtoMapper).convert(anyList());
 
 		statusBody = StatusVo.builder()
@@ -753,8 +771,10 @@ public class StatusControllerWsRestTest {
 						.build())
 				.build();
 
-		doReturn(Arrays.asList( EphemeralTupleResponse
-				.newBuilder().build())).when(this.cryptoServerClient).generateEphemeralTuple(any());
+		doReturn(Optional.of(EphemeralTupleResponse
+				.newBuilder()
+				.addAllTuple(Arrays.asList(this.tuple))
+				.build())).when(this.cryptoServerClient).generateEphemeralTuple(any());
 		doReturn(Arrays.asList(epochKeyDto)).when(this.epochKeyBundleDtoMapper).convert(anyList());
 
 

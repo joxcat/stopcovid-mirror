@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -17,9 +16,9 @@ import org.springframework.util.CollectionUtils;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.EphemeralTupleRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.request.MacEsrValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.response.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacEsrValidationRequest;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robertserver.database.model.ApplicationConfigurationModel;
@@ -52,7 +51,7 @@ public class StatusControllerImpl implements IStatusController {
 	private final ICryptoServerGrpcClient cryptoServerClient;
 
 	private EpochKeyBundleDtoMapper epochKeyBundleDtoMapper;
-
+	
 	@Inject
 	public StatusControllerImpl(
 			final IServerConfigurationService serverConfigurationService,
@@ -72,6 +71,7 @@ public class StatusControllerImpl implements IStatusController {
 
 	@Override
 	public ResponseEntity<StatusResponseDto> getStatus(StatusVo statusVo) {
+	    
 		Optional<ResponseEntity> entity = authRequestValidationService.validateRequestForAuth(
 				statusVo,
 				new StatusMacValidator(this.cryptoServerClient),
@@ -82,6 +82,7 @@ public class StatusControllerImpl implements IStatusController {
 		} else {
 			return ResponseEntity.badRequest().build();
 		}
+		 
 	}
 
 	private class StatusMacValidator implements AuthRequestValidationService.IMacValidator {
@@ -203,15 +204,15 @@ public class StatusControllerImpl implements IStatusController {
 					.setNumberOfEpochsToGenerate(numberOfEpochs)
 					.build();
 
-			List<EphemeralTupleResponse> ephTuples = this.cryptoServerClient.generateEphemeralTuple(request);
+			Optional<EphemeralTupleResponse> tupleResponse = this.cryptoServerClient.generateEphemeralTuple(request);
 
-			if(CollectionUtils.isEmpty(ephTuples)) {
+			if(!tupleResponse.isPresent() || CollectionUtils.isEmpty(tupleResponse.get().getTupleList())) {
 				log.error("Could not generate (EBID, ECC) tuples");
 				throw new RobertServerException(MessageConstants.ERROR_OCCURED);
 			}
 
 			statusResponse.setIdsForEpochs(
-					epochKeyBundleDtoMapper.convert(ephTuples));
+					epochKeyBundleDtoMapper.convert(tupleResponse.get().getTupleList()));
 
 		}
 	}
