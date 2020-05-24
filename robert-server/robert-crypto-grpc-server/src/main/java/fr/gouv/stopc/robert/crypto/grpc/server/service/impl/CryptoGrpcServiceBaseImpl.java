@@ -35,10 +35,16 @@ import fr.gouv.stopc.robert.server.crypto.callable.TupleGenerator;
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import fr.gouv.stopc.robert.server.crypto.model.EphemeralTuple;
 import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.Crypto3DES;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAES;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoSkinny64;
 import io.grpc.stub.StreamObserver;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.inject.Inject;
+import java.util.Collection;
+import java.util.Objects;
 
 @Service
 public class CryptoGrpcServiceBaseImpl extends CryptoGrpcServiceImplImplBase {
@@ -100,7 +106,7 @@ public class CryptoGrpcServiceBaseImpl extends CryptoGrpcServiceImplImplBase {
         try {
             responseObserver.onNext(EBIDResponse.newBuilder()
                     .setEbid(ByteString.copyFrom(this.cryptoService.generateEBID(
-                            new Crypto3DES(this.serverConfigurationService.getServerKey()),
+                            new CryptoSkinny64(this.serverConfigurationService.getServerKey()),
                             request.getEpochId(),
                             request.getIdA().toByteArray())))
                     .build());
@@ -117,7 +123,7 @@ public class CryptoGrpcServiceBaseImpl extends CryptoGrpcServiceImplImplBase {
             responseObserver.onNext(EBIDResponse.newBuilder()
                     .setEbid(ByteString.copyFrom(
                             this.cryptoService.decryptEBID(
-                                    new Crypto3DES(this.serverConfigurationService.getServerKey()),
+                                    new CryptoSkinny64(this.serverConfigurationService.getServerKey()),
                                     request.getEbid().toByteArray())))
                     .build());
             responseObserver.onCompleted();

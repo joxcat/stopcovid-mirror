@@ -137,7 +137,7 @@ public class StatusControllerImpl implements IStatusController {
 			// (now iterating through steps from section "If the ESR_REQUEST_A,i is valid, the server:", p11 of spec)
 			// Step #1: Set SRE with current epoch number
 			int latestNotifEpoch = record.getLastNotificationEpoch();
-			setLastEpochReqRegistration(record, epoch);
+			record.setLastStatusRequestEpoch(epoch);
 
 			// Step #2: "Score" was already processed during batch, simple lookup
 			boolean atRisk = record.isAtRisk();
@@ -168,6 +168,8 @@ public class StatusControllerImpl implements IStatusController {
 
 				atRisk = totalRisk > serverConfigurationService.getRiskThreshold();
 			}
+			// Update the registration
+			updateRegistration(record);
 
 			// Include new EBIDs and ECCs for next M epochs
 			StatusResponseDto statusResponse = StatusResponseDto.builder().atRisk(atRisk).build();
@@ -217,8 +219,7 @@ public class StatusControllerImpl implements IStatusController {
 		}
 	}
 
-	private void setLastEpochReqRegistration(Registration user, int epoch) {
-		user.setLastStatusRequestEpoch(epoch);
+	private void updateRegistration(Registration user) {
 		registrationService.saveRegistration(user);
 	}
 }

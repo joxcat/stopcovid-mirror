@@ -1,11 +1,10 @@
 package fr.gouv.stopc.robert.server.crypto.service;
 
 import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.Crypto3DES;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAES;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import fr.gouv.stopc.robert.server.crypto.model.EphemeralTuple;
+import fr.gouv.stopc.robert.server.crypto.structure.CryptoCipherStructureAbstract;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
 
 /**
  * Service centralizing crypto operations required to generate or validate crypto tokens
@@ -13,12 +12,12 @@ import fr.gouv.stopc.robert.server.crypto.model.EphemeralTuple;
 public interface CryptoService {
 
     /**
-     * Generating Tuple ECC EBID and epoch performing encryption with crypto3DES and cryptoAES
-     * EBID -> {@link #generateEBID(Crypto3DES, int, byte[])}
-     * ECC -> {@link #encryptCountryCode(CryptoAES, byte[], byte)}
+     * Generating Tuple ECC EBID and epoch performing encryption with cryptoForEBID and cryptoForECC
+     * EBID -> {@link #generateEBID(CryptoCipherStructureAbstract, int, byte[])}
+     * ECC -> {@link #encryptCountryCode(CryptoCipherStructureAbstract, byte[], byte)}
      *
-     * @param crypto3DES instance of crypto3DES initialize with the KS key
-     * @param cryptoAES  instance of cryptoAES initialize with the KS key
+     * @param cryptoForEBID instance of cryptoForEBID initialize with the KS key
+     * @param cryptoForECC  instance of cryptoForECC initialize with the KS key
      * @param epochId    epoch to concat - 24-bits
      * @param idA        permanent identifier to concat 40-bits
      * @param countryCode         country code 8-bits (ex.: FR => 0x33)
@@ -26,46 +25,46 @@ public interface CryptoService {
      * @throws RobertServerCryptoException
      */
     EphemeralTuple generateEphemeralTuple(
-            Crypto3DES crypto3DES,
-            CryptoAES cryptoAES,
+            CryptoCipherStructureAbstract cryptoForEBID,
+            CryptoCipherStructureAbstract cryptoForECC,
             int epochId, byte[] idA, byte countryCode) throws RobertServerCryptoException;
 
     /**
-     * @param crypto3DES instance of TripleDES initialize with the KS key
+     * @param cryptoForEBID instance of Crypto algo to encrypt EBID with, using KS (server key)
      * @param epochId          epoch in int
      * @param idA        permanent identifier to concat 40-bits
-     * @return return encrypted epochId idA as EBID with TripleDES algorithm
+     * @return return encrypted epochId idA as encrypted EBID
      * @throws RobertServerCryptoException
      */
-    byte[] generateEBID(Crypto3DES crypto3DES, int epochId, byte[] idA) throws RobertServerCryptoException;
+    byte[] generateEBID(CryptoCipherStructureAbstract cryptoForEBID, int epochId, byte[] idA) throws RobertServerCryptoException;
 
     /**
      * Decrypt an EBID
-     * @param crypto3DES
+     * @param cryptoForEBID
      * @param ebid
      * @return
      * @throws RobertServerCryptoException
      */
-    byte[] decryptEBID(Crypto3DES crypto3DES, byte[] ebid) throws RobertServerCryptoException;
+    byte[] decryptEBID(CryptoCipherStructureAbstract cryptoForEBID, byte[] ebid) throws RobertServerCryptoException;
 
     /**
-     * @param cryptoAES instance of TripleDES initialize with the KS key
+     * @param cryptoForECC instance of Crypto algo to encrypt ECC with, using KG (federation key)
      * @param ebid      Result of encryption of IDa and i as EBID - 64-bits
      * @param countryCode        country code - 8-bits
      * @return return encrypted countryCode and EBID as ECC with MSB method specified in ROBert documentation.
      * @throws RobertServerCryptoException
      */
-    byte[] encryptCountryCode(CryptoAES cryptoAES, byte[] ebid, byte countryCode) throws RobertServerCryptoException;
+    byte[] encryptCountryCode(CryptoCipherStructureAbstract cryptoForECC, byte[] ebid, byte countryCode) throws RobertServerCryptoException;
 
     /**
      * Decrypt an encrypted country code
-     * @param cryptoAES
+     * @param cryptoForECC
      * @param ebid
      * @param encryptedCountryCode
      * @return
      * @throws RobertServerCryptoException
      */
-     byte[] decryptCountryCode(CryptoAES cryptoAES, byte[] ebid, byte encryptedCountryCode) throws RobertServerCryptoException;
+     byte[] decryptCountryCode(CryptoCipherStructureAbstract cryptoForECC, byte[] ebid, byte encryptedCountryCode) throws RobertServerCryptoException;
 
     /**
      *

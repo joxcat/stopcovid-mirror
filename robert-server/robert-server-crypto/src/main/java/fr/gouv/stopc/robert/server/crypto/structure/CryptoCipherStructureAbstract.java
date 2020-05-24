@@ -30,15 +30,15 @@ public abstract class CryptoCipherStructureAbstract implements ICryptoStructure,
     }
 
     /**
-     * @param payloadToEncrypt argument should be byte[] to decrypt
+     * @param payloadToDecrypt argument should be byte[] to decrypt
      * @return payloadToEncrypted depending the {@link #getCipher()} and {@link #getSecretKey()} provided by implemented algo
      */
     @Override
-    public byte[] decrypt(byte[] payloadToEncrypt) throws RobertServerCryptoException {
+    public byte[] decrypt(byte[] payloadToDecrypt) throws RobertServerCryptoException {
         try {
             this.getCipher().init(Cipher.DECRYPT_MODE, this.getSecretKey(), this.getIv());
 
-            return this.getCipher().doFinal(payloadToEncrypt);
+            return this.getCipher().doFinal(payloadToDecrypt);
         } catch (InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
             log.error(e.getMessage(), e);
             throw new RobertServerCryptoException(e.getMessage());

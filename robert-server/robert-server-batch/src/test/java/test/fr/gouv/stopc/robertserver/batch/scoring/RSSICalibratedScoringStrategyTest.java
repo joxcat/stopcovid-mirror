@@ -364,7 +364,7 @@ public class RSSICalibratedScoringStrategyTest {
         RobertScoringException thrown = assertThrows(
                 RobertScoringException.class,
                 () -> scoringStrategyService.execute(contact),
-                "Expected doThing() to throw, but it didn't"
+                "Expected scoring function to throw, but it didn't"
         );
 
         assertNotEquals(null, thrown);

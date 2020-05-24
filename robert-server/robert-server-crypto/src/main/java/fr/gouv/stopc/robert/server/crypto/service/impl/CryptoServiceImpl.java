@@ -2,14 +2,14 @@ package fr.gouv.stopc.robert.server.crypto.service.impl;
 
 import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
+import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import fr.gouv.stopc.robert.server.crypto.model.EphemeralTuple;
 import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.Crypto3DES;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAES;
+import fr.gouv.stopc.robert.server.crypto.structure.CryptoCipherStructureAbstract;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
-import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.util.Arrays;
 
 @Service
@@ -17,22 +17,22 @@ import java.util.Arrays;
 public class CryptoServiceImpl implements CryptoService {
     @Override
     public EphemeralTuple generateEphemeralTuple(
-            final Crypto3DES crypto3DES,
-            final CryptoAES cryptoAES,
+            final CryptoCipherStructureAbstract cryptoForEBID,
+            final CryptoCipherStructureAbstract cryptoForECC,
             final int epochId,
             final byte[] idA,
             final byte countryCode) throws RobertServerCryptoException {
 
-        byte[] ebid =  this.generateEBID(crypto3DES, epochId, idA);
+        byte[] ebid =  this.generateEBID(cryptoForEBID, epochId, idA);
 
         // generate ECC 8-bits MSB method
-        byte[] encryptedCountryCode = this.encryptCountryCode(cryptoAES, ebid, countryCode);
+        byte[] encryptedCountryCode = this.encryptCountryCode(cryptoForECC, ebid, countryCode);
 
         return  new EphemeralTuple(epochId, ebid, encryptedCountryCode);
     }
 
     @Override
-    public byte[] generateEBID(final Crypto3DES crypto3DES, final int epochId, final byte[] idA) throws RobertServerCryptoException {
+    public byte[] generateEBID(final CryptoCipherStructureAbstract cryptoForEBID, final int epochId, final byte[] idA) throws RobertServerCryptoException {
         byte[] epoch =  ByteUtils.intToBytes(epochId);
         byte[] truncatedEpoch = new byte[] { epoch[epoch.length - 3], epoch[epoch.length - 2], epoch[epoch.length - 1] };
         this.assertLength("IDa", 40, idA);
@@ -40,18 +40,18 @@ public class CryptoServiceImpl implements CryptoService {
         // concat epoch (truncate to 24 bits) and IDa (40 bits)
         byte[] bytesToEncrypt = ByteUtils.addAll(truncatedEpoch, idA);
 
-        return crypto3DES.encrypt(bytesToEncrypt);
+        return cryptoForEBID.encrypt(bytesToEncrypt);
     }
 
     @Override
-    public byte[] decryptEBID(final Crypto3DES crypto3DES, final byte[] ebid) throws RobertServerCryptoException {
+    public byte[] decryptEBID(final CryptoCipherStructureAbstract cryptoForEBID, final byte[] ebid) throws RobertServerCryptoException {
 
         this.assertLength("ebid", 64, ebid);
-        return crypto3DES.decrypt(ebid);
+        return cryptoForEBID.decrypt(ebid);
     }
 
     @Override
-    public byte[] encryptCountryCode(final CryptoAES cryptoAES, final byte[] ebid, final byte countryCode) throws RobertServerCryptoException {
+    public byte[] encryptCountryCode(final CryptoCipherStructureAbstract cryptoForECC, final byte[] ebid, final byte countryCode) throws RobertServerCryptoException {
         this.assertLength("ebid", 64, ebid);
         this.assertLength("country code", 8, countryCode);
 
@@ -59,7 +59,7 @@ public class CryptoServiceImpl implements CryptoService {
         byte[] payloadToEncrypt = Arrays.copyOf(ebid, 128 / 8);
 
         // AES Encryption of the payload to encrypt
-        byte[] encryptedPayload = cryptoAES.encrypt(payloadToEncrypt);
+        byte[] encryptedPayload = cryptoForECC.encrypt(payloadToEncrypt);
 
         // Truncate to 8 bits
         // Equivalent to MSB in ROBert spec
@@ -69,12 +69,12 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public byte[] decryptCountryCode(final CryptoAES cryptoAES, final byte[] ebid, final byte encryptedCountryCode) throws RobertServerCryptoException {
+    public byte[] decryptCountryCode(final CryptoCipherStructureAbstract cryptoForECC, final byte[] ebid, final byte encryptedCountryCode) throws RobertServerCryptoException {
         this.assertLength("ebid", 64, ebid);
         this.assertLength("encrypted country code", 8, encryptedCountryCode);
 
         // decrypt method is same as encrypt but take in third parameter ecc
-        return this.encryptCountryCode(cryptoAES, ebid, encryptedCountryCode);
+        return this.encryptCountryCode(cryptoForECC, ebid, encryptedCountryCode);
     }
 
     @Override
