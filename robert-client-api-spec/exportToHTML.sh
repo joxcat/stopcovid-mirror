@@ -1,2 +1,2 @@
 #!/bin/bash
-redoc-cli bundle -o swagger.html swagger.json
+redoc-cli bundle -o openapi.html openapi.yaml

@@ -1,3 +1,11 @@
+**Note** : La publication de l'intégralité du code source de l’application mobile, sous iOS et sous Android fait apparaitre des écrans et des textes. 
+Ces écrans et ces textes vont évoluer au cours des jours qui viennent, en amont de tout déploiement éventuel, du fait :
+- de la prise en compte des éléments recommandés dans les délibérations de la CNIL,
+- des retours des tests, 
+- de la prise en compte de l'ensemble des exigences en matière d'accessibilité, 
+- de la précision des éléments légaux,
+- de tout autre élément susceptible de conduire à des modifications
+
 # Rappel du contexte
 
 Sous la supervision du Ministère de la Santé et des solidarités et du Secrétariat d’État au numérique, en lien avec le Ministère de l’enseignement supérieur, de la recherche et de l’innovation, **Inria pilote depuis le 7 avril 2020** le développement de l’application « StopCovid » auquel contribue à titre gracieux un ensemble d’acteurs publics et privés, au sein de l’équipe-projet StopCovid, qui rassemble ANSSI, Capgemini, Dassault Systèmes, INSERM, Lunabee, Orange, Santé Publique France et Withings , et que complète un écosystème de contributeurs. Ce projet contribue à la gestion de la crise sanitaire Covid-19 et au suivi épidémiologique par les autorités de santé.
