@@ -252,8 +252,11 @@ components:
             complete the user registration process
         clientPublicECDHKey:
           type: string
-          description: Public client key to be used by server to encrypt the 'key' returned
-            in the response.
+          description: >-
+            Client public key to be used by server to derive shared secret and keys.
+
+
+            Base64 encoded
       required:
         - captcha
         - clientPublicECDHKey
@@ -278,10 +281,19 @@ components:
           $ref: "#/components/schemas/ClientConfiguration"
         message:
           type: string
+        serverPublicECDHKey:
+          type: string
+          format: byte
+          description: >-
+            Server public key to be used by client to derive shared secret and keys.
+
+
+            Base64 encoded
       required:
         - tuples
         - config
         - timeStart
+        - serverPublicECDHKey
     ReportBatchRequest:
       type: object
       properties:
