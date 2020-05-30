@@ -3,6 +3,7 @@ package fr.gouv.stopc.robertserver.database.service.impl;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,61 +28,58 @@ public class RegistrationService implements IRegistrationService {
 		this.registrationRepository = registrationRepository;
 	}
 
-	private Registration create() {
-		return Registration.builder()
-		.permanentIdentifier(generateIdA())
-		.sharedKey(generateKA())
-		.build();
-
-	}
-
-	private byte[] generateIdA() {
-		byte[] id = generateKey(5);
-		while(registrationRepository.existsById(id)) {
-			id = generateKey(5);
-		}
-		return id;
-	}
-
-	public byte [] generateKA() {
-		byte [] ka = null;
-
-		try {
-			KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-
-			//Creating a SecureRandom object
-			SecureRandom secRandom = new SecureRandom();
-
-			//Initializing the KeyGenerator
-			keyGen.init(secRandom);
-
-			//Creating/Generating a key
-			Key key = keyGen.generateKey();
-			ka = key.getEncoded();
-		} catch (NoSuchAlgorithmException e) {
-			log.error("Could not generate 256-bit key");
-		} 
-		return ka;
-	}
-
-	public byte[] generateKey(final int nbOfbytes) {
-		byte[] rndBytes = new byte[nbOfbytes];
-		SecureRandom sr = new SecureRandom();
-		sr.nextBytes(rndBytes);
-		return rndBytes;
-	}
+	// TODO: remove comments
+//	private Registration create() {
+//		return Registration.builder()
+//		.permanentIdentifier(generateIdA())
+//		.build();
+//	}
+//	private byte[] generateIdA() {
+//		byte[] id = generateKey(5);
+//		while(registrationRepository.existsById(id)) {
+//			id = generateKey(5);
+//		}
+//		return id;
+//	}
+//
+//	public byte [] generateKA() {
+//		byte [] ka = null;
+//
+//		try {
+//			KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+//
+//			//Creating a SecureRandom object
+//			SecureRandom secRandom = new SecureRandom();
+//
+//			//Initializing the KeyGenerator
+//			keyGen.init(secRandom);
+//
+//			//Creating/Generating a key
+//			Key key = keyGen.generateKey();
+//			ka = key.getEncoded();
+//		} catch (NoSuchAlgorithmException e) {
+//			log.error("Could not generate 256-bit key");
+//		}
+//		return ka;
+//	}
+//
+//	public byte[] generateKey(final int nbOfbytes) {
+//		byte[] rndBytes = new byte[nbOfbytes];
+//		SecureRandom sr = new SecureRandom();
+//		sr.nextBytes(rndBytes);
+//		return rndBytes;
+//	}
 
 	@Override
-	public Optional<Registration> createRegistration() {
-
-
-		return Optional.ofNullable(this.create())
+	public Optional<Registration> createRegistration(byte[] id) {
+		return Optional.ofNullable(Registration.builder()
+					.permanentIdentifier(id)
+					.build())
 				.map(this.registrationRepository::insert);
 	}
 
 	@Override
 	public Optional<Registration> findById(byte[] id) {
-		
 		return this.registrationRepository.findById(id);
 	}
 	
@@ -93,7 +91,6 @@ public class RegistrationService implements IRegistrationService {
 
 	@Override
 	public void delete(Registration registration) {
-
 		Optional.ofNullable(registration).ifPresent(this.registrationRepository::delete);
 	}
 

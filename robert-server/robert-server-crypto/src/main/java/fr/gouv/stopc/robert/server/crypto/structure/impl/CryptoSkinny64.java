@@ -1,5 +1,6 @@
 package fr.gouv.stopc.robert.server.crypto.structure.impl;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
@@ -10,6 +11,7 @@ import fr.gouv.stopc.robert.server.crypto.skinny64.impl.SkinnyCipher192Impl;
 import fr.gouv.stopc.robert.server.crypto.structure.CryptoCipherStructureAbstract;
 import lombok.extern.slf4j.Slf4j;
 
+import java.security.spec.AlgorithmParameterSpec;
 import java.util.Objects;
 
 @Slf4j
@@ -84,14 +86,19 @@ public class CryptoSkinny64 extends CryptoCipherStructureAbstract {
 	}
 
 	@Override
-	public IvParameterSpec getIv() {
+	public SecretKey getSecretKey() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public SecretKey getSecretKey() {
-		// TODO Auto-generated method stub
+	public AlgorithmParameterSpec getAlgorithmParameterSpec() {
 		return null;
 	}
+
+    @Override
+    public Cipher getDecryptCypher() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

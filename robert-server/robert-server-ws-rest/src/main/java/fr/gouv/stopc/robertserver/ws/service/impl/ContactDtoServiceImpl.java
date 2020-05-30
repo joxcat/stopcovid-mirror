@@ -11,7 +11,7 @@ import fr.gouv.stopc.robertserver.database.service.ContactService;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
 import fr.gouv.stopc.robertserver.ws.service.ContactDtoService;
 import fr.gouv.stopc.robertserver.ws.utils.MessageConstants;
-import fr.gouv.stopc.robertserver.ws.vo.GroupedHellosReportVo;
+import fr.gouv.stopc.robertserver.ws.vo.ContactVo;
 import fr.gouv.stopc.robertserver.ws.vo.mapper.ContactMapper;
 
 
@@ -30,7 +30,7 @@ public class ContactDtoServiceImpl implements ContactDtoService {
 	}
 
 	@Override
-	public void saveContacts(List<GroupedHellosReportVo> contactVoList) throws RobertServerException {
+	public void saveContacts(List<ContactVo> contactVoList) throws RobertServerException {
 
 		try {
 			List<Contact> contacts = contactMapper.convertToEntity(contactVoList);

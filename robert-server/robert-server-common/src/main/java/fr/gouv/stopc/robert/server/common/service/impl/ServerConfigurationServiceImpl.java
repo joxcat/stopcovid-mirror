@@ -67,7 +67,7 @@ public class ServerConfigurationServiceImpl implements IServerConfigurationServi
 
     @Override
     public int getHelloMessageTimeStampTolerance() {
-        return 3;
+        return 180;
     }
 
     @Override
@@ -78,6 +78,13 @@ public class ServerConfigurationServiceImpl implements IServerConfigurationServi
     @Override
     public int getEpochDurationSecs() {
         return TimeUtils.EPOCH_DURATION_SECS;
+    }
+
+    @Override
+    public int getEpochBundleDurationInDays() {
+        // number of seconds in a day / duration of an epoch in seconds * number of days for which to generates bundle
+        // (to be configurable)
+        return 4;
     }
 
     @Override
@@ -98,6 +105,6 @@ public class ServerConfigurationServiceImpl implements IServerConfigurationServi
     // Issue #TODO: store all values of this risk threshold to track any configuration change over time
     @Override
     public double getRiskThreshold() {
-        return 5.0;
+        return 0.5;
     }
 }

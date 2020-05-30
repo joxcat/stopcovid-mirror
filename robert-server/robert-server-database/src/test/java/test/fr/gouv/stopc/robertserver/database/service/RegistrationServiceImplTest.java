@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +22,12 @@ import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.repository.RegistrationRepository;
 import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
 
+import javax.crypto.KeyGenerator;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+
+@Slf4j
 @ExtendWith(SpringExtension.class)
 public class RegistrationServiceImplTest {
 
@@ -30,6 +37,42 @@ public class RegistrationServiceImplTest {
 	@Mock
 	RegistrationRepository registrationRepository;
 
+
+	private byte[] generateIdA() {
+		byte[] id = generateKey(5);
+		while(registrationRepository.existsById(id)) {
+			id = generateKey(5);
+		}
+		return id;
+	}
+
+	public byte [] generateKA() {
+		byte [] ka = null;
+
+		try {
+			KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+
+			//Creating a SecureRandom object
+			SecureRandom secRandom = new SecureRandom();
+
+			//Initializing the KeyGenerator
+			keyGen.init(secRandom);
+
+			//Creating/Generating a key
+			Key key = keyGen.generateKey();
+			ka = key.getEncoded();
+		} catch (NoSuchAlgorithmException e) {
+			log.error("Could not generate 256-bit key");
+		}
+		return ka;
+	}
+
+	public byte[] generateKey(final int nbOfbytes) {
+		byte[] rndBytes = new byte[nbOfbytes];
+		SecureRandom sr = new SecureRandom();
+		sr.nextBytes(rndBytes);
+		return rndBytes;
+	}
 
 	@Test
 	public void testCreateRegistration() {
@@ -41,7 +84,7 @@ public class RegistrationServiceImplTest {
 		when(this.registrationRepository.existsById(any())).thenReturn(false);
 
 		// When
-		this.registrationService.createRegistration();
+		this.registrationService.createRegistration(this.generateIdA());
 
 		// Then
 		verify(this.registrationRepository).insert(any(Registration.class));
@@ -58,33 +101,12 @@ public class RegistrationServiceImplTest {
 		when(this.registrationRepository.existsById(any())).thenReturn(true).thenReturn(false);
 
 		// When
-		this.registrationService.createRegistration();
+		this.registrationService.createRegistration(this.generateIdA());
 
 		// Then
 		verify(this.registrationRepository, times(2)).existsById(any());
 		verify(this.registrationRepository).insert(any(Registration.class));
 
-	}
-	@Test
-	public void testGenerateKA() {
-
-		// When
-		byte [] ka = this.registrationService.generateKA();
-
-		// Then
-		assertTrue(ByteUtils.isNotEmpty(ka));
-		assertEquals(32, ka.length);
-	}
-	
-	@Test
-	public void testGenerateKey() {
-
-		// When
-		byte[] key = this.registrationService.generateKey(5);
-
-		// Then
-		assertTrue(ByteUtils.isNotEmpty(key));
-		assertEquals(5, key.length);
 	}
 
 	@Test

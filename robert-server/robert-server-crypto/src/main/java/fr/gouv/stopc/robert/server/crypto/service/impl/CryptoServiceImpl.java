@@ -1,5 +1,19 @@
 package fr.gouv.stopc.robert.server.crypto.service.impl;
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.stereotype.Service;
+
 import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
@@ -8,13 +22,13 @@ import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
 import fr.gouv.stopc.robert.server.crypto.structure.CryptoCipherStructureAbstract;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
 
 @Service
 @Slf4j
 public class CryptoServiceImpl implements CryptoService {
+
+    private static byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
     @Override
     public EphemeralTuple generateEphemeralTuple(
             final CryptoCipherStructureAbstract cryptoForEBID,
@@ -101,8 +115,8 @@ public class CryptoServiceImpl implements CryptoService {
      * @return the HMAC-SHA256 encrypted, truncated value.
      */
     private byte[] generateHMAC(final CryptoHMACSHA256 cryptoHMACSHA256S,
-                                final byte[] argument,
-                                final DigestSaltEnum salt) throws RobertServerCryptoException {
+            final byte[] argument,
+            final DigestSaltEnum salt) throws RobertServerCryptoException {
 
         final byte[] prefix = new byte[] { salt.getValue() };
 
@@ -125,17 +139,17 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public boolean macESRValidation(final CryptoHMACSHA256 cryptoHMACSHA256S,
-                                    final byte[] toBeEncrypted,
-                                    final byte[] macToVerify) throws RobertServerCryptoException {
+            final byte[] toBeEncrypted,
+            final byte[] macToVerify) throws RobertServerCryptoException {
         return macValidationForType(cryptoHMACSHA256S, toBeEncrypted, macToVerify, DigestSaltEnum.STATUS);
     }
 
     @Override
     public boolean macValidationForType(final CryptoHMACSHA256 cryptoHMACSHA256S,
-                                        final byte[] toBeEncrypted,
-                                        final byte[] macToVerify,
-                                        final DigestSaltEnum salt) throws RobertServerCryptoException {
-        this.assertLength("concat(EBID | Time)", 96, toBeEncrypted);
+            final byte[] toBeEncrypted,
+            final byte[] macToVerify,
+            final DigestSaltEnum salt) throws RobertServerCryptoException {
+        this.assertLength("concat(EBID | Time)", 64+32+32, toBeEncrypted);
         byte[] generatedMAC = this.generateHMAC(cryptoHMACSHA256S, toBeEncrypted, salt);
         return Arrays.equals(macToVerify, generatedMAC);
     }
@@ -155,4 +169,24 @@ public class CryptoServiceImpl implements CryptoService {
         }
     }
 
+    @Override
+    public byte[] performAESOperation(int mode, byte[] data, byte[] key) {
+
+        try {
+            IvParameterSpec ivspec = new IvParameterSpec(iv);
+            SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(mode, skeySpec, ivspec);
+
+            return cipher.doFinal(data);
+
+        } catch (NoSuchPaddingException |  NoSuchAlgorithmException |
+                InvalidKeyException |
+                IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
+
+            log.error("Unable to decrypt with AES cryptographic algorithm due to {}", e);
+        }
+        return null;
+    }
 }

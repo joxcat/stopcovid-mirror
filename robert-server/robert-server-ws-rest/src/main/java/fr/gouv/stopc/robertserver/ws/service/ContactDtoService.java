@@ -3,11 +3,11 @@ package fr.gouv.stopc.robertserver.ws.service;
 import java.util.List;
 
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
-import fr.gouv.stopc.robertserver.ws.vo.GroupedHellosReportVo;
+import fr.gouv.stopc.robertserver.ws.vo.ContactVo;
 
 
 public interface ContactDtoService {
 
-	public void saveContacts(List<GroupedHellosReportVo> contactVoList) throws RobertServerException;
+	public void saveContacts(List<ContactVo> contactVoList) throws RobertServerException;
 
 }

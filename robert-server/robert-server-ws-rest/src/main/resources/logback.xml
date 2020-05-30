@@ -48,6 +48,12 @@
     <logger name="trace" level="trace" additivity="false">
         <appender-ref ref="RollingFile" />
     </logger>
+
+	<!-- at WARN level -->
+	<logger name="warn" level="warn" additivity="false">
+		<appender-ref ref="RollingFile" />
+	</logger>
+
     <!-- at TRACE level -->
     <logger name="error" level="error" additivity="false">
         <appender-ref ref="RollingErrorFile" />

@@ -6,9 +6,9 @@ package fr.gouv.stopc.robert.server.crypto.model;
  * Once the values are set at instantiation they cannot be change to preserve their integrity between each other
  */
 public class EphemeralTuple {
-    private final int epochId;
-    private final byte[] ebid;
-    private final byte[] encryptedCountryCode;
+    private int epochId;
+    private byte[] ebid;
+    private byte[] encryptedCountryCode;
 
     /**
      * Default constructor given the three link attributes epoch, ebid, ecc
@@ -22,7 +22,22 @@ public class EphemeralTuple {
         this.encryptedCountryCode = encryptedCountryCode;
     }
 
-    public int getEpoch() {
+    public EphemeralTuple() {
+    }
+    
+    public void setEpochId(int epochId) {
+        this.epochId = epochId;
+    }
+
+    public void setEbid(byte[] ebid) {
+        this.ebid = ebid;
+    }
+
+    public void setEncryptedCountryCode(byte[] encryptedCountryCode) {
+        this.encryptedCountryCode = encryptedCountryCode;
+    }
+
+    public int getEpochId() {
         return epochId;
     }
 

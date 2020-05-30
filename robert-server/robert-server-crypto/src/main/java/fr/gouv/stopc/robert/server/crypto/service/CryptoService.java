@@ -28,6 +28,7 @@ public interface CryptoService {
             CryptoCipherStructureAbstract cryptoForEBID,
             CryptoCipherStructureAbstract cryptoForECC,
             int epochId, byte[] idA, byte countryCode) throws RobertServerCryptoException;
+ 
 
     /**
      * @param cryptoForEBID instance of Crypto algo to encrypt EBID with, using KS (server key)
@@ -106,5 +107,9 @@ public interface CryptoService {
     boolean macValidationForType(final CryptoHMACSHA256 cryptoHMACSHA256S,
                                  final byte[] toBeEncrypted,
                                  final byte[] macToVerify,
-                                 final DigestSaltEnum salt) throws Exception;
+                                 final DigestSaltEnum salt) throws RobertServerCryptoException;
+
+
+    byte[] performAESOperation(int mode, byte[] data, byte[] key);
+
 }

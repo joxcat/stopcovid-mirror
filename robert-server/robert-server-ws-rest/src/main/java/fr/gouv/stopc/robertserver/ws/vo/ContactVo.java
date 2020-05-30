@@ -16,7 +16,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Data
 @Builder
-public class GroupedHellosReportVo {
+public class ContactVo {
 
 	@NotNull
 	@Size(min = 12, max = 12)
@@ -27,9 +27,24 @@ public class GroupedHellosReportVo {
 	@Size(min = 4, max = 4)
 	private String ecc;
 
+	/* TODO: to be formally validated first and added to API spec
+	@NotNull
+	@Min(0)
+	private Integer neighborCount;
+
+	@NotNull
+	private Double contactScore;
+
+	@NotNull
+	private Integer contactDuration;
+
+	@NotNull
+	private Double confidence;
+	*/
+
 	@Builder.Default
 	@Size(min = 1)
 	@NotNull
-	private List<DistinctiveHelloInfoWithinEpochForSameEBIDVo> ids = new ArrayList<>();
+	private List<HelloMessageDetailVo> ids = new ArrayList<>();
 
 }

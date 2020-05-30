@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class DistinctiveHelloInfoWithinEpochForSameEBIDVo {
+public class HelloMessageDetailVo {
 
 	@NotNull
 	@Min(0)
@@ -29,10 +29,6 @@ public class DistinctiveHelloInfoWithinEpochForSameEBIDVo {
 	@NotNull
 	@Size(min = 8, max = 8)
 	private String mac;
-
-	@Min(-127)
-	@Max(0)
-	private Integer rssiRaw;
 
 	@Min(-127)
 	@Max(0)

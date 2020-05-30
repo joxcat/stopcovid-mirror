@@ -2,30 +2,20 @@ package fr.gouv.stopc.robert.crypto.grpc.server.client.service;
 
 import java.util.Optional;
 
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptEBIDRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacEsrValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationForTypeRequest;
-
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
 
 
 public interface ICryptoServerGrpcClient {
 
 	void init(String host, int port);
 
-	Optional<EphemeralTupleResponse> generateEphemeralTuple(EphemeralTupleRequest request);
+	Optional<GetIdFromStatusResponse> getIdFromStatus(GetIdFromStatusRequest request);
 
-	byte []  decryptEBID(DecryptEBIDRequest request);
+	Optional<GetIdFromAuthResponse> getIdFromAuth(GetIdFromAuthRequest request);
 
-	boolean  validateMacEsr(MacEsrValidationRequest request);
-	
-	boolean  validateMacForType(MacValidationForTypeRequest request);
+	Optional<CreateRegistrationResponse> createRegistration(CreateRegistrationRequest request);
 
-	boolean validateMacHello(MacHelloValidationRequest request);
+	Optional<GetInfoFromHelloMessageResponse> getInfoFromHelloMessage(GetInfoFromHelloMessageRequest request);
 
-	byte decryptCountryCode(DecryptCountryCodeRequest request);
-
+	Optional<DeleteIdResponse> deleteId(DeleteIdRequest request);
 }

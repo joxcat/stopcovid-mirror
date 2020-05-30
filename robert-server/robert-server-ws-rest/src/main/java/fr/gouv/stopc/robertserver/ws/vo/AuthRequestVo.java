@@ -1,5 +1,6 @@
 package fr.gouv.stopc.robertserver.ws.vo;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -15,6 +16,11 @@ public abstract class AuthRequestVo
     @Size(min = 12, max = 12)
     @ToString.Exclude
     private String ebid;
+
+    @NotNull
+    @ToString.Exclude
+    @Min(0)
+    private Integer epochId;
 
     @NotNull
     @Size(min = 8, max = 8)

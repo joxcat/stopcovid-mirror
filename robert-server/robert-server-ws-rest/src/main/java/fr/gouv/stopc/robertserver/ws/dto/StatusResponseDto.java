@@ -16,17 +16,16 @@ import javax.validation.constraints.Size;
 @Data
 @Builder
 public class StatusResponseDto {
-	@NotNull
-	private boolean atRisk;
+    @NotNull
+    private boolean atRisk;
 
-	private long lastExposureTimeframe;
-	private String message;
+    @NotNull
+    private String tuples;
 
-	@NotNull
-	@Singular
-	@Size(min = 1)
-	private List<EpochKeyBundleDto> idsForEpochs;
-	
-	@Singular("filteringAlgoConfig")
-	private List<AlgoConfigDto> filteringAlgoConfig;
+    @Singular("config")
+    private List<ClientConfigDto> config;
+
+    private long lastExposureTimeframe;
+
+    private String message;
 }

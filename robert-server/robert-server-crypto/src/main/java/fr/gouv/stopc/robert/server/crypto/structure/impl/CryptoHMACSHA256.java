@@ -26,7 +26,7 @@ public class CryptoHMACSHA256 extends CryptoMacStructureAbstract {
         SecretKey key = null;
         try {
             // Generate encryption key with server federate key.
-            key =  new SecretKeySpec(applicationKey, HMAC_SHA_256);
+            key = new SecretKeySpec(applicationKey, HMAC_SHA_256);
 
             // Create cipher with AES encryption scheme.
             mac = Mac.getInstance(HMAC_SHA_256);

@@ -20,4 +20,9 @@ public class RegisterVo {
   @ToString.Exclude
   private String captcha;
 
+  @JsonProperty(required = true)
+  @NotNull
+  @ToString.Exclude
+  private String clientPublicECDHKey;
+
 }

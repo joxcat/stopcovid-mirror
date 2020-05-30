@@ -1,8 +1,12 @@
 package fr.gouv.stopc.robert.server.common.utils;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 public final class TimeUtils {
     //  Number of seconds to fill the gap between UNIX timestamp (1/1/1970) and NTP timestamp (1/1/1900)
-    private final static long SECONDS_FROM_01_01_1900 = 2208988800L;
+    public final static long SECONDS_FROM_01_01_1900 = 2208988800L;
 
     // Epoch duration is 15 minutes so 15 * 60 = 900 seconds
     public final static int EPOCH_DURATION_SECS = 900;
@@ -38,5 +42,18 @@ public final class TimeUtils {
      */
     public static int getCurrentEpochFrom(final long timeStart) {
         return getNumberOfEpochsBetween(timeStart, convertUnixMillistoNtpSeconds(System.currentTimeMillis()));
+    }
+
+    /**
+     *
+     * @param epoch
+     * @param timeStart in NTP seconds
+     * @return
+     */
+    public static LocalDate getDateFromEpoch(int epoch, long timeStart) {
+
+        long fromInNtpSecs = (EPOCH_DURATION_SECS * epoch) + timeStart;
+        long fromUnixMillis = (fromInNtpSecs - SECONDS_FROM_01_01_1900) * 1000;
+        return Instant.ofEpochMilli(fromUnixMillis).atZone(ZoneId.of("Europe/Paris")).toLocalDate();
     }
 }

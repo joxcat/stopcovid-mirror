@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,22 +18,14 @@ import lombok.ToString;
 @Builder
 public class RegisterResponseDto
  {
-	
 	@NotNull
-	@ToString.Exclude
-	private String key;
+	private String tuples;
 
-	@NotNull
-	@Size(min = 1)
-	@Singular
-	private List<EpochKeyBundleDto> idsForEpochs;
-
-	private String message;
-
-	@Singular("filteringAlgoConfig")
-	private List<AlgoConfigDto> filteringAlgoConfig;
+	@Singular("config")
+	private List<ClientConfigDto> config;
 
 	@Min(3797858242L)
 	private long timeStart;
 
-}
+	private String message;
+ }

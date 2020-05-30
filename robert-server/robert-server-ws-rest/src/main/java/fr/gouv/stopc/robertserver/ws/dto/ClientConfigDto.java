@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class AlgoConfigDto {
+public class ClientConfigDto {
 
 	@NotNull
 	private String name;

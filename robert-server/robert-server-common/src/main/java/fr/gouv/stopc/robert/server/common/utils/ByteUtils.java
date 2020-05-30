@@ -1,7 +1,7 @@
 package fr.gouv.stopc.robert.server.common.utils;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.security.SecureRandom;
 
 /**
  * Simplify conversion to/from numerical value to byte arrays
@@ -36,6 +36,7 @@ public final class ByteUtils {
 
     public static int convertEpoch24bitsToInt(byte[] epoch24) {
         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        buffer.put((byte)0x0); // pad first byte
         buffer.put(epoch24, 0, epoch24.length);
         buffer.flip();
         return buffer.getInt();
@@ -69,5 +70,12 @@ public final class ByteUtils {
     }
 
     public static byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+    public static byte[] generateRandom(final int nbOfbytes) {
+        byte[] rndBytes = new byte[nbOfbytes];
+        SecureRandom sr = new SecureRandom();
+        sr.nextBytes(rndBytes);
+        return rndBytes;
+    }
 }
 

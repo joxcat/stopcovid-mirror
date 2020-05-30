@@ -88,7 +88,7 @@ public class RSSICalibratedScoringStrategyTest {
         }
 
         log.info(String.format("1-minute encounter (4 messages over 1 minute): %f", score));
-        assertTrue(score < this.riskThreshold);
+        assertTrue(score < 1.0 && score > 0.75);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class RSSICalibratedScoringStrategyTest {
         }
 
         log.info(String.format("10-minute encounter (12 messages over 10 minutes): %f", score));
-        assertTrue(score > this.riskThreshold);
+        assertTrue(score > 9.0 && score < 10.0);
     }
 
     @Test
@@ -232,7 +232,7 @@ public class RSSICalibratedScoringStrategyTest {
         }
 
         log.info(String.format("Spotty encounter (4 messages over 10+ minutes): %f", score));
-        assertTrue(score > this.riskThreshold);
+        assertTrue(score > 6.0 && score < 7.0);
     }
 
     @Test
@@ -260,7 +260,7 @@ public class RSSICalibratedScoringStrategyTest {
         }
 
         log.info(String.format("One early, one late: %f", score));
-        assertTrue(score < this.riskThreshold);
+        assertTrue(score < 4.0 && score > 3.9);
     }
 
     @Test

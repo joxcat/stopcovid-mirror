@@ -15,4 +15,8 @@ public interface ICryptoServerConfigurationService {
      * @return
      */
     byte[] getFederationKey();
+
+    byte[] getServerKeyForEpochId(int epochId);
+
+    long getServiceTimeStart();
 }

@@ -72,7 +72,7 @@ public class Crypto3DES extends CryptoCipherStructureAbstract {
     }
 
     @Override
-    public IvParameterSpec getIv() {
+    public IvParameterSpec getAlgorithmParameterSpec() {
         return this.iv;
     }
 
@@ -92,5 +92,11 @@ public class Crypto3DES extends CryptoCipherStructureAbstract {
     @Override
     public SecretKey getSecretKey() {
         return this.key;
+    }
+
+    @Override
+    public Cipher getDecryptCypher() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

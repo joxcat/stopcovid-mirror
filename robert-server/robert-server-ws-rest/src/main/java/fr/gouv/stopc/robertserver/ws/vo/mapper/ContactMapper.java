@@ -12,8 +12,8 @@ import org.springframework.util.CollectionUtils;
 
 import fr.gouv.stopc.robertserver.database.model.Contact;
 import fr.gouv.stopc.robertserver.database.model.HelloMessageDetail;
-import fr.gouv.stopc.robertserver.ws.vo.DistinctiveHelloInfoWithinEpochForSameEBIDVo;
-import fr.gouv.stopc.robertserver.ws.vo.GroupedHellosReportVo;
+import fr.gouv.stopc.robertserver.ws.vo.HelloMessageDetailVo;
+import fr.gouv.stopc.robertserver.ws.vo.ContactVo;
 
 @Component
 public class ContactMapper {
@@ -21,19 +21,19 @@ public class ContactMapper {
 
 	public ContactMapper() {}
 
-	public Optional<Contact> convertToEntity(GroupedHellosReportVo groupedHellosReportVo) {
+	public Optional<Contact> convertToEntity(ContactVo contactVo) {
 
-		return Optional.ofNullable(groupedHellosReportVo).map(this::mapContact).orElse(Optional.empty());
+		return Optional.ofNullable(contactVo).map(this::mapContact).orElse(Optional.empty());
 	}
 
-	public List<Contact> convertToEntity(List<GroupedHellosReportVo> groupedHellosReportVoList) {
+	public List<Contact> convertToEntity(List<ContactVo> contactVoList) {
 
-		if (CollectionUtils.isEmpty(groupedHellosReportVoList)) {
+		if (CollectionUtils.isEmpty(contactVoList)) {
 			return Collections.emptyList();
 		}
 
 		List<Contact> contacts = new ArrayList<>();
-		groupedHellosReportVoList.stream()
+		contactVoList.stream()
 				.map(this::convertToEntity)
 				.filter(item -> item.isPresent())
 				.forEach(item -> contacts.add(item.get()));
@@ -42,17 +42,16 @@ public class ContactMapper {
 
 	}
 
-	private HelloMessageDetail mapHelloMessageDetail(DistinctiveHelloInfoWithinEpochForSameEBIDVo dtoMessage) {
+	private HelloMessageDetail mapHelloMessageDetail(HelloMessageDetailVo dtoMessage) {
 		return HelloMessageDetail.builder()
 				.mac(Base64.decode(dtoMessage.getMac()))
 				.rssiCalibrated(dtoMessage.getRssiCalibrated())
-				.rssiRaw(dtoMessage.getRssiRaw())
 				.timeCollectedOnDevice(dtoMessage.getTimeCollectedOnDevice())
 				.timeFromHelloMessage(dtoMessage.getTimeFromHelloMessage())
 				.build();
 	}
 
-	private Optional<Contact> mapContact(GroupedHellosReportVo contactVo) {
+	private Optional<Contact> mapContact(ContactVo contactVo) {
 		List<HelloMessageDetail> messageDetails = contactVo.getIds()
 				.stream()
 				.map(this::mapHelloMessageDetail)

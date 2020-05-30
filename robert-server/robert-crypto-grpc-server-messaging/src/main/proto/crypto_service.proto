@@ -21,133 +21,76 @@ option objc_class_prefix = "";
 
 package robert.server.crypto;
 
-// The greeting service definition.
 service CryptoGrpcServiceImpl {
-  // Streams a many greetings
-  rpc generateEphemeralTuple (EphemeralTupleRequest) returns (EphemeralTupleResponse) {}
-  rpc generateEBID(GenerateEBIDRequest) returns (EBIDResponse){}
-  rpc decryptEBID(DecryptEBIDRequest) returns (EBIDResponse){}
-  rpc encryptCountryCode(EncryptCountryCodeRequest) returns (EncryptCountryCodeResponse){}
-  rpc decryptCountryCode(DecryptCountryCodeRequest) returns (DecryptCountryCodeResponse){}
-  rpc generateMacHello(MacHelloGenerationRequest) returns (MacHelloGenerationResponse){}
-  rpc validateMacHello(MacHelloValidationRequest) returns (MacValidationResponse){}
-  rpc validateMacEsr(MacEsrValidationRequest) returns (MacValidationResponse){}
-  rpc validateMacForType(MacValidationForTypeRequest) returns (MacValidationResponse){}
+	rpc createRegistration(CreateRegistrationRequest) returns (CreateRegistrationResponse){}
+	rpc getIdFromAuth(GetIdFromAuthRequest) returns (GetIdFromAuthResponse){}
+	rpc getIdFromStatus(GetIdFromStatusRequest) returns (GetIdFromStatusResponse){}
+	rpc getInfoFromHelloMessage(GetInfoFromHelloMessageRequest) returns (GetInfoFromHelloMessageResponse){}
+	rpc deleteId(DeleteIdRequest) returns (DeleteIdResponse){}
 }
 
-// The request message containing the user's name.
-message EphemeralTupleRequest {
-	// byte[] IDA of Registration
-	// int currentEpochID
-	// int numberOfEpochsToGenerate
-	// byte countryCode;
-	
+message CreateRegistrationRequest {
+	bytes clientPublicKey = 1;
+	int32 fromEpochId = 2;
+	int32 numberOfDaysForEpochBundles = 3; // the number of days for which ephemeral bundles must be generated
+	bytes serverCountryCode = 4; // the country code configured on the server to be used when generating ECCs
+}
+
+message CreateRegistrationResponse {
 	bytes idA = 1;
-	int32 currentEpochID = 2;
-	int32 numberOfEpochsToGenerate = 3;
-	bytes countryCode = 4;
-	
+	bytes tuples = 2;
 }
 
-// The response message containing the greetings
- message EphemeralTupleResponse {
-	// int epochId;
-	// byte[] ebid;
-	// byte[] ecc;
-	repeated Tuple tuple = 1;
+message GetIdFromAuthRequest {
+	bytes ebid = 1;
+	int32 epochId = 2;
+	int64 time = 3;
+	bytes mac = 4;
+	int32 requestType = 5;
 }
 
-message Tuple {
-
-	int32 epochId = 1;
-	bytes ebid = 2;
-	bytes ecc = 3;
-}
-message GenerateEBIDRequest {
-	// byte[] IDA of Registration
-	// int currentEpochID
+message GetIdFromAuthResponse {
 	bytes idA = 1;
 	int32 epochId = 2;
-	
 }
 
-message EBIDResponse {
-
+message GetIdFromStatusRequest {
 	bytes ebid = 1;
+	int32 epochId = 2;
+	int64 time = 3;
+	bytes mac = 4;
+	int32 fromEpochId = 5;
+	int32 numberOfDaysForEpochBundles = 6;
+	bytes serverCountryCode = 7;
 }
 
-message DecryptEBIDRequest {
-	bytes ebid = 1;
+message GetIdFromStatusResponse {
+	bytes idA = 1;
+	int32 epochId = 2;
+	bytes tuples = 3;
 }
 
-message EncryptCountryCodeRequest {
-	//  byte[] ebid;
-	// byte countryCode;
-	bytes ebid = 1;
-	bytes countryCode = 2;
+message GetInfoFromHelloMessageRequest {
+	bytes ecc = 1;
+	bytes ebid = 2;
+	bytes mac = 3;
+	int32 timeSent = 4; // time hello message was sent from emitting device (unsigned 16 bits)
+	int64 timeReceived = 5; // time hello message was received on device (unsigned 32 bits, stored in long)
 }
 
-message EncryptCountryCodeResponse {
-
-	// byte[] encryptedCountryCode;
-	bytes encryptedCountryCode = 1;
-}
-
-message DecryptCountryCodeRequest {
-	//  byte[] ebid;
-	// byte encryptedCountryCode;
-	bytes ebid = 1;
-	bytes encryptedCountryCode = 2;
-}
-
-message DecryptCountryCodeResponse {
-
-	// byte[] countryCode;
+message GetInfoFromHelloMessageResponse {
 	bytes countryCode = 1;
+	bytes idA = 2;
+	int32 epochId = 3;
 }
 
-message MacHelloGenerationRequest {
-	// byte[] KA;
-	// byte[] helloMessage;
-	bytes ka = 1;
-	bytes helloMessage = 2;
+message DeleteIdRequest {
+	bytes ebid = 1;
+	int32 epochId = 2;
+	int64 time = 3;
+	bytes mac = 4;
 }
 
-message MacHelloGenerationResponse {
-
-	// byte[] macHelloMessage;
-	bytes macHelloMessage = 1;
+message DeleteIdResponse {
+	bytes idA = 1;
 }
-
-message MacHelloValidationRequest {
-	// byte[] KA;
-	// byte[] dataToValidate;
-	bytes ka = 1;
-	bytes dataToValidate = 2;
-}
-message MacValidationResponse {
-
-	// boolean isValid;
-	bool isValid = 1;
-}
-
-message MacEsrValidationRequest {
-	// byte[] KA;
-	// byte[] dataToValidate;
-	// byte[] macToMatchWith;
-	bytes ka = 1;
-	bytes dataToValidate = 2;
-	bytes macToMatchWith = 3;
-}
-
-message MacValidationForTypeRequest {
-	// byte[] KA;
-	// byte[] dataToValidate;
-	// byte[] macToMatchWith;
-	// byte prefixes;
-	bytes ka = 1;
-	bytes dataToValidate = 2;
-	bytes macToMatchWith = 3;
-	bytes prefixe = 4;
-}
-

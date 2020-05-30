@@ -32,7 +32,7 @@ class CryptoStructureConcurrentArray<T extends ICryptoStructure> {
      * @throws RobertServerCryptoException
      */
     public T getCryptoStructure(String threadName) throws RobertServerCryptoException {
-        if (!this.cryptoStructureIndexByThread.containsKey(threadName)) {
+//        if (!this.cryptoStructureIndexByThread.containsKey(threadName)) {
             this.cryptoStructureList = Collections.synchronizedList(this.cryptoStructureList);
 
             if (this.cryptoStructureList.isEmpty()) {
@@ -40,10 +40,10 @@ class CryptoStructureConcurrentArray<T extends ICryptoStructure> {
             }
 
             final T t = this.cryptoStructureList.get(0);
-            this.cryptoStructureIndexByThread.put(threadName, t);
+//            this.cryptoStructureIndexByThread.put(threadName, t);
 
             this.cryptoStructureList = withoutFirstElement(this.cryptoStructureList);
-        }
+//        }
         return this.cryptoStructureIndexByThread.get(threadName);
     }
 

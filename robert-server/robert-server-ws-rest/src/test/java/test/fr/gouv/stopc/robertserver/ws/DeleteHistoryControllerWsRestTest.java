@@ -20,6 +20,8 @@ import java.util.Optional;
 import javax.crypto.KeyGenerator;
 import javax.inject.Inject;
 
+import com.google.protobuf.ByteString;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthResponse;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoSkinny64;
 import org.bson.internal.Base64;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,47 +128,66 @@ public class DeleteHistoryControllerWsRestTest {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
-		Registration reg = Registration.builder().permanentIdentifier(idA).sharedKey(kA).atRisk(true).isNotified(false)
-				.lastStatusRequestEpoch(currentEpoch - 3).build();
+		Registration reg = Registration.builder()
+				.permanentIdentifier(idA)
+				.atRisk(true)
+				.isNotified(false)
+				.lastStatusRequestEpoch(this.currentEpoch - 3).build();
 
 		byte[] decryptedEbid = new byte[8];
 		System.arraycopy(idA, 0, decryptedEbid, 3, idA.length);
-		System.arraycopy(ByteUtils.intToBytes(currentEpoch), 1, decryptedEbid, 0, decryptedEbid.length - idA.length);
+		System.arraycopy(ByteUtils.intToBytes(this.currentEpoch), 1, decryptedEbid, 0, decryptedEbid.length - idA.length);
 
+		doReturn(Optional.of(GetIdFromAuthResponse.newBuilder()
+								.setIdA(ByteString.copyFrom(idA))
+								.setEpochId(this.currentEpoch)
+								.build()))
+				.when(this.cryptoServerClient).getIdFromAuth(any());
 		doReturn(Optional.of(reg)).when(this.registrationService).findById(idA);
-		doReturn(decryptedEbid).when(this.cryptoServerClient).decryptEBID(any());
-		doReturn(true).when(this.cryptoServerClient).validateMacForType(any());
 
 		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
-				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
+		this.requestBody = DeleteHistoryRequestVo.builder()
+				.ebid(Base64.encode(reqContent[0]))
+				.epochId(this.currentEpoch)
+				.time(Base64.encode(reqContent[1]))
+				.mac(Base64.encode(reqContent[2]))
+				.build();
 
 		// WHEN - THEN
-		callWsAndAssertResponse(reg, requestBody, HttpStatus.OK, 1, 0);
+		callWsAndAssertResponse(reg, this.requestBody, HttpStatus.OK, 1, 0);
 	}
 
 	@Test
-	public void testDeleteHistoryWithExposedEpochsSuccess() {
+	public void testDeleteHistoryWithExposedEpochsSucceeds() {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
 		List<EpochExposition> history = new ArrayList<>(Arrays.asList(new EpochExposition(), new EpochExposition()));
-		Registration reg = Registration.builder().permanentIdentifier(idA).sharedKey(kA).atRisk(true).isNotified(false)
-				.lastStatusRequestEpoch(currentEpoch - 3).exposedEpochs(history).build();
+		Registration reg = Registration.builder()
+				.permanentIdentifier(idA)
+				.atRisk(true)
+				.isNotified(false)
+				.lastStatusRequestEpoch(this.currentEpoch - 3).exposedEpochs(history).build();
 
 		byte[] decryptedEbid = new byte[8];
 		System.arraycopy(idA, 0, decryptedEbid, 3, idA.length);
-		System.arraycopy(ByteUtils.intToBytes(currentEpoch), 1, decryptedEbid, 0, decryptedEbid.length - idA.length);
+		System.arraycopy(ByteUtils.intToBytes(this.currentEpoch), 1, decryptedEbid, 0, decryptedEbid.length - idA.length);
 
 		doReturn(Optional.of(reg)).when(this.registrationService).findById(idA);
-		doReturn(decryptedEbid).when(this.cryptoServerClient).decryptEBID(any());
-		doReturn(true).when(this.cryptoServerClient).validateMacForType(any());
+		doReturn(Optional.of(GetIdFromAuthResponse.newBuilder()
+				.setIdA(ByteString.copyFrom(idA))
+				.setEpochId(this.currentEpoch)
+				.build()))
+				.when(this.cryptoServerClient).getIdFromAuth(any());
 
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch);
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
-				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
+		this.requestBody = DeleteHistoryRequestVo.builder()
+				.ebid(Base64.encode(reqContent[0]))
+				.epochId(this.currentEpoch)
+				.time(Base64.encode(reqContent[1]))
+				.mac(Base64.encode(reqContent[2])).build();
 
 		this.requestEntity = new HttpEntity<>(this.requestBody, this.headers);
 
@@ -178,11 +199,10 @@ public class DeleteHistoryControllerWsRestTest {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		verify(this.registrationService, times(1)).findById(ArgumentMatchers.any());
 		ArgumentCaptor<Registration> captor = ArgumentCaptor.forClass(Registration.class);
-		verify(registrationService).saveRegistration(captor.capture());
+		verify(this.registrationService).saveRegistration(captor.capture());
 
 		Registration arg = captor.getValue();
 		assertTrue(arg.getExposedEpochs().isEmpty());
-
 	}
 
 	@Test
@@ -190,161 +210,185 @@ public class DeleteHistoryControllerWsRestTest {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
-		Registration reg = Registration.builder().permanentIdentifier(idA).sharedKey(kA).atRisk(true).isNotified(false)
-				.lastStatusRequestEpoch(currentEpoch - 3).build();
+		Registration reg = Registration.builder()
+				.permanentIdentifier(idA)
+				.atRisk(true)
+				.isNotified(false)
+				.lastStatusRequestEpoch(this.currentEpoch - 3).build();
 
 		doReturn(Optional.empty()).when(this.registrationService).findById(idA);
 
 		byte[] decryptedEbid = new byte[8];
 		System.arraycopy(idA, 0, decryptedEbid, 3, idA.length);
-		System.arraycopy(ByteUtils.intToBytes(currentEpoch), 1, decryptedEbid, 0, decryptedEbid.length - idA.length);
+		System.arraycopy(ByteUtils.intToBytes(this.currentEpoch), 1, decryptedEbid, 0, decryptedEbid.length - idA.length);
 
-		doReturn(decryptedEbid).when(this.cryptoServerClient).decryptEBID(any());
-		doReturn(true).when(this.cryptoServerClient).validateMacForType(any());
+		doReturn(Optional.of(GetIdFromAuthResponse.newBuilder()
+				.setIdA(ByteString.copyFrom(idA))
+				.setEpochId(this.currentEpoch)
+				.build()))
+				.when(this.cryptoServerClient).getIdFromAuth(any());
 
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch);
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
-				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
+		this.requestBody = DeleteHistoryRequestVo.builder()
+				.ebid(Base64.encode(reqContent[0]))
+				.epochId(this.currentEpoch)
+				.time(Base64.encode(reqContent[1]))
+				.mac(Base64.encode(reqContent[2])).build();
 
 		// WHEN - THEN
-		callWsAndAssertResponse(reg, requestBody, HttpStatus.NOT_FOUND, 1, 0);
+		callWsAndAssertResponse(reg, this.requestBody, HttpStatus.NOT_FOUND, 1, 0);
 	}
 
 	@Test
-	public void testBadEBIDSize() {
+	public void testBadEBIDSizeFails() {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
 
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch);
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode("ABC".getBytes()))
+		this.requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode("ABC".getBytes()))
 				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
 		// WHEN - THEN
-		callWsAndAssertResponse(null, requestBody, HttpStatus.BAD_REQUEST, 0, 0);
+		callWsAndAssertResponse(null, this.requestBody, HttpStatus.BAD_REQUEST, 0, 0);
 	}
 
 	/**
 	 * Business requirement: app can use an old EBID to perform its request
 	 */
 	@Test
-	public void testAcceptOldEBIDValueEpoch() {
+	public void testAcceptOldEBIDValueEpochSucceeds() {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
 		List<EpochExposition> history = new ArrayList<>(Arrays.asList(new EpochExposition(), new EpochExposition()));
-		Registration reg = Registration.builder().permanentIdentifier(idA).sharedKey(kA).atRisk(true).isNotified(false)
-				.lastStatusRequestEpoch(currentEpoch - 3).exposedEpochs(history).build();
+		Registration reg = Registration.builder()
+				.permanentIdentifier(idA)
+				.atRisk(true)
+				.isNotified(false)
+				.lastStatusRequestEpoch(this.currentEpoch - 3).exposedEpochs(history).build();
 
 		doReturn(Optional.of(reg)).when(this.registrationService).findById(idA);
 
 		// Mess up with the epoch used to create the EBID
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch - 10);
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch - 10);
 
 		byte[] decryptedEbid = new byte[8];
 		System.arraycopy(idA, 0, decryptedEbid, 3, idA.length);
 		System.arraycopy(ByteUtils.intToBytes(currentEpoch - 10), 1, decryptedEbid, 0,
 				decryptedEbid.length - idA.length);
-		doReturn(decryptedEbid).when(this.cryptoServerClient).decryptEBID(any());
-		doReturn(true).when(this.cryptoServerClient).validateMacForType(any());
+		doReturn(Optional.of(GetIdFromAuthResponse.newBuilder()
+				.setIdA(ByteString.copyFrom(idA))
+				.setEpochId(this.currentEpoch - 10)
+				.build()))
+				.when(this.cryptoServerClient).getIdFromAuth(any());
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
-				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
+		this.requestBody = DeleteHistoryRequestVo.builder()
+				.ebid(Base64.encode(reqContent[0]))
+				.epochId(this.currentEpoch - 10)
+				.time(Base64.encode(reqContent[1]))
+				.mac(Base64.encode(reqContent[2]))
+				.build();
 		// WHEN - THEN
-		callWsAndAssertResponse(reg, requestBody, HttpStatus.OK, 1, 1);
+		callWsAndAssertResponse(reg, this.requestBody, HttpStatus.OK, 1, 1);
 	}
 
 	@Test
-	public void testBadTimeFuture() {
+	public void testBadTimeFutureFails() {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
 
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch,
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch,
 				0 - ((int) this.serverConfigurationService.getRequestTimeDeltaTolerance() + 1));
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
+		this.requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
 				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
 
 		// WHEN - THEN
-		callWsAndAssertResponse(null, requestBody, HttpStatus.BAD_REQUEST, 0, 0);
+		callWsAndAssertResponse(null, this.requestBody, HttpStatus.BAD_REQUEST, 0, 0);
 	}
 
 	@Test
-	public void testBadTimePast() {
+	public void testBadTimePastFails() {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
 
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch,
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch,
 				0 - (this.serverConfigurationService.getRequestTimeDeltaTolerance() + 1));
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
+		this.requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
 				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
 
 		// WHEN - THEN
-		callWsAndAssertResponse(null, requestBody, HttpStatus.BAD_REQUEST, 0, 0);
+		callWsAndAssertResponse(null, this.requestBody, HttpStatus.BAD_REQUEST, 0, 0);
 	}
 
 	@Test
-	public void testBadTimeSize() {
+	public void testBadTimeSizeFails() {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
 
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch);
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
+		this.requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
 				.time(Base64.encode("AB".getBytes())).mac(Base64.encode(reqContent[2])).build();
 
 		// WHEN - THEN
-		callWsAndAssertResponse(null, requestBody, HttpStatus.BAD_REQUEST, 0, 0);
+		callWsAndAssertResponse(null, this.requestBody, HttpStatus.BAD_REQUEST, 0, 0);
 	}
 
 	@Test
-	public void testBadMACSize() {
+	public void testBadMACSizeFails() {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
 
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch);
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
+		this.requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
 				.time(Base64.encode(reqContent[1])).mac(Base64.encode("ABC".getBytes())).build();
 
 		this.requestEntity = new HttpEntity<>(this.requestBody, this.headers);
 
 		// WHEN - THEN
-		callWsAndAssertResponse(null, requestBody, HttpStatus.BAD_REQUEST, 0, 0);
+		callWsAndAssertResponse(null, this.requestBody, HttpStatus.BAD_REQUEST, 0, 0);
 	}
 
 	@Test
-	public void testBadMAC() {
+	public void testBadMACFails() {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
-		Registration reg = Registration.builder().permanentIdentifier(idA).sharedKey(kA).atRisk(true).isNotified(false)
-				.lastStatusRequestEpoch(currentEpoch - 3).build();
+		Registration reg = Registration.builder()
+				.permanentIdentifier(idA)
+				.atRisk(true)
+				.isNotified(false)
+				.lastStatusRequestEpoch(this.currentEpoch - 3).build();
 
 		byte[] decryptedEbid = new byte[8];
 		System.arraycopy(idA, 0, decryptedEbid, 3, idA.length);
-		System.arraycopy(ByteUtils.intToBytes(currentEpoch), 1, decryptedEbid, 0, decryptedEbid.length - idA.length);
+		System.arraycopy(ByteUtils.intToBytes(this.currentEpoch), 1, decryptedEbid, 0, decryptedEbid.length - idA.length);
 
 		doReturn(Optional.of(reg)).when(this.registrationService).findById(ArgumentMatchers.any());
-		doReturn(decryptedEbid).when(this.cryptoServerClient).decryptEBID(any());
-		doReturn(false).when(this.cryptoServerClient).validateMacForType(any());
+		doReturn(Optional.empty()).when(this.cryptoServerClient).getIdFromAuth(any());
 
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
+		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch);
 
 		// Mess up with MAC
 		reqContent[2][3] = 0x00;
 
-		requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
-				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
+		this.requestBody = DeleteHistoryRequestVo.builder()
+				.ebid(Base64.encode(reqContent[0]))
+				.epochId(this.currentEpoch)
+				.time(Base64.encode(reqContent[1]))
+				.mac(Base64.encode(reqContent[2])).build();
 
 		// WHEN - THEN
-		callWsAndAssertResponse(null, requestBody, HttpStatus.BAD_REQUEST, 1, 0);
+		callWsAndAssertResponse(null, this.requestBody, HttpStatus.BAD_REQUEST, 0, 0);
 	}
 
 	private byte[] generateKA() {

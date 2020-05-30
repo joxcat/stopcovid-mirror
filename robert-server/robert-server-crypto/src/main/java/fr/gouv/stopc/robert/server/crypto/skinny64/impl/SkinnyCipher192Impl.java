@@ -167,7 +167,7 @@ public class SkinnyCipher192Impl implements SkinnyCipher192 {
         }
 
         if ( key.length != SKINNY64_KEY_SIZE ) {
-            throw new IllegalArgumentException("setKey: key lenght is not valid");
+            throw new IllegalArgumentException("setKey: key length is not valid");
         }
 
         setTk1(ks, key, 0);

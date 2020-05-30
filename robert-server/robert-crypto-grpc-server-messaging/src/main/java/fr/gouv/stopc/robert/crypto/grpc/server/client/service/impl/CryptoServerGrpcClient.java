@@ -3,24 +3,14 @@ package fr.gouv.stopc.robert.crypto.grpc.server.client.service.impl;
 import java.util.Objects;
 import java.util.Optional;
 
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplBlockingStub;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptCountryCodeResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DecryptEBIDRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EBIDResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.EphemeralTupleResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacEsrValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacHelloValidationRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationForTypeRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.MacValidationResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
@@ -59,128 +49,80 @@ public class CryptoServerGrpcClient implements ICryptoServerGrpcClient {
     }
 
     @Override
-    public Optional<EphemeralTupleResponse> generateEphemeralTuple(EphemeralTupleRequest request) {
+    public Optional<GetIdFromStatusResponse> getIdFromStatus(GetIdFromStatusRequest request) {
         try {
-
-            EphemeralTupleResponse response = this.blockingStub.generateEphemeralTuple(request);
-
-            if (this.testHelper != null) {
+            GetIdFromStatusResponse response = this.blockingStub.getIdFromStatus(request);
+            if (Objects.nonNull(this.testHelper)) {
                 this.testHelper.onMessage(response);
             }
 
-            if(Objects.nonNull(response)) {
-                return Optional.of(response);
-            }
-        } catch (StatusRuntimeException e) {
-            log.warn(ERROR_MESSAGE, e.getStatus());
+            return Optional.ofNullable(response);
+        } catch (StatusRuntimeException ex) {
+            log.error(ERROR_MESSAGE, ex.getMessage());
         }
         return Optional.empty();
     }
 
     @Override
-    public byte[] decryptEBID(DecryptEBIDRequest request) {
+    public Optional<GetIdFromAuthResponse> getIdFromAuth(GetIdFromAuthRequest request) {
         try {
-
-            EBIDResponse response = this.blockingStub.decryptEBID(request);
-
-            if (this.testHelper != null) {
+            GetIdFromAuthResponse response = this.blockingStub.getIdFromAuth(request);
+            if (Objects.nonNull(this.testHelper)) {
                 this.testHelper.onMessage(response);
             }
 
-            if(Objects.nonNull(response)) {
-                return response.getEbid().toByteArray();
-            }
+            return Optional.ofNullable(response);
         } catch (StatusRuntimeException ex) {
-            log.error(ERROR_MESSAGE, ex.getStatus());
+            log.error(ERROR_MESSAGE, ex.getMessage());
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public boolean validateMacEsr(MacEsrValidationRequest request) {
-
+    public Optional<CreateRegistrationResponse> createRegistration(CreateRegistrationRequest request) {
         try {
-
-            MacValidationResponse response = blockingStub.validateMacEsr(request);
-
-            if (this.testHelper != null) {
+            CreateRegistrationResponse response = this.blockingStub.createRegistration(request);
+            if (Objects.nonNull(this.testHelper)) {
                 this.testHelper.onMessage(response);
             }
 
-            if(Objects.nonNull(response)) {
-                return response.getIsValid();
-            }
+            return Optional.ofNullable(response);
         } catch (StatusRuntimeException ex) {
-            log.error(ERROR_MESSAGE, ex.getStatus());
+            log.error(ERROR_MESSAGE, ex.getMessage());
         }
-        return false;
-    }
-
-
-    @Override
-    public boolean validateMacForType(MacValidationForTypeRequest request) {
-
-        try {
-
-            MacValidationResponse response = this.blockingStub.validateMacForType(request);
-
-            if (this.testHelper != null) {
-                this.testHelper.onMessage(response);
-            }
-
-            if(Objects.nonNull(response)) {
-                return response.getIsValid();
-            }
-        } catch (StatusRuntimeException ex) {
-            log.error(ERROR_MESSAGE, ex.getStatus());
-        }
-        return false;
-    }
-
-
-    @Override
-    public boolean validateMacHello(MacHelloValidationRequest request) {
-
-        try {
-
-            MacValidationResponse response = this.blockingStub.validateMacHello(request);
-
-            if (this.testHelper != null) {
-                this.testHelper.onMessage(response);
-            }
-
-            if(Objects.nonNull(response)) {
-                return response.getIsValid();
-            }
-        } catch (StatusRuntimeException ex) {
-            log.error(ERROR_MESSAGE, ex.getStatus());
-        }
-        return false;
+        return Optional.empty();
     }
 
     @Override
-    public byte decryptCountryCode(DecryptCountryCodeRequest request) {
-
+    public Optional<GetInfoFromHelloMessageResponse> getInfoFromHelloMessage(GetInfoFromHelloMessageRequest request) {
         try {
-
-            DecryptCountryCodeResponse response = this.blockingStub.decryptCountryCode(request);
-
-            if (this.testHelper != null) {
+            GetInfoFromHelloMessageResponse response = this.blockingStub.getInfoFromHelloMessage(request);
+            if (Objects.nonNull(this.testHelper)) {
                 this.testHelper.onMessage(response);
             }
 
-            if(Objects.nonNull(response)) {
-                return response.getCountryCode().toByteArray()[0];
-            }
+            return Optional.ofNullable(response);
         } catch (StatusRuntimeException ex) {
-            log.error(ERROR_MESSAGE, ex.getStatus());
+            log.error(ERROR_MESSAGE, ex.getMessage());
         }
-        return 0;
+        return Optional.empty();
     }
 
-    /**
-     * Only used for helping unit test.
-     */
+    @Override
+    public Optional<DeleteIdResponse> deleteId(DeleteIdRequest request) {
+        try {
+            DeleteIdResponse response = this.blockingStub.deleteId(request);
+            if (Objects.nonNull(this.testHelper)) {
+                this.testHelper.onMessage(response);
+            }
+
+            return Optional.ofNullable(response);
+        } catch (StatusRuntimeException ex) {
+            log.error(ERROR_MESSAGE, ex.getMessage());
+        }
+        return Optional.empty();
+    }
+
     @VisibleForTesting
     public interface TestHelper {
         /**
@@ -199,5 +141,4 @@ public class CryptoServerGrpcClient implements ICryptoServerGrpcClient {
     void setTestHelper(TestHelper testHelper) {
         this.testHelper = testHelper;
     }
-
 }

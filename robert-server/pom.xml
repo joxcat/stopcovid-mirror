@@ -34,23 +34,33 @@
 		<module>robert-server-common</module>
 		<module>robert-crypto-grpc-server</module>
 		<module>robert-crypto-grpc-server-messaging</module>
+		<module>robert-crypto-grpc-server-storage</module>
 	</modules>
 
 	<properties>
 		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<project.reporting.outputEncoding>UTF-8
+		</project.reporting.outputEncoding>
 		<maven.jar.plugin.version>3.1.1</maven.jar.plugin.version>
 		<javax-rs.version>2.1.1</javax-rs.version>
 		<grpc.version>1.29.0</grpc.version>
 		<protobuf.version>3.11.0</protobuf.version>
-		<error_prone_annotations.version>2.3.4</error_prone_annotations.version>
+		<error_prone_annotations.version>2.3.4
+		</error_prone_annotations.version>
+		<postgresql.version>42.2.12</postgresql.version>
+		<bountycastle.version>1.65</bountycastle.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-batch</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>bson</artifactId>
 		</dependency>
 
 		<dependency>
@@ -67,6 +77,10 @@
 				<exclusion>
 					<groupId>org.junit.vintage</groupId>
 					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -133,6 +147,18 @@
 				<artifactId>error_prone_annotations</artifactId>
 				<version>${error_prone_annotations.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${postgresql.version}</version>
+			</dependency>
+
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>${bountycastle.version}</version>
+		</dependency>
 
 		</dependencies>
 	</dependencyManagement>
@@ -219,49 +245,30 @@
 
 		<plugins>
 			<!-- Disabled because fails when not executed from each module's directory -->
-			<!--
-            <plugin>
-                <groupId>org.complykit</groupId>
-                <artifactId>license-check-maven-plugin</artifactId>
-                <version>0.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>os-check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <blacklist>
-                        <param>agpl-3.0</param>
-                        <param>gpl-2.0</param>
-                        <param>gpl-3.0</param>
-                    </blacklist>
-					<excludes>
-					</excludes>
-                </configuration>
-            </plugin>
-			-->
+			<!-- <plugin> <groupId>org.complykit</groupId> <artifactId>license-check-maven-plugin</artifactId> 
+				<version>0.5.3</version> <executions> <execution> <phase>verify</phase> <goals> 
+				<goal>os-check</goal> </goals> </execution> </executions> <configuration> 
+				<blacklist> <param>agpl-3.0</param> <param>gpl-2.0</param> <param>gpl-3.0</param> 
+				</blacklist> <excludes> </excludes> </configuration> </plugin> -->
 		</plugins>
 	</build>
 
 	<reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>5.3.2</version>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>aggregate</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-        </plugins>
-    </reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>5.3.2</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>aggregate</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
 
 	<profiles>
 		<profile>

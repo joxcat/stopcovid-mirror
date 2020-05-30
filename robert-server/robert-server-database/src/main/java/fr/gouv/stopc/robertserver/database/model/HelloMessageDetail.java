@@ -34,8 +34,6 @@ public class HelloMessageDetail {
     @ToString.Exclude
     private byte[] mac;
 
-    private Integer rssiRaw;
-
     @NotNull
     private Integer rssiCalibrated;
 

@@ -7,7 +7,7 @@ import fr.gouv.stopc.robertserver.database.model.Registration;
 
 public interface IRegistrationService {
 	
-	Optional<Registration> createRegistration();
+	Optional<Registration> createRegistration(byte[] id);
 	
 	Optional<Registration> findById(byte[] id);
 
