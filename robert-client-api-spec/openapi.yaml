@@ -281,19 +281,10 @@ components:
           $ref: "#/components/schemas/ClientConfiguration"
         message:
           type: string
-        serverPublicECDHKey:
-          type: string
-          format: byte
-          description: >-
-            Server public key to be used by client to derive shared secret and keys.
-
-
-            Base64 encoded
       required:
         - tuples
         - config
         - timeStart
-        - serverPublicECDHKey
     ReportBatchRequest:
       type: object
       properties:

@@ -11,6 +11,7 @@ import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
 import fr.gouv.stopc.robertserver.database.model.Registration;
@@ -56,7 +57,7 @@ public class DeleteHistoryControllerImpl implements IDeleteHistoryController {
 			Registration record = registrationRecord.get();
 
 			// Clear ExposedEpoch list then save the updated registration
-			if (Objects.nonNull(record.getExposedEpochs())) {
+			if (!CollectionUtils.isEmpty(record.getExposedEpochs())) {
 				record.getExposedEpochs().clear();
 				registrationService.saveRegistration(record);
 			}

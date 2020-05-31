@@ -196,7 +196,7 @@ public class ClientKeyStorageServiceImpl implements IClientKeyStorageService {
           }
 
           ClientIdentifier c = ClientIdentifier.builder()
-                  .idA(Base64.encode(generateKey(5)))
+                  .idA(Base64.encode(id))
                   .keyForMac(Base64.encode(encryptedKeyForMac))
                   .keyForTuples(Base64.encode(encryptedKeyForTuples))
                   .build();
