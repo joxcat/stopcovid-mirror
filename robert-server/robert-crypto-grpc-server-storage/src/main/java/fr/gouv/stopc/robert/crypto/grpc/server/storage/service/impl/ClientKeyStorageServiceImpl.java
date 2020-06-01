@@ -53,7 +53,6 @@ public class ClientKeyStorageServiceImpl implements IClientKeyStorageService {
                 .keyForMac(Base64.encode(generateRandomKey()))
                 .keyForTuples(Base64.encode(generateRandomKey()))
                 .build();
-//        log.info("Trying to save the client identifier : {}", c);
         c = this.clientIdentifierRepository.saveAndFlush(c);
         this.clientIdentifierRepository.delete(c);
     }
@@ -107,66 +106,31 @@ public class ClientKeyStorageServiceImpl implements IClientKeyStorageService {
         
         int failureCounter = 0;
         Optional<ClientIdentifierBundle> clientIdentifierBundle = Optional.empty();
+        byte[] id = null;
         do {
-            clientIdentifierBundle = createClientIdentifier(keyForMac, keyForTuples);
+            id = generateKey(5);
+            String tempId = Base64.encode(id);
+
+            if (!this.clientIdentifierRepository.findByIdA(tempId).isPresent()) {
+                break;
+            }
             failureCounter++;
-        } while (!clientIdentifierBundle.isPresent() && failureCounter < MAX_ID_CREATION_ATTEMPTS);
+        } while (failureCounter < MAX_ID_CREATION_ATTEMPTS);
 
         if (MAX_ID_CREATION_ATTEMPTS == failureCounter) {
             log.error(
-                    String.format("Could not generate an clientIdentfier within max attempts %s", MAX_ID_CREATION_ATTEMPTS));
+                    String.format("Could not generate an client identifier within max attempts %s", MAX_ID_CREATION_ATTEMPTS));
+        } else {
+            clientIdentifierBundle = createClientKeysForIdentifier(id, keyForMac, keyForTuples);
         }
         
         return clientIdentifierBundle;
         
     }
 
-//    @Override
-//    public Optional<ClientIdentifierBundle> createClientIdAndKey() {
-//        log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-//        byte[] id = generateRandomIdentifier();
-//        byte[] key = generateRandomKey();
-//        byte[] keyForTuples = generateRandomKey();
-//        log.info("//////~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-//        if(Objects.isNull(this.cryptographicStorageService.getKeyForEncryptingKeys())) {
-//            log.error("The server private key is Null");
-//            return Optional.empty();
-//        }
-//
-//        byte[] encryptedKey =  this.performEncryption(Cipher.ENCRYPT_MODE, key, this.cryptographicStorageService.getKeyForEncryptingKeys());
-//
-//        if (Objects.isNull(encryptedKey)) {
-//            log.error("The encrypted key  is Null");
-//            return Optional.empty();
-//        }
-//
-//        byte[] encryptedKeyForTuples =  this.performEncryption(Cipher.ENCRYPT_MODE, key, this.cryptographicStorageService.getKeyForEncryptingKeys());
-//
-//        if (Objects.isNull(encryptedKeyForTuples)) {
-//            log.error("The encrypted key for tuples is Null");
-//            return Optional.empty();
-//        }
-//
-//        ClientIdentifier c = ClientIdentifier.builder()
-//                .idA(Base64.encode(id))
-//                .key(Base64.encode(encryptedKey))
-//                .keyForTuples(Base64.encode(encryptedKeyForTuples))
-//                .build();
-//        log.info("Trying to save the client identifier : {}", c);
-//        this.clientIdentifierRepository.saveAndFlush(c);
-//        log.info("Saving the client identifier");
-//        return Optional.of(ClientIdentifierBundle.builder()
-//                .id(id)
-//                .key(key)
-//                .keyForTuples(keyForTuples)
-//                .build());
-//    }
-
-    private Optional<ClientIdentifierBundle> createClientIdentifier(byte[] keyForMac, byte[] keyForTuples) {
+    private Optional<ClientIdentifierBundle> createClientKeysForIdentifier(byte[] id, byte[] keyForMac, byte[] keyForTuples) {
         try {
-//          log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-          byte[] id = generateKey(5);
-//          log.info("//////~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
           if (Objects.isNull(keyForMac)) {
               log.error("Provided key for mac is null");
               return Optional.empty();
@@ -200,11 +164,11 @@ public class ClientKeyStorageServiceImpl implements IClientKeyStorageService {
                   .keyForMac(Base64.encode(encryptedKeyForMac))
                   .keyForTuples(Base64.encode(encryptedKeyForTuples))
                   .build();
-//          log.info("Trying to save the client identifier : {}", c);
+
           this.clientIdentifierRepository.save(c);
-//          log.info("Saving the client identifier");
+
           return Optional.of(ClientIdentifierBundle.builder()
-                  .id(id)
+                  .id(Arrays.copyOf(id, id.length))
                   .keyForMac(keyForMac)
                   .keyForTuples(keyForTuples)
                   .build());
@@ -213,6 +177,7 @@ public class ClientKeyStorageServiceImpl implements IClientKeyStorageService {
       }
       return Optional.empty();
     }
+
     @Override
     public Optional<ClientIdentifierBundle> findKeyById(byte[] id) {
         return this.clientIdentifierRepository.findByIdA(Base64.encode(id))
@@ -258,6 +223,7 @@ public class ClientKeyStorageServiceImpl implements IClientKeyStorageService {
 
     private static final String AES_ENCRYPTION_CIPHER_SCHEME = "AES/GCM/NoPadding";
     private static final int IV_LENGTH = 12;
+
     public byte[] decryptStoredKeyWithAES256GCMAndKek(byte[] storedKey, Key kek) {
         AlgorithmParameterSpec algorithmParameterSpec = new GCMParameterSpec(128, storedKey, 0, IV_LENGTH);
         byte[] toDecrypt = new byte[storedKey.length - IV_LENGTH];
@@ -265,8 +231,6 @@ public class ClientKeyStorageServiceImpl implements IClientKeyStorageService {
         Cipher cipher = null;
 
         try {
-
-            // Create cipher with AES encryption scheme.
             cipher = Cipher.getInstance(AES_ENCRYPTION_CIPHER_SCHEME);
             cipher.init(Cipher.DECRYPT_MODE, kek, algorithmParameterSpec);
             return cipher.doFinal(toDecrypt);
@@ -279,13 +243,11 @@ public class ClientKeyStorageServiceImpl implements IClientKeyStorageService {
     }
 
     public byte[] encryptKeyWithAES256GCMAndKek(byte[] keyToEncrypt, Key kek) {
-        Cipher cipher = null;
-
         byte[] cipherText = null;
         try {
 
             // Create cipher with AES encryption scheme.
-            cipher = Cipher.getInstance(AES_ENCRYPTION_CIPHER_SCHEME);
+            Cipher cipher = Cipher.getInstance(AES_ENCRYPTION_CIPHER_SCHEME);
             cipher.init(Cipher.ENCRYPT_MODE, kek);
             cipherText = cipher.doFinal(keyToEncrypt);
             cipherText = ByteUtils.addAll(cipher.getIV(), cipherText);

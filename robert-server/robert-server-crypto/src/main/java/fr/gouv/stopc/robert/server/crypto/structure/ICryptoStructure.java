@@ -6,6 +6,8 @@ import javax.crypto.SecretKey;
 
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 
+import java.security.Key;
+
 /**
  * Interface abstracting encryption algorithms
  * TripleDES, AES, HMAC-SHA256
@@ -16,7 +18,7 @@ import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
  */
 public interface ICryptoStructure<C extends Cipher, M extends Mac> {
 
-    SecretKey getSecretKey();
+    Key getSecretKey();
 
     /**
      * Encryption method TripleDES, AES, HMAC-SHA256

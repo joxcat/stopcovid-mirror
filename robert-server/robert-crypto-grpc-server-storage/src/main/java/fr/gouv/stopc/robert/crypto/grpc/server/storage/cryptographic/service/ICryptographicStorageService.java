@@ -11,26 +11,23 @@ public interface ICryptographicStorageService {
     void init(String password, String configFile);
  
     boolean contains(String alias);
- 
-    void delete(String alias);
-    
-    void store(String alias, String secretKey);
- 
+
     byte[] getServerKey(int epochId, long serviceTimeStart);
 
     byte[][] getServerKeys(int epochId, long serviceTimeStart, int nbDays);
+
+    Key getFederationKey();
  
     byte[] getEntry(String alias);
 
-    void addECDHKeys(String serverPublicKey, String serverPrivateKey);
-    void addKekKeysIfNotExist(byte[] kekForKa, byte[] kekForKs);
+//    void addECDHKeys(String serverPublicKey, String serverPrivateKey);
+//    void addKekKeysIfNotExist(byte[] kekForKa, byte[] kekForKs);
 
     Optional<KeyPair> getServerKeyPair();
 
     Provider getProvider();
 
     Key getKeyForEncryptingClientKeys();
-    Key getKeyForEncryptingServerKeys();
-
+    //Key getKeyForEncryptingServerKeys();
 
 }

@@ -21,6 +21,7 @@ public interface IClientKeyStorageService {
      */
     Optional<ClientIdentifierBundle> findKeyById(byte[] id);
 
+
     /**
      * Delete the record corresponding to the provided id, effectively destroying the key
      */

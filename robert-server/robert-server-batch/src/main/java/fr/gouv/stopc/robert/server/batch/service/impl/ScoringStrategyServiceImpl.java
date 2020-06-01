@@ -1,17 +1,18 @@
 package fr.gouv.stopc.robert.server.batch.service.impl;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import fr.gouv.stopc.robert.server.batch.exception.RobertScoringException;
 import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
+import fr.gouv.stopc.robert.server.batch.utils.PropertyLoader;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robertserver.database.model.Contact;
 import fr.gouv.stopc.robertserver.database.model.HelloMessageDetail;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.List;
-
 
 /**
  * Scoring strategy that implements the WP4 formula
@@ -22,22 +23,25 @@ import java.util.List;
 @Service
 @Slf4j
 public class ScoringStrategyServiceImpl implements ScoringStrategyService {
-    // Issue #TODO: update based on calibration tests.
+    // Issue #TODO: update robert.server.scoring.algo.rssi property based on calibration tests.
     // This value must come from tests on a maximum number of devices, measuring the RSSI (in dB) at one meter
-    private final static int RSSI_1M = -60;
-    private final static int ALPHA = -RSSI_1M - 5;
 
     private final IServerConfigurationService serverConfigurationService;
 
+    private final PropertyLoader propertyLoader;
+
     @Inject
-    public ScoringStrategyServiceImpl(IServerConfigurationService serverConfigurationService) {
+    public ScoringStrategyServiceImpl(IServerConfigurationService serverConfigurationService, PropertyLoader propertyLoader) {
+
         this.serverConfigurationService = serverConfigurationService;
+        this.propertyLoader = propertyLoader;
     }
 
     @Override
     public Double execute(Contact contact) throws RobertScoringException {
         List<HelloMessageDetail> messageDetails = contact.getMessageDetails();
 
+        final int alpha = initAlpha();
         double acc = 0.0;
         int vectorSize = messageDetails.size();
 
@@ -47,7 +51,7 @@ public class ScoringStrategyServiceImpl implements ScoringStrategyService {
                 HelloMessageDetail nextMessage = messageDetails.get(i);
                 long delta = nextMessage.getTimeCollectedOnDevice() - messageDetail.getTimeCollectedOnDevice();
                 int averageRSSI = (messageDetail.getRssiCalibrated() + nextMessage.getRssiCalibrated()) / 2;
-                acc += (double) (delta * 5) / (Math.min(averageRSSI + ALPHA, -5) * 60);
+                acc += (double) (delta * 5) / (Math.min(averageRSSI + alpha, -5) * 60);
             }
         } else if (vectorSize == 1) {
             HelloMessageDetail message = messageDetails.get(0);
@@ -57,7 +61,7 @@ public class ScoringStrategyServiceImpl implements ScoringStrategyService {
 
             // Cap delta to 120 seconds max
             long cappedDelta = delta > 120 ? 120 : delta;
-            acc += (double) (cappedDelta * 5) / (Math.min(message.getRssiCalibrated() + ALPHA, -5) * 60);
+            acc += (double) (cappedDelta * 5) / (Math.min(message.getRssiCalibrated() + alpha, -5) * 60);
         } else {
             String errorMessage = "Cannot score contact with no HELLO messages";
             log.error(errorMessage);
@@ -66,4 +70,10 @@ public class ScoringStrategyServiceImpl implements ScoringStrategyService {
 
         return 0 - acc;
     }
+
+    private int initAlpha() {
+
+        return -this.propertyLoader.getRssiScoringAlgorithm() - 5;
+    }
+
 }

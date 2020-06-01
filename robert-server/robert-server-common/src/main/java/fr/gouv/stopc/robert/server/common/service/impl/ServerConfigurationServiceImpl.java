@@ -16,43 +16,6 @@ import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 @Service
 public class ServerConfigurationServiceImpl implements IServerConfigurationService {
 
-    private final byte[] serverKey;
-
-    private final byte[] federationKey;
-
-    /**
-     * Generate a key of bit array.
-     *
-     * @param size in bits
-     * @return
-     */
-    private byte[] generateKey(int size) {
-        size /= 8;
-        byte[] data = new byte[size];
-        for (int i = 0; i < size; i++) {
-            data[i] = new Long(i).byteValue();
-        }
-        return data;
-    }
-
-    public ServerConfigurationServiceImpl() {
-        // key serv should be a 192-bits key
-        this.serverKey = this.generateKey(192);
-
-        // key serv should be a 256-bits key
-        this.federationKey = this.generateKey(256);
-    }
-
-    @Override
-    public byte[] getServerKey() {
-        return this.serverKey;
-    }
-
-    @Override
-    public byte[] getFederationKey() {
-        return this.federationKey;
-    }
-
     @Override
     public long getServiceTimeStart() {
         final LocalDateTime ldt = LocalDateTime.of(2020, 4, 14, 00, 00);

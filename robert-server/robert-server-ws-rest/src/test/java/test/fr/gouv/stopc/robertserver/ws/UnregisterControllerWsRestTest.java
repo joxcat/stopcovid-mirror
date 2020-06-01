@@ -83,6 +83,8 @@ public class UnregisterControllerWsRestTest {
 
 	private int currentEpoch;
 
+	private byte[] serverKey;
+
 	@BeforeEach
 	public void before() {
 		MockitoAnnotations.initMocks(this);
@@ -92,6 +94,7 @@ public class UnregisterControllerWsRestTest {
 		this.targetUrl = UriComponentsBuilder.fromUriString(this.pathPrefix).path(UriConstants.UNREGISTER).build().encode().toUri();
 
 		this.currentEpoch = this.getCurrentEpoch();
+		this.serverKey = generateKey(24);
 	}
 
 	@Test
@@ -395,7 +398,7 @@ public class UnregisterControllerWsRestTest {
 	private byte[][] createEBIDTimeMACFor(byte[] id, byte[] ka, int currentEpoch, int adjustTimeBySeconds) {
 		byte[][] res = new byte[3][];
 		try {
-			res[0] = this.cryptoService.generateEBID(new CryptoSkinny64(this.serverConfigurationService.getServerKey()),
+			res[0] = this.cryptoService.generateEBID(new CryptoSkinny64(this.serverKey),
 					currentEpoch, id);
 			res[1] = this.generateTime32(adjustTimeBySeconds);
 			res[2] = this.generateMACFor(res[0], res[1], ka);

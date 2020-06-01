@@ -3,7 +3,6 @@ package test.fr.gouv.stopc.robert.crypto.grpc.server;
 import java.io.IOException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -17,8 +16,9 @@ import fr.gouv.stopc.robert.crypto.grpc.server.storage.model.ClientIdentifierBun
 import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
+import fr.gouv.stopc.robert.server.crypto.structure.CryptoAES;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESECB;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESGCM;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESOFB;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoSkinny64;
 import lombok.*;
@@ -53,11 +53,9 @@ import io.grpc.testing.GrpcCleanupRule;
 import test.fr.gouv.stopc.robert.crypto.grpc.server.utils.CryptoTestUtils;
 
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -89,6 +87,8 @@ class CryptoServiceGrpcServerTest {
     private ICryptographicStorageService cryptographicStorageService;
 
     private int currentEpochId;
+
+    private Key federationKey;
 
     @BeforeEach
     void beforeEach() throws IOException {
@@ -125,6 +125,10 @@ class CryptoServiceGrpcServerTest {
                 InProcessChannelBuilder.forName(serverName).directExecutor().build());
 
         this.currentEpochId = TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart());
+
+        this.federationKey = new SecretKeySpec(CryptoTestUtils.generateKey(32), CryptoAES.AES_ENCRYPTION_KEY_SCHEME);
+
+        when(this.cryptographicStorageService.getFederationKey()).thenReturn(this.federationKey);
     }
 
     @AfterEach
@@ -1032,13 +1036,15 @@ class CryptoServiceGrpcServerTest {
 
         when(this.cryptographicStorageService.getServerKeys(epochId, this.serverConfigurationService.getServiceTimeStart(), 4)).thenReturn(new byte[][] { serverKey, serverKey, serverKey, serverKey });
         when(this.cryptographicStorageService.getServerKey(epochId, this.serverConfigurationService.getServiceTimeStart())).thenReturn(serverKey);
+        when(this.cryptographicStorageService.getFederationKey()).thenReturn(this.federationKey);
+
 
         byte[] mac;
         byte[] ecc;
         try {
             byte[] hello = new byte[16];
             ecc = this.cryptoService.encryptCountryCode(
-                    new CryptoAESOFB(this.serverConfigurationService.getFederationKey()),
+                    new CryptoAESECB(this.cryptographicStorageService.getFederationKey()),
                     ebid,
                     SERVER_COUNTRY_CODE[0]);
             System.arraycopy(ecc, 0, hello, 0, 1);

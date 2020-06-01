@@ -23,13 +23,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
 import fr.gouv.stopc.robert.server.batch.processor.ContactProcessor;
 import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
+import fr.gouv.stopc.robert.server.batch.utils.PropertyLoader;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robertserver.database.model.Contact;
 import fr.gouv.stopc.robertserver.database.service.ContactService;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Configuration
 @EnableBatchProcessing
 public class ContactsProcessingConfiguration {
@@ -45,13 +44,16 @@ public class ContactsProcessingConfiguration {
 	private final ICryptoServerGrpcClient cryptoServerClient;
 
 	private final int CHUNK_SIZE = 10000;
-	
+
+	private final PropertyLoader propertyLoader;
+
 	@Inject
 	public ContactsProcessingConfiguration(final IServerConfigurationService serverConfigurationService,
 										   final IRegistrationService registrationService,
 										   final ContactService contactService,
 										   final ICryptoServerGrpcClient cryptoServerClient,
-										   final ScoringStrategyService scoringStrategyService
+										   final ScoringStrategyService scoringStrategyService,
+										   final PropertyLoader propertyLoader
 			) {
 		
 		this.serverConfigurationService = serverConfigurationService;
@@ -59,6 +61,7 @@ public class ContactsProcessingConfiguration {
 		this.contactService = contactService;
 		this.cryptoServerClient = cryptoServerClient;
 		this.scoringStrategyService = scoringStrategyService;
+		this.propertyLoader =  propertyLoader;
 
 	}
 
@@ -109,7 +112,8 @@ public class ContactsProcessingConfiguration {
 				this.registrationService,
 				this.contactService,
 				this.cryptoServerClient,
-				this.scoringStrategyService) {
+				this.scoringStrategyService,
+				this.propertyLoader) {
 		};
 	}
 }

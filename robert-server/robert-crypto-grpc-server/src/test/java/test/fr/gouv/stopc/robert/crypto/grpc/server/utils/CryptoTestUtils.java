@@ -61,4 +61,10 @@ public final class CryptoTestUtils {
         return null;
     }
 
+    public static byte[] generateKey(int sizeInBytes) {
+        byte[] data = new byte[sizeInBytes];
+        new SecureRandom().nextBytes(data);
+        return data;
+    }
+
 }

@@ -2,6 +2,7 @@ package fr.gouv.stopc.robert.server.crypto.structure;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Objects;
@@ -19,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class CryptoAES extends CryptoCipherStructureAbstract {
 
-    private static final String AES_ENCRYPTION_KEY_SCHEME = "AES";
+    public static final String AES_ENCRYPTION_KEY_SCHEME = "AES";
 
     protected AlgorithmParameterSpec algorithmParameterSpec;
 
@@ -27,7 +28,7 @@ public abstract class CryptoAES extends CryptoCipherStructureAbstract {
 
     protected  Cipher decryptCypher;
 
-    protected final SecretKey keySpec;
+    protected final Key keySpec;
 
     /**
      * @param key to be used for cipher
@@ -60,29 +61,24 @@ public abstract class CryptoAES extends CryptoCipherStructureAbstract {
         }
     }
 
-    public CryptoAES(String cipherScheme, byte[] key) {
+    public CryptoAES(String cipherScheme, Key key) {
         Cipher cipher = null;
-        SecretKey keySpec = null;
+        this.keySpec = key;
         try {
-
-            // Generate encryption keySpec with server federate keySpec.
-            keySpec = new SecretKeySpec(key, AES_ENCRYPTION_KEY_SCHEME);
-
             // Create cipher with AES encryption scheme.
             cipher = Cipher.getInstance(cipherScheme);
             decryptCypher = Cipher.getInstance(cipherScheme);
             if (Objects.nonNull(getAlgorithmParameterSpec())) {
-                cipher.init(Cipher.ENCRYPT_MODE, keySpec, this.getAlgorithmParameterSpec());
+                cipher.init(Cipher.ENCRYPT_MODE, key, this.getAlgorithmParameterSpec());
             }
             else {
-                cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+                cipher.init(Cipher.ENCRYPT_MODE, key);
             }
 
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException e) {
             log.error(String.format("Algorithm %s is not available", cipherScheme));
         } finally {
             this.cipher = cipher;
-            this.keySpec = keySpec;
         }
     }
 
@@ -92,7 +88,7 @@ public abstract class CryptoAES extends CryptoCipherStructureAbstract {
     }
 
     @Override
-    public SecretKey getSecretKey() {
+    public Key getSecretKey() {
         return this.keySpec;
     }
 

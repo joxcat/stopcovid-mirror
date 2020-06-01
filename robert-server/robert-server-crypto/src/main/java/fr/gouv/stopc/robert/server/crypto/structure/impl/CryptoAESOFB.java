@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import fr.gouv.stopc.robert.server.crypto.structure.CryptoAES;
@@ -17,7 +18,7 @@ public class CryptoAESOFB extends CryptoAES {
     private static final String AES_ENCRYPTION_CIPHER_SCHEME = "AES/OFB/NoPadding";
 
     public CryptoAESOFB(byte[] key) {
-        super(AES_ENCRYPTION_CIPHER_SCHEME, key);
+        super(AES_ENCRYPTION_CIPHER_SCHEME, new SecretKeySpec(key, CryptoAES.AES_ENCRYPTION_KEY_SCHEME));
     }
 
     @Override

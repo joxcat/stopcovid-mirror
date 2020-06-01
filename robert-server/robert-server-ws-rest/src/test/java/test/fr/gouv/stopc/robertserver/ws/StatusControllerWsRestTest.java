@@ -108,6 +108,8 @@ public class StatusControllerWsRestTest {
 
     private int currentEpoch;
 
+    private byte[] serverKey;
+
     @BeforeEach
     public void before() {
         assert (this.restTemplate != null);
@@ -118,6 +120,8 @@ public class StatusControllerWsRestTest {
         this.currentEpoch = this.getCurrentEpoch();
 
         when(this.propertyLoader.getEsrLimit()).thenReturn(-1);
+
+        this.serverKey = this.generateKey(24);
     }
 
     @Test
@@ -499,7 +503,7 @@ public class StatusControllerWsRestTest {
     private byte[][] createEBIDTimeMACFor(byte[] id, byte[] ka, int currentEpoch, int adjustTimeBySeconds) {
         byte[][] res = new byte[3][];
         try {
-            res[0] = this.cryptoService.generateEBID(new CryptoSkinny64(this.serverConfigurationService.getServerKey()),
+            res[0] = this.cryptoService.generateEBID(new CryptoSkinny64(this.serverKey),
                     currentEpoch, id);
             res[1] = this.generateTime32(adjustTimeBySeconds);
             res[2] = this.generateMACforESR(res[0], res[1], ka);

@@ -97,6 +97,8 @@ public class DeleteHistoryControllerWsRestTest {
 
 	private int currentEpoch;
 
+	private byte[] serverKey;
+
 	@BeforeEach
 	public void before() {
 		MockitoAnnotations.initMocks(this);
@@ -107,6 +109,8 @@ public class DeleteHistoryControllerWsRestTest {
 				.encode().toUri();
 
 		this.currentEpoch = this.getCurrentEpoch();
+
+		this.serverKey = this.generateKey(24);
 	}
 
 	@Test
@@ -473,7 +477,7 @@ public class DeleteHistoryControllerWsRestTest {
 	private byte[][] createEBIDTimeMACFor(byte[] id, byte[] ka, int currentEpoch, int adjustTimeBySeconds) {
 		byte[][] res = new byte[3][];
 		try {
-			res[0] = this.cryptoService.generateEBID(new CryptoSkinny64(this.serverConfigurationService.getServerKey()),
+			res[0] = this.cryptoService.generateEBID(new CryptoSkinny64(this.serverKey),
 					currentEpoch, id);
 			res[1] = this.generateTime32(adjustTimeBySeconds);
 			res[2] = this.generateMACforESR(res[0], res[1], ka);

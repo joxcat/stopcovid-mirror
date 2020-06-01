@@ -2,6 +2,7 @@ package fr.gouv.stopc.robert.server.crypto.structure.impl;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import fr.gouv.stopc.robert.server.crypto.structure.CryptoAES;
@@ -18,7 +19,7 @@ public class CryptoAESGCM extends CryptoAES {
      */
     public CryptoAESGCM(byte[] key) {
 
-        super(AES_ENCRYPTION_CIPHER_SCHEME, key);
+        super(AES_ENCRYPTION_CIPHER_SCHEME, new SecretKeySpec(key, CryptoAES.AES_ENCRYPTION_KEY_SCHEME));
     }
 
     @Override

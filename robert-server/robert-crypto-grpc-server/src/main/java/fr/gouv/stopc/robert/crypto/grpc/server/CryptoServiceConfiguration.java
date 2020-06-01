@@ -23,10 +23,10 @@ public class CryptoServiceConfiguration {
         cryptoStorageService.init(propertyLoader.getKeyStorePassword(), propertyLoader.getKeyStoreConfigFile());
 
         // Store if does not exist the public and key 
-        cryptoStorageService.addECDHKeys(propertyLoader.getServerPublicKey(), propertyLoader.getServerPrivateKey());
-        cryptoStorageService.addKekKeysIfNotExist(
-                ByteUtils.generateRandom(32),
-                ByteUtils.generateRandom(32));
+        //cryptoStorageService.addECDHKeys(propertyLoader.getServerPublicKey(), propertyLoader.getServerPrivateKey());
+        //cryptoStorageService.addKekKeysIfNotExist(
+        //        ByteUtils.generateRandom(32),
+        //        ByteUtils.generateRandom(32));
         server.initPort(Integer.parseInt(propertyLoader.getCryptoServerPort()));
         server.start();
         server.blockUntilShutdown();

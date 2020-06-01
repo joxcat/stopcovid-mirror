@@ -11,9 +11,10 @@ import java.util.Date;
 import java.util.Random;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import fr.gouv.stopc.robert.server.crypto.structure.CryptoAES;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESOFB;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESECB;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -24,15 +25,9 @@ import fr.gouv.stopc.robert.server.crypto.callable.TupleGenerator;
 import fr.gouv.stopc.robert.server.crypto.model.EphemeralTuple;
 import fr.gouv.stopc.robert.server.crypto.service.impl.CryptoServiceImpl;
 import fr.gouv.stopc.robert.server.crypto.structure.CryptoCipherStructureAbstract;
-import fr.gouv.stopc.robert.server.crypto.structure.CryptoAES;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoSkinny64;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
@@ -68,7 +63,7 @@ class CryptoServiceImplTest {
         final int currentEpoch = TimeUtils.getNumberOfEpochsBetween(0, TimeUtils.convertUnixMillistoNtpSeconds(new Date().getTime()));
         int numberOfEpochs = 4 * 24 * 4;
 
-        final TupleGenerator tupleGenerator = new TupleGenerator(serverKey, federationKey, 50);
+        final TupleGenerator tupleGenerator = new TupleGenerator(serverKey, new SecretKeySpec(federationKey, CryptoAES.AES_ENCRYPTION_KEY_SCHEME));
         final Collection<EphemeralTuple> ephemeralTuples = tupleGenerator.exec(idA, currentEpoch, numberOfEpochs, (byte) 0x33);
         tupleGenerator.stop();
 
@@ -127,7 +122,7 @@ class CryptoServiceImplTest {
         final int currentEpoch = TimeUtils.getNumberOfEpochsBetween(0, TimeUtils.convertUnixMillistoNtpSeconds(new Date().getTime()));
         int numberOfEpochs = 4 * 24 * 4;
 
-        final TupleGenerator tupleGenerator = new TupleGenerator(serverKey, federationKey, 50);
+        final TupleGenerator tupleGenerator = new TupleGenerator(serverKey, new SecretKeySpec(federationKey, CryptoAES.AES_ENCRYPTION_KEY_SCHEME));
         final Collection<EphemeralTuple> ephemeralTuples = tupleGenerator.exec(idA, currentEpoch, numberOfEpochs, (byte) 0x33);
         tupleGenerator.stop();
 
@@ -152,7 +147,7 @@ class CryptoServiceImplTest {
         final byte[] hello = ByteUtils.addAll(referenceET.getEncryptedCountryCode(), ByteUtils.addAll(referenceET.getEbid(), ByteUtils.addAll(referenceTime, referenceMAC)));
 
         final CryptoCipherStructureAbstract cryptoForEBID = new CryptoSkinny64(serverKey);
-        final CryptoCipherStructureAbstract cryptoForECC = new CryptoAESOFB(federationKey);
+        final CryptoCipherStructureAbstract cryptoForECC = new CryptoAESECB(federationKey);
 
         //Verify that the message has the right length :
         assert hello.length == (8 + 64 + 16 + 40) / 8;

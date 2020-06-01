@@ -21,6 +21,7 @@ import fr.gouv.stopc.robertserver.ws.dto.DeleteHistoryResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
 import fr.gouv.stopc.robertserver.ws.service.AuthRequestValidationService;
 import fr.gouv.stopc.robertserver.ws.vo.DeleteHistoryRequestVo;
+import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service

@@ -16,6 +16,7 @@ import com.google.protobuf.ByteString;
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
 import fr.gouv.stopc.robert.server.batch.exception.RobertScoringException;
 import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
+import fr.gouv.stopc.robert.server.batch.utils.PropertyLoader;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
@@ -41,6 +42,8 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
     private ICryptoServerGrpcClient cryptoServerClient;
 
     private ScoringStrategyService scoringStrategy;
+
+    private PropertyLoader propertyLoader;
 
     /**
      * NOTE:
@@ -139,7 +142,7 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
                 .map(item -> item.stream().mapToDouble(Double::doubleValue).sum())
                 .reduce(0.0, (a,b) -> a + b);
 
-        registration.setAtRisk(totalRisk > this.serverConfigurationService.getRiskThreshold());
+        registration.setAtRisk(totalRisk > this.propertyLoader.getRiskThreshold());
 
         this.registrationService.saveRegistration(registration);
         this.contactService.delete(contact);
