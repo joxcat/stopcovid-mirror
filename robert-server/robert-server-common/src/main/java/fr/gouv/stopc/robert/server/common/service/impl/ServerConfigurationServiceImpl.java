@@ -1,73 +1,108 @@
 package fr.gouv.stopc.robert.server.common.service.impl;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 
 /**
- * Issue #TODO: this class must not use hardcoded values
- * Facade for server configuration parameters and keys
+ * Default implementation of the IServerConfigurationService
  */
 @Service
 public class ServerConfigurationServiceImpl implements IServerConfigurationService {
 
-    @Override
-    public long getServiceTimeStart() {
-        final LocalDateTime ldt = LocalDateTime.of(2020, 4, 14, 00, 00);
-        final ZonedDateTime zdt = ldt.atZone(ZoneId.of("Europe/Paris"));
-        return TimeUtils.convertUnixMillistoNtpSeconds(zdt.toInstant().toEpochMilli());
-    }
+	@Value("${robert.server.country-code}")
+	private byte serverCountryCode;
 
-    @Override
-    public byte getServerCountryCode() {
-        return (byte) 0x33;
-    }
+	@Value("${robert.protocol.hello-message-timestamp-tolerance:180}")
+	private Integer helloMessageTimeStampTolerance;
 
-    @Override
-    public int getHelloMessageTimeStampTolerance() {
-        return 180;
-    }
+	@Value("${robert.protocol.contagious-period:14}")
+	private Integer contagiousPeriod;
 
-    @Override
-    public int getContagiousPeriod() {
-        return 14;
-    }
+	@Value("${robert.server.request-time-delta-tolerance:60}")
+	private Integer requestTimeDeltaTolerance;
 
-    @Override
-    public int getEpochDurationSecs() {
-        return TimeUtils.EPOCH_DURATION_SECS;
-    }
+	@Value("${robert.server.status-request-minimum-epoch-gap:48}")
+	private Integer statusRequestMinimumEpochGap;
 
-    @Override
-    public int getEpochBundleDurationInDays() {
-        // number of seconds in a day / duration of an epoch in seconds * number of days for which to generates bundle
-        // (to be configurable)
-        return 4;
-    }
+	@Value("${robert.server.captcha-challenge-timestamp-tolerance:15}")
+	private Integer captchaChallengeTimestampTolerance;
 
-    @Override
-    public int getRequestTimeDeltaTolerance() {
-        return 60;
-    }
+	@Value("${robert.protocol.risk-threshold:15.0}")
+	private Double riskThreshold;
 
-    @Override
-    public int getStatusRequestMinimumEpochGap() {
-        return 2;
-    }
+	@Value("${robert.protocol.epoch-bundle-duration:4}")
+	private Integer epochBundleDurationInDays;
 
-    @Override
-    public int getCaptchaChallengeTimestampTolerance() {
-        return 60;
-    }
+	@Value("${robert.server.time-start}")
+	private String timeStart;
 
-    // Issue #TODO: store all values of this risk threshold to track any configuration change over time
-    @Override
-    public double getRiskThreshold() {
-        return 0.5;
-    }
+	private Long timeStartNtp;
+
+	/**
+	 * Initializes the timeStartNtp field
+	 */
+	@PostConstruct
+	private void initTimeStartNtp() {
+		LocalDate ld = LocalDate.parse(timeStart, DateTimeFormatter.BASIC_ISO_DATE);
+		timeStartNtp = TimeUtils.convertUnixStoNtpSeconds(ld.atStartOfDay().toEpochSecond(ZoneOffset.UTC));
+	}
+
+	@Override
+	public long getServiceTimeStart() {
+		return this.timeStartNtp;
+	}
+
+	@Override
+	public byte getServerCountryCode() {
+		return this.serverCountryCode;
+	}
+
+	@Override
+	public int getHelloMessageTimeStampTolerance() {
+		return this.helloMessageTimeStampTolerance;
+	}
+
+	@Override
+	public int getContagiousPeriod() {
+		return this.contagiousPeriod;
+	}
+
+	@Override
+	public int getEpochDurationSecs() {
+		return TimeUtils.EPOCH_DURATION_SECS;
+	}
+
+	@Override
+	public int getEpochBundleDurationInDays() {
+		return this.epochBundleDurationInDays;
+	}
+
+	@Override
+	public int getRequestTimeDeltaTolerance() {
+		return this.requestTimeDeltaTolerance;
+	}
+
+	@Override
+	public int getStatusRequestMinimumEpochGap() {
+		return this.statusRequestMinimumEpochGap;
+	}
+
+	@Override
+	public int getCaptchaChallengeTimestampTolerance() {
+		return this.captchaChallengeTimestampTolerance;
+	}
+
+	@Override
+	public double getRiskThreshold() {
+		return this.riskThreshold;
+	}
 }

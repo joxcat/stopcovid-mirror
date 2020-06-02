@@ -1,5 +1,6 @@
 package fr.gouv.stopc.robertserver.ws.service.impl;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -11,17 +12,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robertserver.ws.dto.CaptchaDto;
 import fr.gouv.stopc.robertserver.ws.service.CaptchaService;
 import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.vo.RegisterVo;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -35,7 +35,9 @@ public class CaptchaServiceImpl implements CaptchaService {
 	private PropertyLoader propertyLoader;
 
 	@Inject
-	public CaptchaServiceImpl(RestTemplate restTemplate, IServerConfigurationService serverConfigurationService, PropertyLoader propertyLoader) {
+	public CaptchaServiceImpl(RestTemplate restTemplate,
+							  IServerConfigurationService serverConfigurationService,
+							  PropertyLoader propertyLoader) {
 
 		this.restTemplate = restTemplate;
 		this.serverConfigurationService = serverConfigurationService;
@@ -45,27 +47,31 @@ public class CaptchaServiceImpl implements CaptchaService {
 	@Override
 	public boolean verifyCaptcha(final RegisterVo registerVo) {
 
-		// TODO: Remove this forced returned value until reCATPCHA service is really
-		// used but method verifyCaptcha
-		// must be called for test
-		return true || Optional.ofNullable(registerVo).map(item -> {
+		// This part of the code should be removed before any public use. For security reason.
+		// TODO: remove this as far as it is no more needed for test.
+		if (this.hasMagicNumber(registerVo)) return true;
 
-			HttpEntity<RegisterVo> request = new HttpEntity(new CaptchaVo(item.getCaptcha(), this.propertyLoader.getCaptchaSecret()).toString(), initHttpHeaders());
+		return Optional.ofNullable(registerVo).map(RegisterVo::getCaptcha).map(captcha -> {
+
+			HttpEntity request = new HttpEntity(initHttpHeaders());
 			Date sendingDate = new Date();
 
 			ResponseEntity<CaptchaDto> response = null;
 			try {
-				response = this.restTemplate.postForEntity(this.propertyLoader.getCaptchaVerificationUrl(), request, CaptchaDto.class);
-			} catch(RestClientException e) {
+				response = this.restTemplate.postForEntity(constructUri(captcha), request, CaptchaDto.class);
+			} catch (RestClientException e) {
 				log.error(e.getMessage());
 				return false;
 			}
 
-			return Optional.ofNullable(response).map(ResponseEntity::getBody).filter(captchaDto -> Objects.nonNull(captchaDto.getChallengeTimestamp())).map(captchaDto -> {
+			return Optional.ofNullable(response)
+						   .map(ResponseEntity::getBody)
+						   .filter(captchaDto -> Objects.nonNull(captchaDto.getChallengeTimestamp()))
+						   .map(captchaDto -> {
 
-				log.info("Result of CAPTCHA verification: {}", captchaDto);
-				return isSuccess(captchaDto, sendingDate);
-			}).orElse(false);
+							   return isSuccess(captchaDto, sendingDate);
+						   })
+						   .orElse(false);
 
 		}).orElse(false);
 	}
@@ -78,21 +84,43 @@ public class CaptchaServiceImpl implements CaptchaService {
 		return headers;
 	}
 
-	private boolean isSuccess(CaptchaDto captchaDto, Date sendingDate) {
+	/**
+	 *
+	 * Method checks if captcha in RegisterVo should be ignore.
+	 * This part of the code should be removed before any public use. For security reason.
+	 * TODO: Remove this as far as it is no more needed for tests
+	 */
+	private boolean hasMagicNumber(RegisterVo registerVo) {
 
-		return this.propertyLoader.getCaptchaHostname().equals(captchaDto.getHostname()) && Math
-				.abs(sendingDate.getTime() - captchaDto.getChallengeTimestamp().getTime()) <= this.serverConfigurationService.getCaptchaChallengeTimestampTolerance() * 1000L;
+		return Optional.ofNullable(registerVo).map(RegisterVo::getCaptcha).map(
+				captcha -> {
+					if(!StringUtils.isEmpty(this.propertyLoader.getMagicNumber())) {
+						return this.propertyLoader.getMagicNumber().equals(captcha);
+					} else{
+						return false;
+					}
+				}
+		).orElse(false);
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Data
-	class CaptchaVo {
+	private boolean isSuccess(CaptchaDto captchaDto, Date sendingDate) {
 
-		private String secret;
+		return this.propertyLoader.getCaptchaHostname().equals(captchaDto.getHostname())
+				&& Math.abs(sendingDate.getTime()
+						- captchaDto.getChallengeTimestamp()
+									.getTime()) <= this.serverConfigurationService.getCaptchaChallengeTimestampTolerance()
+											* 1000L;
+	}
 
-		private String response;
+	private URI constructUri(String captcha) {
 
+
+	    return UriComponentsBuilder.fromHttpUrl(this.propertyLoader.getCaptchaVerificationUrl())
+                .queryParam("secret", this.propertyLoader.getCaptchaSecret())
+                .queryParam("response", captcha)
+                .build()
+                .encode()
+                .toUri();
 	}
 
 }

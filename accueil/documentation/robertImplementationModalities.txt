@@ -56,7 +56,5 @@ A application that receive a positive result after an ESR, will continue to do E
 
 
 
-Translated with www.DeepL.com/Translator (free version)
-
 [1] ROBERT: ROBust and privacy-presERving proximity Tracing, PRIVATICS team, Inria, France Fraunhofer AISEC, Germany April 19, 2020 v1.0
 [2] Recommandations de l'ANSSI pour la sécurisation de StopCovid

@@ -22,7 +22,7 @@ public class CaptchaDto {
 	@NotNull
 	private boolean success;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZZ")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
 	@JsonProperty("challenge_ts")
 	private Date challengeTimestamp;
 

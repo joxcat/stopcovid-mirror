@@ -72,5 +72,6 @@ Merci de vous référer au fichier dédié : [LICENSE.md](LICENSE.md).
 * Les membres de l’équipe-projet StopCovid : [https://www.inria.fr/fr/stopcovid](https://www.inria.fr/fr/stopcovid)
 * Le protocole ROBERT v1 : [https://github.com/ROBERT-proximity-tracing/](https://github.com/ROBERT-proximity-tracing/)
 * Le document [comment contribuer](CONTRIBUTING.md)
+* Le document [de ressources scientifiques du projet](SCIENTIFIC_RESOURCES.md)
 * La [liste des sous-projets déjà publiés](https://gitlab.inria.fr/stopcovid19)
 

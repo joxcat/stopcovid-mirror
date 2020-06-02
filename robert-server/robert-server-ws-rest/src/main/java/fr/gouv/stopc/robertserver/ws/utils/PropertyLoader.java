@@ -48,4 +48,13 @@ public class PropertyLoader {
 
     @Value("${robert.esr.limit}")
     private Integer esrLimit;
+
+    /**
+     *
+     * TODO: Remove before any public use.
+     * This should remain only for development uses.
+     */
+    @Value("${captcha.magicnumber}")
+    private String magicNumber;
+
 }

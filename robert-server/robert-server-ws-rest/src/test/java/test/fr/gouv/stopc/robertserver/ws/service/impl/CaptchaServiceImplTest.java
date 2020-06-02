@@ -1,11 +1,14 @@
 package test.fr.gouv.stopc.robertserver.ws.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.Date;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,69 +27,159 @@ import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.vo.RegisterVo;
 
 @ExtendWith(SpringExtension.class)
+@TestPropertySource("classpath:application.properties")
 public class CaptchaServiceImplTest {
 
-	@Value("${captcha.verify.url}")
-	private String captchaVerificationUrl;
+    @Value("${captcha.verify.url}")
+    private String captchaVerificationUrl;
 
-	@Value("${captcha.secret}")
-	private String captchaSecret;
+    @Value("${captcha.secret}")
+    private String captchaSecret;
 
-	@Value("${captcha.hostname}")
-	private String captchaHostname;
+    @Value("${captcha.hostname}")
+    private String captchaHostname;
 
-	@InjectMocks
-	private CaptchaServiceImpl captchaServiceImpl;
+    /**
+     *
+     * TODO: Remove this as far as it is no more needed for tests
+     */
+    @Value("${captcha.magicnumber}")
+    private String magicNumber;
 
-	@Mock
-	private RestTemplate restTemplate;
+    @InjectMocks
+    private CaptchaServiceImpl captchaServiceImpl;
 
-	@Mock
-	private IServerConfigurationService serverConfigurationService;
+    @Mock
+    private RestTemplate restTemplate;
 
-	@Mock
-	private PropertyLoader propertyLoader;
+    @Mock
+    private IServerConfigurationService serverConfigurationService;
 
-	@Test
-	public void testVerifyCaptchaWhenVoIsNull() {
+    @Mock
+    private PropertyLoader propertyLoader;
 
-		// When
-		boolean isVerified = this.captchaServiceImpl.verifyCaptcha(null);
+    private RegisterVo registerVo;
 
-		// Then
-		assertTrue(isVerified);
-	}
+    @BeforeEach
+    public void beforeEach() {
 
-	@Test
-	public void testVerifyCaptchaWhenVoIsNotNull() {
+        this.registerVo = RegisterVo.builder().captcha("captcha").build();
+    }
 
-		// Given
-		CaptchaDto captchaDto = CaptchaDto.builder().success(true).challengeTimestamp(new Date()).hostname(this.captchaHostname).build();
-		when(this.restTemplate.postForEntity(any(String.class), any(), any())).thenReturn(ResponseEntity.ok(captchaDto));
+    @Test
+    public void testVerifyCaptchaWhenVoIsNull() {
 
-		when(this.propertyLoader.getCaptchaVerificationUrl()).thenReturn(this.captchaVerificationUrl);
-		when(this.propertyLoader.getCaptchaSecret()).thenReturn(this.captchaSecret);
-		when(this.propertyLoader.getCaptchaHostname()).thenReturn(this.captchaHostname);
-		when(this.serverConfigurationService.getCaptchaChallengeTimestampTolerance()).thenReturn(3600);
+        // When
+        boolean isVerified = this.captchaServiceImpl.verifyCaptcha(null);
 
-		// When
-		boolean isVerified = this.captchaServiceImpl.verifyCaptcha(RegisterVo.builder().build());
+        // Then
+        assertFalse(isVerified);
+    }
 
-		// Then
-		assertTrue(isVerified);
-	}
+    @Test
+    public void testVerifyCaptchaWhenVoHasNoCaptcha() {
 
-	@Test
-	public void testVerifyCaptchaWhenErrorIsThrown() {
+        // Given
+        this.registerVo.setCaptcha(null);
 
-		// Given
-		when(this.restTemplate.postForEntity(any(String.class), any(), any())).thenThrow(RestClientException.class);
+        // When
+        boolean isVerified = this.captchaServiceImpl.verifyCaptcha(null);
 
-		// When
-		boolean isVerified = this.captchaServiceImpl.verifyCaptcha(RegisterVo.builder().build());
+        // Then
+        assertFalse(isVerified);
+    }
 
-		// Then
-		assertTrue(isVerified);
-	}
+    @Test
+    public void testVerifyCaptchaWhenVoIsNotNull() {
+
+        // Given
+        CaptchaDto captchaDto = CaptchaDto.builder()
+                .success(true)
+                .challengeTimestamp(new Date())
+                .hostname(this.captchaHostname)
+                .build();
+        when(this.restTemplate.postForEntity(any(URI.class), any(),
+                any())).thenReturn(ResponseEntity.ok(captchaDto));
+
+        when(this.propertyLoader.getCaptchaVerificationUrl()).thenReturn(this.captchaVerificationUrl);
+        when(this.propertyLoader.getCaptchaSecret()).thenReturn(this.captchaSecret);
+        when(this.propertyLoader.getCaptchaHostname()).thenReturn(this.captchaHostname);
+        when(this.serverConfigurationService.getCaptchaChallengeTimestampTolerance()).thenReturn(3600);
+
+        // When
+        boolean isVerified = this.captchaServiceImpl.verifyCaptcha(this.registerVo);
+
+        // Then
+        assertTrue(isVerified);
+    }
+
+    @Test
+    public void testVerifyCaptchaWhenErrorIsThrown() {
+
+        // Given
+        when(this.propertyLoader.getCaptchaVerificationUrl()).thenReturn(this.captchaVerificationUrl);
+        when(this.propertyLoader.getCaptchaSecret()).thenReturn(this.captchaSecret);
+        when(this.propertyLoader.getCaptchaHostname()).thenReturn(this.captchaHostname);
+        when(this.serverConfigurationService.getCaptchaChallengeTimestampTolerance()).thenReturn(3600);
+        when(this.restTemplate.postForEntity(any(String.class), any(), any())).thenThrow(RestClientException.class);
+
+        // When
+        boolean isVerified = this.captchaServiceImpl.verifyCaptcha(this.registerVo);
+
+        // Then
+        assertFalse(isVerified);
+    }
+
+    /**
+     *
+     * TODO: Remove this as far as it is no more needed for tests
+     */
+    @Test
+    public void testIsMagicNumber() {
+
+        when(this.propertyLoader.getMagicNumber()).thenReturn(this.magicNumber);
+
+        // Given
+        final RegisterVo registerVo = RegisterVo.builder()
+                .captcha(this.magicNumber).build();
+        // When
+        final boolean isVerified = this.captchaServiceImpl.verifyCaptcha(registerVo);
+
+        // Then
+        assertTrue(isVerified);
+    }
+
+    /**
+     *
+     * TODO: Remove this as far as it is no more needed for tests
+     */
+    @Test
+    public void testMagicNumberIgnoredWhenEmptySucceeds() {
+
+        // Given
+        final String fakeEmptyMagicNumberInProperties = "";
+        when(this.propertyLoader.getMagicNumber()).thenReturn(fakeEmptyMagicNumberInProperties);
+
+        CaptchaDto captchaDto = CaptchaDto.builder()
+                .success(true)
+                .challengeTimestamp(new Date())
+                .hostname(this.captchaHostname)
+                .build();
+        when(this.restTemplate.postForEntity(any(URI.class), any(),
+                any())).thenReturn(ResponseEntity.ok(captchaDto));
+
+        when(this.propertyLoader.getCaptchaVerificationUrl()).thenReturn(this.captchaVerificationUrl);
+        when(this.propertyLoader.getCaptchaSecret()).thenReturn(this.captchaSecret);
+        when(this.propertyLoader.getCaptchaHostname()).thenReturn(this.captchaHostname);
+        when(this.serverConfigurationService.getCaptchaChallengeTimestampTolerance()).thenReturn(3600);
+
+        final RegisterVo registerVo = RegisterVo.builder()
+                .captcha(fakeEmptyMagicNumberInProperties).build();
+        // When
+        final boolean isVerified = this.captchaServiceImpl.verifyCaptcha(registerVo);
+
+        // Then
+        assertTrue(isVerified);
+    }
 
 }
