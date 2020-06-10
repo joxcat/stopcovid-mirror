@@ -1,17 +1,11 @@
 package fr.gouv.stopc.robertserver.ws.service.impl;
 
-import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.validation.Validation;
-import javax.xml.ws.Response;
 
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
-import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
-import fr.gouv.stopc.robertserver.ws.vo.StatusVo;
 import org.bson.internal.Base64;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,13 +13,20 @@ import org.springframework.stereotype.Service;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusResponse;
+import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
-import fr.gouv.stopc.robertserver.database.model.Registration;
-import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
 import fr.gouv.stopc.robertserver.ws.service.AuthRequestValidationService;
+import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.vo.AuthRequestVo;
+import fr.gouv.stopc.robertserver.ws.vo.StatusVo;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -35,17 +36,16 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
     private final IServerConfigurationService serverConfigurationService;
 
     private final ICryptoServerGrpcClient cryptoServerClient;
+    
+    private final PropertyLoader propertyLoader;
 
     @Inject
     public AuthRequestValidationServiceImpl(final IServerConfigurationService serverConfigurationService,
-                                            final ICryptoServerGrpcClient cryptoServerClient) {
+                                            final ICryptoServerGrpcClient cryptoServerClient,
+                                            final PropertyLoader propertyLoader) {
         this.serverConfigurationService = serverConfigurationService;
         this.cryptoServerClient = cryptoServerClient;
-    }
-
-    private ResponseEntity createErrorIdNotFound() {
-        log.info("Discarding authenticated request because id unknown (fake or was deleted)");
-        return ResponseEntity.notFound().build();
+        this.propertyLoader = propertyLoader;
     }
 
     private ResponseEntity createErrorValidationFailed() {
@@ -226,6 +226,6 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
     private boolean checkTime(byte[] timeA, long timeCurrent) {
         byte[] timeAIn64bits = ByteUtils.addAll(new byte[] { 0, 0, 0, 0 }, timeA);
         long timeASeconds = ByteUtils.bytesToLong(timeAIn64bits);
-        return Math.abs(timeASeconds - timeCurrent) < this.serverConfigurationService.getRequestTimeDeltaTolerance();
+        return Math.abs(timeASeconds - timeCurrent) < this.propertyLoader.getRequestTimeDeltaTolerance();
     }
 }

@@ -49,12 +49,12 @@ public class PropertyLoader {
     @Value("${robert.esr.limit}")
     private Integer esrLimit;
 
-    /**
-     *
-     * TODO: Remove before any public use.
-     * This should remain only for development uses.
-     */
-    @Value("${captcha.magicnumber}")
-    private String magicNumber;
+    @Value("${robert.server.request-time-delta-tolerance}")
+    private Integer requestTimeDeltaTolerance;
 
+    @Value("${robert.server.status-request-minimum-epoch-gap}")
+    private Integer statusRequestMinimumEpochGap;
+
+    @Value("${robert.server.captcha-challenge-timestamp-tolerance}")
+    private Integer captchaChallengeTimestampTolerance;
 }

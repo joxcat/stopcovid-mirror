@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: "#STOPCOVID, Robert Proximity Tracing Client API"
-  version: 1.0.0
+  version: 2.0.0
   title: "#STOPCOVID, Robert Proximity Tracing"
   termsOfService: https://github.com/ROBERT-proximity-tracing/
   contact:
@@ -11,6 +11,93 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 tags: []
 paths:
+  /captcha:
+    post:
+      tags: [ "captcha" ]
+      summary: Create a CAPTCHA
+      description: |-
+        Request the creation of a CAPTCHA challenge. A CAPTCHA Id is returned.
+
+
+        Both CAPTCHA Id and CAPTCHA resolution must be provided as input to the /register service.
+
+
+        A locale must be passed to localize the CAPTCHA.
+
+
+        A type must be passed to request visual/audio format.
+      operationId: captcha
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaptchaGenerationRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CaptchaGenerationSuccessResponse"
+        "400":
+          description: bad request
+      security: []
+  /captcha/{captchaId}/image:
+    get:
+      tags: [ "captcha" ]
+      summary: Get image CAPTCHA
+      description: Get image version of the CAPTCHA challenge
+      operationId: captchaChallengeImage
+      parameters:
+        - name: captchaId
+          in: path
+          description: CAPTCHA Id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary        
+        "400":
+          description: CAPTCHA Id not found
+        "404":
+          description: CAPTCHA Id not found, bad URL pattern
+        "410":
+          description: CAPTCHA Id already used
+      security: []
+  /captcha/{captchaId}/audio:
+    get:
+      tags: [ "captcha" ]
+      summary: Get audio CAPTCHA
+      description: Get audio version of the CAPTCHA challenge
+      operationId: captchaChallengeAudio
+      parameters:
+        - name: captchaId
+          in: path
+          description: CAPTCHA Id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            audio/wav:
+              schema:
+                type: string
+                format: binary        
+        "400":
+          description: CAPTCHA Id not found
+        "404":
+          description: CAPTCHA Id not found, bad URL pattern
+        "410":
+          description: CAPTCHA Id already used
+      security: []
   /register:
     post:
       tags: []
@@ -19,7 +106,7 @@ paths:
         Register the app to the ROBERT service.
 
 
-        Requires a CAPTCHA resolution token that will be verified by the server.
+        Requires a CAPTCHA resolution token (and its ID) that will be verified by the server.
 
 
         To be called once during app first startup.
@@ -153,7 +240,7 @@ externalDocs:
   description: Find out more about ROBERT
   url: https://github.com/ROBERT-proximity-tracing/
 servers:
-  - url: https://yourrobertserver.org/v1
+  - url: https://yourrobertserver.org/v2
 components:
   requestBodies:
     AuthentifiedRequest:
@@ -196,7 +283,7 @@ components:
           format: byte
         mac:
           description: |-
-            The MAC digest for this request, Base64 encodedn
+            The MAC digest for this request, Base64 encoded
 
 
             Raw content must be 256 bits. Base64 string must be 44 chars.
@@ -250,6 +337,9 @@ components:
           type: string
           description: The CAPTCHA resolution token obtained by the app. Required to
             complete the user registration process
+        captchaId:
+          type: string
+          description: The CAPTCHA Id as provided in the /captcha response
         clientPublicECDHKey:
           type: string
           description: >-
@@ -259,6 +349,7 @@ components:
             Base64 encoded
       required:
         - captcha
+        - captchaId
         - clientPublicECDHKey
     RegisterSuccessResponse:
       type: object
@@ -285,6 +376,31 @@ components:
         - tuples
         - config
         - timeStart
+    CaptchaGenerationRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          description: IMAGE or AUDIO (provided for accessibility)
+        locale:
+          type: string
+          description: |-
+            The locale that will be used to generate the CAPTCHA as an image or an audio clip.
+
+            Supported locales for IMAGE: "ar" for arabic alphabet; defaults to latin characters
+
+            Supported locales for AUDIO: "en", "fr"; defaults to "fr"
+      required:
+        - type
+        - locale
+    CaptchaGenerationSuccessResponse:
+      type: object
+      properties:
+        captchaId:
+          type: string
+          description: The ID of the generated CAPTCHA
+      required:
+        - captchaId
     ReportBatchRequest:
       type: object
       properties:

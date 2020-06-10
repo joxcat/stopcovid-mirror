@@ -18,32 +18,12 @@ import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 @Service
 public class ServerConfigurationServiceImpl implements IServerConfigurationService {
 
-	@Value("${robert.server.country-code}")
-	private byte serverCountryCode;
 
-	@Value("${robert.protocol.hello-message-timestamp-tolerance:180}")
-	private Integer helloMessageTimeStampTolerance;
+    @Value("${robert.server.time-start:20200601}")
+    private String timeStart;
 
-	@Value("${robert.protocol.contagious-period:14}")
-	private Integer contagiousPeriod;
-
-	@Value("${robert.server.request-time-delta-tolerance:60}")
-	private Integer requestTimeDeltaTolerance;
-
-	@Value("${robert.server.status-request-minimum-epoch-gap:48}")
-	private Integer statusRequestMinimumEpochGap;
-
-	@Value("${robert.server.captcha-challenge-timestamp-tolerance:15}")
-	private Integer captchaChallengeTimestampTolerance;
-
-	@Value("${robert.protocol.risk-threshold:15.0}")
-	private Double riskThreshold;
-
-	@Value("${robert.protocol.epoch-bundle-duration:4}")
-	private Integer epochBundleDurationInDays;
-
-	@Value("${robert.server.time-start}")
-	private String timeStart;
+    @Value("${robert.server.country-code:0x21}")
+    private byte countryCode;
 
 	private Long timeStartNtp;
 
@@ -52,7 +32,7 @@ public class ServerConfigurationServiceImpl implements IServerConfigurationServi
 	 */
 	@PostConstruct
 	private void initTimeStartNtp() {
-		LocalDate ld = LocalDate.parse(timeStart, DateTimeFormatter.BASIC_ISO_DATE);
+		LocalDate ld = LocalDate.parse(this.timeStart, DateTimeFormatter.BASIC_ISO_DATE);
 		timeStartNtp = TimeUtils.convertUnixStoNtpSeconds(ld.atStartOfDay().toEpochSecond(ZoneOffset.UTC));
 	}
 
@@ -63,17 +43,7 @@ public class ServerConfigurationServiceImpl implements IServerConfigurationServi
 
 	@Override
 	public byte getServerCountryCode() {
-		return this.serverCountryCode;
-	}
-
-	@Override
-	public int getHelloMessageTimeStampTolerance() {
-		return this.helloMessageTimeStampTolerance;
-	}
-
-	@Override
-	public int getContagiousPeriod() {
-		return this.contagiousPeriod;
+		return this.countryCode;
 	}
 
 	@Override
@@ -83,26 +53,7 @@ public class ServerConfigurationServiceImpl implements IServerConfigurationServi
 
 	@Override
 	public int getEpochBundleDurationInDays() {
-		return this.epochBundleDurationInDays;
+		return 4;
 	}
 
-	@Override
-	public int getRequestTimeDeltaTolerance() {
-		return this.requestTimeDeltaTolerance;
-	}
-
-	@Override
-	public int getStatusRequestMinimumEpochGap() {
-		return this.statusRequestMinimumEpochGap;
-	}
-
-	@Override
-	public int getCaptchaChallengeTimestampTolerance() {
-		return this.captchaChallengeTimestampTolerance;
-	}
-
-	@Override
-	public double getRiskThreshold() {
-		return this.riskThreshold;
-	}
 }

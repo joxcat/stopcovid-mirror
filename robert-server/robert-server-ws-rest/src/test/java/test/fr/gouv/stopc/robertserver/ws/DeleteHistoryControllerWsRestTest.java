@@ -58,6 +58,7 @@ import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
 import fr.gouv.stopc.robertserver.ws.RobertServerWsRestApplication;
 import fr.gouv.stopc.robertserver.ws.dto.DeleteHistoryResponseDto;
+import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.utils.UriConstants;
 import fr.gouv.stopc.robertserver.ws.vo.DeleteHistoryRequestVo;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +95,9 @@ public class DeleteHistoryControllerWsRestTest {
 
 	@Autowired
 	private IServerConfigurationService serverConfigurationService;
+
+	@Autowired
+    private PropertyLoader propertyLoader;
 
 	private int currentEpoch;
 
@@ -305,7 +309,7 @@ public class DeleteHistoryControllerWsRestTest {
 		byte[] kA = this.generateKA();
 
 		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch,
-				0 - ((int) this.serverConfigurationService.getRequestTimeDeltaTolerance() + 1));
+				0 - ((int) this.propertyLoader.getRequestTimeDeltaTolerance() + 1));
 
 		this.requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
 				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();
@@ -321,7 +325,7 @@ public class DeleteHistoryControllerWsRestTest {
 		byte[] kA = this.generateKA();
 
 		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch,
-				0 - (this.serverConfigurationService.getRequestTimeDeltaTolerance() + 1));
+				0 - (this.propertyLoader.getRequestTimeDeltaTolerance() + 1));
 
 		this.requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
 				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();

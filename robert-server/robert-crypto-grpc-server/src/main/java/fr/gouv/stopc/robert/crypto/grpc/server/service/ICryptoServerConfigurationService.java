@@ -10,9 +10,4 @@ public interface ICryptoServerConfigurationService {
 	 */
 	long getServiceTimeStart();
 
-	/**
-	 * 
-	 * @return the time tolerance for the validation of helloMessage timestamp
-	 */
-	int getHelloMessageTimeStampTolerance();
 }

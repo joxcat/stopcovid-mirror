@@ -14,6 +14,7 @@ import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
 import fr.gouv.stopc.robertserver.ws.RobertServerWsRestApplication;
 import fr.gouv.stopc.robertserver.ws.dto.UnregisterResponseDto;
+import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.utils.UriConstants;
 import fr.gouv.stopc.robertserver.ws.vo.UnregisterRequestVo;
 import lombok.extern.slf4j.Slf4j;
@@ -80,6 +81,9 @@ public class UnregisterControllerWsRestTest {
 
 	@Autowired
 	private IServerConfigurationService serverConfigurationService;
+
+	@Autowired
+	private PropertyLoader propertyLoader;
 
 	private int currentEpoch;
 
@@ -192,7 +196,7 @@ public class UnregisterControllerWsRestTest {
 				idA,
 				kA,
 				currentEpoch,
-				0 - (this.serverConfigurationService.getRequestTimeDeltaTolerance() + 1));
+				0 - (this.propertyLoader.getRequestTimeDeltaTolerance() + 1));
 
 		requestBody = UnregisterRequestVo.builder()
 				.ebid(Base64.encode(reqContent[0]))
@@ -220,7 +224,7 @@ public class UnregisterControllerWsRestTest {
 				idA,
 				kA,
 				currentEpoch,
-				0 - (this.serverConfigurationService.getRequestTimeDeltaTolerance() + 1));
+				0 - (this.propertyLoader.getRequestTimeDeltaTolerance() + 1));
 
 		requestBody = UnregisterRequestVo.builder()
 				.ebid(Base64.encode(reqContent[0]))

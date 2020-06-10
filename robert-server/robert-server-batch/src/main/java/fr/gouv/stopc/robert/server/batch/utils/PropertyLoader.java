@@ -9,16 +9,21 @@ import lombok.Getter;
 @Component
 public class PropertyLoader {
 
-	@Value("${robert.crypto.server.host}")
-	private String cryptoServerHost;
+    @Value("${robert.crypto.server.host}")
+    private String cryptoServerHost;
 
-	@Value("${robert.crypto.server.port}")
-	private String cryptoServerPort;
+    @Value("${robert.crypto.server.port}")
+    private String cryptoServerPort;
 
-	@Value("${robert.protocol.scoring-algo-rssi}")
-	private Integer rssiScoringAlgorithm;
+    @Value("${robert.protocol.scoring-algo-rssi}")
+    private Integer rssiScoringAlgorithm;
 
-	@Value("${robert.protocol.risk-threshold}")
-	private Double riskThreshold;
+    @Value("${robert.protocol.risk-threshold}")
+    private Double riskThreshold;
 
+    @Value("${robert.protocol.hello-message-timestamp-tolerance}")
+    private Integer helloMessageTimeStampTolerance;
+
+    @Value("${robert.protocol.contagious-period}")
+    private Integer contagiousPeriod;
 }

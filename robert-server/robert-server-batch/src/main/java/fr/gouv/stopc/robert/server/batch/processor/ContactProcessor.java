@@ -245,7 +245,7 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
         // Process 16-bit values for sanity check
         final long timeFromHelloNTPsecAs16bits = castIntegerToLong(helloMessageDetail.getTimeFromHelloMessage(), 2);
         final long timeFromDeviceAs16bits = castLong(helloMessageDetail.getTimeCollectedOnDevice(), 2);
-        final int timeDiffTolerance = this.serverConfigurationService.getHelloMessageTimeStampTolerance();
+        final int timeDiffTolerance = this.propertyLoader.getHelloMessageTimeStampTolerance();
 
         if (Math.abs(timeFromHelloNTPsecAs16bits - timeFromDeviceAs16bits) > timeDiffTolerance) {
             log.warn("Time tolerance was exceeded: |{} (HELLO) vs {} (receiving device)| > {}; discarding HELLO message",
@@ -350,7 +350,7 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
         return CollectionUtils.isEmpty(exposedEpochs) ?
                 new ArrayList<>()
                 : exposedEpochs.stream().filter(epoch -> {
-            int nbOfEpochsToKeep = (this.serverConfigurationService.getContagiousPeriod() * 24 * 3600)
+            int nbOfEpochsToKeep = (this.propertyLoader.getContagiousPeriod() * 24 * 3600)
                     / this.serverConfigurationService.getEpochDurationSecs();
             return (currentEpochId - epoch.getEpochId()) <= nbOfEpochsToKeep;
         }).collect(Collectors.toList());

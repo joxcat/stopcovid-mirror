@@ -25,4 +25,6 @@ public class PropertyLoader {
     @Value("${robert.crypto.server.private.key}")
     private String serverPrivateKey;
 
+    @Value("${robert.server.time-start}")
+    private String timeStart;
 }

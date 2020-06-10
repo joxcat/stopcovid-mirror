@@ -123,11 +123,11 @@ public class StatusControllerImpl implements IStatusController {
 		// Step #7: Check that epochs are not too distant
 		int currentEpoch = TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart());
 		int epochDistance = currentEpoch - record.getLastStatusRequestEpoch();
-		if(epochDistance < this.serverConfigurationService.getStatusRequestMinimumEpochGap() 
+		if(epochDistance < this.propertyLoader.getStatusRequestMinimumEpochGap() 
 		        && this.propertyLoader.getEsrLimit() != 0) {
 			log.info("Discarding ESR request because epochs are too close: {} > {} (tolerance)",
 					epochDistance,
-					this.serverConfigurationService.getStatusRequestMinimumEpochGap());
+					this.propertyLoader.getStatusRequestMinimumEpochGap());
 			return Optional.of(ResponseEntity.badRequest().build());
 		}
 

@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -120,7 +119,8 @@ public class StatusControllerWsRestTest {
         this.currentEpoch = this.getCurrentEpoch();
 
         when(this.propertyLoader.getEsrLimit()).thenReturn(-1);
-
+        when(this.propertyLoader.getRequestTimeDeltaTolerance()).thenReturn(60);
+        doReturn(2).when(this.propertyLoader).getStatusRequestMinimumEpochGap();
         this.serverKey = this.generateKey(24);
     }
 
@@ -269,7 +269,7 @@ public class StatusControllerWsRestTest {
 
         doReturn(Optional.of(reg)).when(this.registrationService).findById(ArgumentMatchers.any());
 
-        byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch, 0 - (this.serverConfigurationService.getRequestTimeDeltaTolerance() + 1));
+        byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch, 0 - (this.propertyLoader.getRequestTimeDeltaTolerance() + 1));
 
         statusBody = StatusVo.builder()
                 .ebid(Base64.encode(reqContent[0]))
@@ -300,7 +300,7 @@ public class StatusControllerWsRestTest {
 
         doReturn(Optional.of(reg)).when(this.registrationService).findById(ArgumentMatchers.any());
 
-        byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch, 0 - (this.serverConfigurationService.getRequestTimeDeltaTolerance() + 1));
+        byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch, 0 - (this.propertyLoader.getRequestTimeDeltaTolerance() + 1));
 
         statusBody = StatusVo.builder()
                 .ebid(Base64.encode(reqContent[0]))

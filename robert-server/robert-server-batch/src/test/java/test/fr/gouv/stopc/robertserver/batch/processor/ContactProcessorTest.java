@@ -433,7 +433,7 @@ public class ContactProcessorTest {
 			byte[] time = new byte[2];
 
 			byte[] timeOfDevice = new byte[4];
-			System.arraycopy(ByteUtils.longToBytes(currentTime + this.serverConfigurationService.getHelloMessageTimeStampTolerance() + 1), 4, timeOfDevice, 0, 4);
+			System.arraycopy(ByteUtils.longToBytes(currentTime + this.propertyLoader.getHelloMessageTimeStampTolerance() + 1), 4, timeOfDevice, 0, 4);
 
 			byte[] timeHelloB = new byte[4];
 			System.arraycopy(ByteUtils.longToBytes(currentTime), 4, timeHelloB, 0, 4);
@@ -792,7 +792,7 @@ public class ContactProcessorTest {
 			final long currentTime = TimeUtils.convertUnixMillistoNtpSeconds(new Date().getTime());
 
 			final int currentEpochId = TimeUtils.getNumberOfEpochsBetween(tpstStart, currentTime);
-			int val = (this.serverConfigurationService.getContagiousPeriod() * 24 * 3600)
+			int val = (this.propertyLoader.getContagiousPeriod() * 24 * 3600)
 					/ this.serverConfigurationService.getEpochDurationSecs();
 			val++;
 			int tooOldEpochId = currentEpochId - val;
@@ -958,7 +958,7 @@ public class ContactProcessorTest {
 
 	private void assertRiskThresholdExceededBasedOnConfiguration(Registration expectedRegistration) {
 		boolean atRisk = expectedRegistration.isAtRisk();
-		if (this.serverConfigurationService.getRiskThreshold() >= sumRiskScores(expectedRegistration.getExposedEpochs())) {
+		if (this.propertyLoader.getRiskThreshold() >= sumRiskScores(expectedRegistration.getExposedEpochs())) {
 			assertFalse(atRisk);
 		} else {
 			assertTrue(atRisk);

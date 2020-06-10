@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -63,7 +66,7 @@ import static org.mockito.Mockito.when;
 class CryptoServiceGrpcServerTest {
 
     private final static String UNEXPECTED_FAILURE_MESSAGE = "Should not fail";
-    private final static byte[] SERVER_COUNTRY_CODE = new byte[] { (byte) 0x33 };
+    private final static byte[] SERVER_COUNTRY_CODE = new byte[] { (byte) 0x21 };
     private final static int NUMBER_OF_DAYS_FOR_BUNDLES = 4;
 
     final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
@@ -93,7 +96,15 @@ class CryptoServiceGrpcServerTest {
     @BeforeEach
     void beforeEach() throws IOException {
 
-        serverConfigurationService = new CryptoServerConfigurationServiceImpl();
+        serverConfigurationService = new ICryptoServerConfigurationService() {
+           long timeStartNtp = TimeUtils.convertUnixStoNtpSeconds(LocalDate.of(2020, 6, 1).atStartOfDay().toEpochSecond(ZoneOffset.UTC));
+
+           @Override
+            public long getServiceTimeStart() {
+                return timeStartNtp;
+            }
+
+        };
 
         cryptoService = new CryptoServiceImpl();
 
@@ -106,7 +117,7 @@ class CryptoServiceGrpcServerTest {
                 cryptographicStorageService);
 
         when(this.cryptographicStorageService.getServerKeyPair())
-                .thenReturn(Optional.ofNullable(CryptoTestUtils.generateECDHKeyPair()));
+        .thenReturn(Optional.ofNullable(CryptoTestUtils.generateECDHKeyPair()));
 
         byte[] keyToEncodeKeys = new byte[32];
         new SecureRandom().nextBytes(keyToEncodeKeys);
@@ -313,9 +324,9 @@ class CryptoServiceGrpcServerTest {
     }
 
     private AuthRequestBundle generateAuthRequestBundleWithTimeDelta(byte[] id,
-                                                                     byte[] keyForMac,
-                                                                     DigestSaltEnum digestSalt,
-                                                                     long timeDelta) {
+            byte[] keyForMac,
+            DigestSaltEnum digestSalt,
+            long timeDelta) {
         long time = getCurrentTimeNTPSeconds();
         int epochId = TimeUtils.getNumberOfEpochsBetween(this.serverConfigurationService.getServiceTimeStart(), time - timeDelta);
 
@@ -326,7 +337,7 @@ class CryptoServiceGrpcServerTest {
         when(this.cryptographicStorageService.getServerKey(
                 epochId,
                 this.serverConfigurationService.getServiceTimeStart()))
-                .thenReturn(ks);
+        .thenReturn(ks);
 
         return new AuthRequestBundle().builder()
                 .ebid(ebid)
@@ -850,12 +861,12 @@ class CryptoServiceGrpcServerTest {
     }
 
     private byte[][] generateRandomServerKeys() {
-         byte[][] serverKeys = new byte[4][24];
-         new SecureRandom().nextBytes(serverKeys[0]);
+        byte[][] serverKeys = new byte[4][24];
+        new SecureRandom().nextBytes(serverKeys[0]);
         new SecureRandom().nextBytes(serverKeys[1]);
         new SecureRandom().nextBytes(serverKeys[2]);
         new SecureRandom().nextBytes(serverKeys[3]);
-         return serverKeys;
+        return serverKeys;
     }
 
     @Test
@@ -1030,7 +1041,7 @@ class CryptoServiceGrpcServerTest {
     }
 
     private HelloMessageBundle generateHelloMessage(byte[] id, byte[] serverKey, byte[] keyForMac, DigestSaltEnum digestSalt) {
-        long time = getCurrentTimeNTPSeconds() - 500000;
+        long time = getCurrentTimeNTPSeconds() - 100000;
         int epochId = TimeUtils.getNumberOfEpochsBetween(this.serverConfigurationService.getServiceTimeStart(), time);
         byte[] ebid = generateEbid(id, epochId, serverKey);
 
@@ -1199,22 +1210,22 @@ class CryptoServiceGrpcServerTest {
 
             StreamObserver<U> responseObserver =
                     new StreamObserver<U>() {
-                        @Override
-                        public void onNext(U value) {
-                            response.add(value);
-                        }
+                @Override
+                public void onNext(U value) {
+                    response.add(value);
+                }
 
-                        @Override
-                        public void onError(Throwable t) {
-                            handleError.execute(t);
-                            res.setError(true);
-                        }
+                @Override
+                public void onError(Throwable t) {
+                    handleError.execute(t);
+                    res.setError(true);
+                }
 
-                        @Override
-                        public void onCompleted() {
-                            latch.countDown();
-                        }
-                    };
+                @Override
+                public void onCompleted() {
+                    latch.countDown();
+                }
+            };
 
             stubExecution.execute(stub, request, responseObserver);
             // When
@@ -1237,92 +1248,92 @@ class CryptoServiceGrpcServerTest {
 
     public class MockClientKeyStorageService implements IClientKeyStorageService {
 
-    private final HashMap<ByteArray, ClientIdentifierBundle> idKeyHashMap = new HashMap<>();
+        private final HashMap<ByteArray, ClientIdentifierBundle> idKeyHashMap = new HashMap<>();
 
-    private final static int MAX_ID_CREATION_ATTEMPTS = 10;
+        private final static int MAX_ID_CREATION_ATTEMPTS = 10;
 
-    private byte[] generateRandomIdentifier() {
-        byte[] id;
-        int i = 0;
-        do {
-            id = generateKey(5);
-            i++;
-        } while (this.idKeyHashMap.containsKey(id) && i < MAX_ID_CREATION_ATTEMPTS);
-        return i == MAX_ID_CREATION_ATTEMPTS ? null : id;
-    }
-
-    public byte [] generateRandomKey() {
-        byte [] ka = null;
-
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-
-            //Creating a SecureRandom object
-            SecureRandom secRandom = new SecureRandom();
-
-            //Initializing the KeyGenerator
-            keyGen.init(secRandom);
-
-            //Creating/Generating a key
-            Key key = keyGen.generateKey();
-            ka = key.getEncoded();
-        } catch (NoSuchAlgorithmException e) {
-            log.error("Could not generate 256-bit key");
-        }
-        return ka;
-    }
-
-    private byte[] generateKey(final int nbOfbytes) {
-        byte[] rndBytes = new byte[nbOfbytes];
-        SecureRandom sr = new SecureRandom();
-        sr.nextBytes(rndBytes);
-        return rndBytes;
-    }
-
-    @Override
-    public Optional<ClientIdentifierBundle> createClientIdUsingKeys(byte[] kaMac, byte[] kaTuples) {
-        byte[] id = generateRandomIdentifier();
-
-        ClientIdentifierBundle clientBundle = ClientIdentifierBundle.builder()
-                .id(id)
-                .keyForMac(kaMac)
-                .keyForTuples(kaTuples)
-                .build();
-        this.idKeyHashMap.put(new ByteArray(id), clientBundle);
-        return Optional.of(clientBundle);
-    }
-
-    @Override
-    public Optional<ClientIdentifierBundle> findKeyById(byte[] id) {
-        ClientIdentifierBundle bundle = this.idKeyHashMap.get(new ByteArray(id));
-        if (Objects.isNull(bundle)) {
-            return Optional.empty();
+        private byte[] generateRandomIdentifier() {
+            byte[] id;
+            int i = 0;
+            do {
+                id = generateKey(5);
+                i++;
+            } while (this.idKeyHashMap.containsKey(id) && i < MAX_ID_CREATION_ATTEMPTS);
+            return i == MAX_ID_CREATION_ATTEMPTS ? null : id;
         }
 
-        return Optional.of(bundle);
-    }
+        public byte [] generateRandomKey() {
+            byte [] ka = null;
 
-    @Override
-    public void deleteClientId(byte[] id) {
-        this.idKeyHashMap.remove(new ByteArray(id));
-    }
+            try {
+                KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
 
-    private class ByteArray {
-        public final byte[] bytes;
-        public ByteArray(byte[] bytes) {
-            this.bytes = bytes;
+                //Creating a SecureRandom object
+                SecureRandom secRandom = new SecureRandom();
+
+                //Initializing the KeyGenerator
+                keyGen.init(secRandom);
+
+                //Creating/Generating a key
+                Key key = keyGen.generateKey();
+                ka = key.getEncoded();
+            } catch (NoSuchAlgorithmException e) {
+                log.error("Could not generate 256-bit key");
+            }
+            return ka;
         }
+
+        private byte[] generateKey(final int nbOfbytes) {
+            byte[] rndBytes = new byte[nbOfbytes];
+            SecureRandom sr = new SecureRandom();
+            sr.nextBytes(rndBytes);
+            return rndBytes;
+        }
+
         @Override
-        public boolean equals(Object rhs) {
-            return rhs != null && rhs instanceof ByteArray
-                    && Arrays.equals(bytes, ((ByteArray)rhs).bytes);
+        public Optional<ClientIdentifierBundle> createClientIdUsingKeys(byte[] kaMac, byte[] kaTuples) {
+            byte[] id = generateRandomIdentifier();
+
+            ClientIdentifierBundle clientBundle = ClientIdentifierBundle.builder()
+                    .id(id)
+                    .keyForMac(kaMac)
+                    .keyForTuples(kaTuples)
+                    .build();
+            this.idKeyHashMap.put(new ByteArray(id), clientBundle);
+            return Optional.of(clientBundle);
         }
+
         @Override
-        public int hashCode() {
-            return Arrays.hashCode(bytes);
+        public Optional<ClientIdentifierBundle> findKeyById(byte[] id) {
+            ClientIdentifierBundle bundle = this.idKeyHashMap.get(new ByteArray(id));
+            if (Objects.isNull(bundle)) {
+                return Optional.empty();
+            }
+
+            return Optional.of(bundle);
+        }
+
+        @Override
+        public void deleteClientId(byte[] id) {
+            this.idKeyHashMap.remove(new ByteArray(id));
+        }
+
+        private class ByteArray {
+            public final byte[] bytes;
+            public ByteArray(byte[] bytes) {
+                this.bytes = bytes;
+            }
+            @Override
+            public boolean equals(Object rhs) {
+                return rhs != null && rhs instanceof ByteArray
+                        && Arrays.equals(bytes, ((ByteArray)rhs).bytes);
+            }
+            @Override
+            public int hashCode() {
+                return Arrays.hashCode(bytes);
+            }
         }
     }
-}
 
 
 }
