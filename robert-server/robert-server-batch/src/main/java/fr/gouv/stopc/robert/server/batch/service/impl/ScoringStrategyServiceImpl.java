@@ -23,8 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class ScoringStrategyServiceImpl implements ScoringStrategyService {
-    // Issue #TODO: update robert.server.scoring.algo.rssi property based on calibration tests.
-    // This value must come from tests on a maximum number of devices, measuring the RSSI (in dB) at one meter
 
     private final IServerConfigurationService serverConfigurationService;
 

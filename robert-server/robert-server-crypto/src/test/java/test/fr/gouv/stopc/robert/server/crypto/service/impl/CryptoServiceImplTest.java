@@ -64,7 +64,7 @@ class CryptoServiceImplTest {
         int numberOfEpochs = 4 * 24 * 4;
 
         final TupleGenerator tupleGenerator = new TupleGenerator(serverKey, new SecretKeySpec(federationKey, CryptoAES.AES_ENCRYPTION_KEY_SCHEME));
-        final Collection<EphemeralTuple> ephemeralTuples = tupleGenerator.exec(idA, currentEpoch, numberOfEpochs, (byte) 0x33);
+        final Collection<EphemeralTuple> ephemeralTuples = tupleGenerator.exec(idA, currentEpoch, numberOfEpochs, (byte) 0x21);
         tupleGenerator.stop();
 
 
@@ -176,15 +176,6 @@ class CryptoServiceImplTest {
         System.out.println(Arrays.toString(epoch) + Arrays.toString(decryptedIdA));
         System.out.println(Arrays.toString(concatIdAAndEpoch));
 
-        //4. veries that idA
-        // 7. retrieves from IDTable, Ka, the key associated with idA
-        // TODO: call DAO here to verify that user exists and get Ka in the same time here. "one call verify and get necessary information
-
-        // 5. checks that
-
-        // 6. checks that time0
-
-        // 8. verifies if the MAC, macA
         System.out.println("------ MAC VALIDATION ------");
         boolean isValid = cryptoService.macHelloValidation(new CryptoHMACSHA256(applicationKey), hello);
         System.out.println("mac valid : " + (isValid ? "yes" : "no"));

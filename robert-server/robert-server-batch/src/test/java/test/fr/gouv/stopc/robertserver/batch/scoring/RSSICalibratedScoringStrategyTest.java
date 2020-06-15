@@ -6,10 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,6 +64,17 @@ public class RSSICalibratedScoringStrategyTest {
         when(this.propertyLoader.getRssiScoringAlgorithm()).thenReturn(this.rssiScoringAlgorithm);
 
         this.randomReferenceEpochStartTime = this.serverConfigurationService.getServiceTimeStart() + new Random().nextInt(20) * this.serverConfigurationService.getEpochDurationSecs();
+    }
+
+    @Test
+    public void testDateDiff() {
+        final LocalDateTime ldt = LocalDateTime.of(2020, 6, 1, 00, 00);
+        final ZonedDateTime zdt = ldt.atZone(ZoneId.of("Europe/Paris"));
+        log.info("{}", TimeUtils.convertUnixMillistoNtpSeconds(zdt.toInstant().toEpochMilli()));
+
+        final LocalDateTime ldt2 = LocalDateTime.of(2020, 6, 1, 00, 00);
+        final ZonedDateTime zdt2 = ldt2.atZone(ZoneId.of("UTC"));
+        log.info("{}", TimeUtils.convertUnixMillistoNtpSeconds(zdt2.toInstant().toEpochMilli()));
     }
 
     @Test

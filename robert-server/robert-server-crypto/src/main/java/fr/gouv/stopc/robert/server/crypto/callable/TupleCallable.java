@@ -40,7 +40,7 @@ public class TupleCallable implements Callable<EphemeralTuple> {
 //    private final CryptoStructureConcurrentArray<CryptoCipherStructureAbstract> cryptoStructureForECCList;
 
     /**
-     * Country code (ex. : FR -> 0x33)
+     * Country code (ex. : FR -> 0x21)
      */
     private byte countryCode;
 

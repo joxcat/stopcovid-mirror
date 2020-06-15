@@ -19,8 +19,7 @@ import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 @Service
 public class CryptoServerConfigurationServiceImpl implements ICryptoServerConfigurationService {
 
-	
-	private Long timeStartNtp;
+	private long timeStartNtp;
 
 	private final PropertyLoader propertyLoader;
 
@@ -41,5 +40,5 @@ public class CryptoServerConfigurationServiceImpl implements ICryptoServerConfig
 	public long getServiceTimeStart() {
 		return this.timeStartNtp;
 	}
-	
+
 }

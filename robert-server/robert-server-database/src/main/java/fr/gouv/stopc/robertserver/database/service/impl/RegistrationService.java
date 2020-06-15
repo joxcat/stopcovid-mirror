@@ -28,48 +28,6 @@ public class RegistrationService implements IRegistrationService {
 		this.registrationRepository = registrationRepository;
 	}
 
-	// TODO: remove comments
-//	private Registration create() {
-//		return Registration.builder()
-//		.permanentIdentifier(generateIdA())
-//		.build();
-//	}
-//	private byte[] generateIdA() {
-//		byte[] id = generateKey(5);
-//		while(registrationRepository.existsById(id)) {
-//			id = generateKey(5);
-//		}
-//		return id;
-//	}
-//
-//	public byte [] generateKA() {
-//		byte [] ka = null;
-//
-//		try {
-//			KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-//
-//			//Creating a SecureRandom object
-//			SecureRandom secRandom = new SecureRandom();
-//
-//			//Initializing the KeyGenerator
-//			keyGen.init(secRandom);
-//
-//			//Creating/Generating a key
-//			Key key = keyGen.generateKey();
-//			ka = key.getEncoded();
-//		} catch (NoSuchAlgorithmException e) {
-//			log.error("Could not generate 256-bit key");
-//		}
-//		return ka;
-//	}
-//
-//	public byte[] generateKey(final int nbOfbytes) {
-//		byte[] rndBytes = new byte[nbOfbytes];
-//		SecureRandom sr = new SecureRandom();
-//		sr.nextBytes(rndBytes);
-//		return rndBytes;
-//	}
-
 	@Override
 	public Optional<Registration> createRegistration(byte[] id) {
 		return Optional.ofNullable(Registration.builder()

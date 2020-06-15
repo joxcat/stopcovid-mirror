@@ -12,7 +12,7 @@ public interface ICryptographicStorageService {
  
     boolean contains(String alias);
 
-    byte[] getServerKey(int epochId, long serviceTimeStart);
+    byte[] getServerKey(int epochId, long serviceTimeStart, boolean takePreviousDaysKey);
 
     byte[][] getServerKeys(int epochId, long serviceTimeStart, int nbDays);
 

@@ -61,7 +61,6 @@ public class StatusControllerImpl implements IStatusController {
 
 	@Override
 	public ResponseEntity<StatusResponseDto> getStatus(StatusVo statusVo) {
-		log.info("Receiving status request");
 
 		AuthRequestValidationService.ValidationResult<GetIdFromStatusResponse> validationResult =
 				this.authRequestValidationService.validateStatusRequest(statusVo);
@@ -70,18 +69,15 @@ public class StatusControllerImpl implements IStatusController {
 			log.info("Status request authentication failed");
 			return ResponseEntity.badRequest().build();
 		}
-		log.info("Status request authentication passed");
 
 		GetIdFromStatusResponse response = validationResult.getResponse();
 
-		log.info("Finding record for status request");
 		Optional<Registration> record = this.registrationService.findById(response.getIdA().toByteArray());
 		if (record.isPresent()) {
 			try {
 				Optional<ResponseEntity> responseEntity = validate(record.get(), response.getEpochId(), response.getTuples().toByteArray());
 
 				if (responseEntity.isPresent()) {
-					log.info("Status request successful");
 					return responseEntity.get();
 				} else {
 					log.info("Status request failed validation");
@@ -125,7 +121,7 @@ public class StatusControllerImpl implements IStatusController {
 		int epochDistance = currentEpoch - record.getLastStatusRequestEpoch();
 		if(epochDistance < this.propertyLoader.getStatusRequestMinimumEpochGap() 
 		        && this.propertyLoader.getEsrLimit() != 0) {
-			log.info("Discarding ESR request because epochs are too close: {} > {} (tolerance)",
+			log.info("Discarding ESR request because epochs are too close: {} < {} (tolerance)",
 					epochDistance,
 					this.propertyLoader.getStatusRequestMinimumEpochGap());
 			return Optional.of(ResponseEntity.badRequest().build());
@@ -188,44 +184,4 @@ public class StatusControllerImpl implements IStatusController {
 					.collect(Collectors.toList());
 		}
 	}
-
-	// TODO: delete commented code
-//	private void includeEphemeralTuplesForNextMEpochs(final StatusResponseDto statusResponse,
-//													  final Registration user,
-//													  final int numberOfDays) throws RobertServerException {
-//
-//		if (statusResponse != null && user != null) {
-//			List<ApplicationConfigurationModel> serverConf = this.applicationConfigService.findAll();
-//			if (CollectionUtils.isEmpty(serverConf)) {
-//				statusResponse.setConfig(Collections.emptyList());
-//			} else {
-//				statusResponse.setConfig(
-//						serverConf.stream().map(item -> ClientConfigDto.builder().name(item.getName()).value(item.getValue()).build()).collect(Collectors.toList()));
-//			}
-//
-//			final byte countryCode = this.serverConfigurationService.getServerCountryCode();
-//
-//			final long tpstStart = this.serverConfigurationService.getServiceTimeStart();
-//			final int numberOfEpochs = 4 * 24 * numberOfDays;
-//
-//			final int currentEpochId = TimeUtils.getCurrentEpochFrom(tpstStart);
-//
-//
-//			EncryptedEphemeralTupleBundleRequest request = EncryptedEphemeralTupleBundleRequest.newBuilder()
-//					.setCountryCode(ByteString.copyFrom(new byte[] { countryCode }))
-//					.setFromEpoch(currentEpochId)
-//					.setIdA(ByteString.copyFrom(user.getPermanentIdentifier()))
-//					.setNumberOfEpochsToGenerate(numberOfEpochs)
-//					.build();
-//
-//			Optional<EncryptedEphemeralTupleBundleResponse> encryptedTuples = this.cryptoServerClient.generateEncryptedEphemeralTuple(request);
-//
-//			if(!encryptedTuples.isPresent()) {
-//				log.error("Could not generate encrypted (EBID, ECC) tuples");
-//				throw new RobertServerException(MessageConstants.ERROR_OCCURED);
-//			}
-//
-//			statusResponse.setTuples(Base64.encode(encryptedTuples.get().getEncryptedTuples().toByteArray()));
-//		}
-//	}
 }

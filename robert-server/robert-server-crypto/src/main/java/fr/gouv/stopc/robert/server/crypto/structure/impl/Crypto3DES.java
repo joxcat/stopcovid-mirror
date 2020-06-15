@@ -96,7 +96,6 @@ public class Crypto3DES extends CryptoCipherStructureAbstract {
 
     @Override
     public Cipher getDecryptCypher() {
-        // TODO Auto-generated method stub
         return null;
     }
 }

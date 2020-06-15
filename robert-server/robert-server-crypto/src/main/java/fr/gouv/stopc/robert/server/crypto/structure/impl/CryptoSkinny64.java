@@ -81,13 +81,11 @@ public class CryptoSkinny64 extends CryptoCipherStructureAbstract {
 
 	@Override
 	public javax.crypto.Cipher getCipher() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public SecretKey getSecretKey() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -98,7 +96,6 @@ public class CryptoSkinny64 extends CryptoCipherStructureAbstract {
 
     @Override
     public Cipher getDecryptCypher() {
-        // TODO Auto-generated method stub
         return null;
     }
 }

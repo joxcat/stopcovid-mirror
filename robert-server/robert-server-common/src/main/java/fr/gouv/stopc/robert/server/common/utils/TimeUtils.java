@@ -15,6 +15,10 @@ public final class TimeUtils {
         throw new AssertionError();
     }
 
+    public static long convertNTPSecondsToUnixMillis(long ntpTime) {
+        return (ntpTime - SECONDS_FROM_01_01_1900) * 1000;
+    }
+
     /**
      * Convert UNIX timestamp in milliseconds to NTP seconds
      * @param unixTimeInMillis UNIX time in millis
@@ -61,8 +65,22 @@ public final class TimeUtils {
      */
     public static LocalDate getDateFromEpoch(int epoch, long timeStart) {
 
+        String timezone = epoch < 960 ? "Europe/Paris" : "UTC";
+
         long fromInNtpSecs = (EPOCH_DURATION_SECS * epoch) + timeStart;
         long fromUnixMillis = (fromInNtpSecs - SECONDS_FROM_01_01_1900) * 1000;
-        return Instant.ofEpochMilli(fromUnixMillis).atZone(ZoneId.of("Europe/Paris")).toLocalDate();
+        return Instant.ofEpochMilli(fromUnixMillis).atZone(ZoneId.of(timezone)).toLocalDate();
+    }
+
+    public final static int EPOCHS_PER_DAY = 4 * 24;
+    public static int remainingEpochsForToday(int epochId) {
+        if (epochId >= 960) {
+            return EPOCHS_PER_DAY - epochId % EPOCHS_PER_DAY;
+        }
+        else if (epochId >= 952) {
+            return (960 - epochId) + 96;
+        } else {
+            return 1 + (EPOCHS_PER_DAY + 87 - (epochId % EPOCHS_PER_DAY)) % EPOCHS_PER_DAY;
+        }
     }
 }

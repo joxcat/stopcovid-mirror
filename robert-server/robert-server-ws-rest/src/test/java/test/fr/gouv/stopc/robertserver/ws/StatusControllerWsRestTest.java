@@ -613,54 +613,6 @@ public class StatusControllerWsRestTest {
         verify(this.registrationService, times(1)).saveRegistration(reg);
     }
 
-    /*
-     ** Test not relevant anymore since ESR are now allowed after a notification
-	@Test
-	public void testStatusRequestAlreadyNotified() {
-
-		// Given
-		byte[] idA = this.generateKey(5);
-		byte[] kA = this.generateKA();
-
-		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
-		Registration reg = Registration.builder().permanentIdentifier(idA).sharedKey(kA).atRisk(true).isNotified(true)
-				.lastStatusRequestEpoch(currentEpoch - 2).build();
-
-		byte[] ebid = new byte[8];
-		byte[] idA = new byte[5];
-		System.arraycopy(reqContent[0], 3, idA, 0, 5);
-		System.arraycopy(reqContent[0], 0, ebid, 0, 8);
-
-		doReturn(Arrays.asList( EncryptedEphemeralTupleBundleResponse
-				.newBuilder().build())).when(this.cryptoServerClient).generateEncryptedEphemeralTuple(any());
-		doReturn(true).when(this.cryptoServerClient).validateMacEsr(any());
-
-		doReturn(ebid).when(this.cryptoServerClient).decryptEBID(any());
-
-		doReturn(Optional.of(reg)).when(this.registrationService).findById(idA);
-
-
-		when(this.cryptoServerClient.validateMacEsr(any())).thenReturn(true);
-		doReturn(Optional.of(reg)).when(this.registrationService).findById(idA);
-
-
-		statusBody = StatusVo.builder().ebid(Base64.encode(reqContent[0])).time(Base64.encode(reqContent[1]))
-				.mac(Base64.encode(reqContent[2])).build();
-
-		this.requestEntity = new HttpEntity<>(this.statusBody, this.headers);
-
-		// When
-		ResponseEntity<StatusResponseDto> response = this.restTemplate.exchange(this.targetUrl.toString(),
-				HttpMethod.POST, this.requestEntity, StatusResponseDto.class);
-
-		// When
-		// TODO: should maybe have a different HTTP error code?
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-		assertEquals(currentEpoch - 2, reg.getLastStatusRequestEpoch());
-		verify(this.registrationService, times(1)).findById(idA);
-		verify(this.registrationService, times(0)).saveRegistration(reg);
-	}*/
-
     @Test
     public void testStatusRequestNoNewRiskSinceLastNotifSucceeds() {
         byte[] idA = this.generateKey(5);
@@ -843,7 +795,6 @@ public class StatusControllerWsRestTest {
                 HttpMethod.POST, this.requestEntity, StatusResponseDto.class);
 
         // Then
-        // TODO: should maybe have a different HTTP error code?
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
         verify(this.registrationService, times(1)).findById(idA);
@@ -892,7 +843,6 @@ public class StatusControllerWsRestTest {
                 HttpMethod.POST, this.requestEntity, StatusResponseDto.class);
 
         // Then
-        // TODO: should maybe have a different HTTP error code?
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
         assertEquals(true, response.getBody().isAtRisk());

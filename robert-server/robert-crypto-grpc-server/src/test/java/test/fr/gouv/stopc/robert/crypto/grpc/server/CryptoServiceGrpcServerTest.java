@@ -1,65 +1,82 @@
 package test.fr.gouv.stopc.robert.crypto.grpc.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
-import fr.gouv.stopc.robert.crypto.grpc.server.storage.cryptographic.service.ICryptographicStorageService;
-import fr.gouv.stopc.robert.crypto.grpc.server.storage.model.ClientIdentifierBundle;
-import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
-import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
-import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
-import fr.gouv.stopc.robert.server.crypto.structure.CryptoAES;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESECB;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESGCM;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoSkinny64;
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.CryptoServiceGrpcServer;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplStub;
-
-import fr.gouv.stopc.robert.crypto.grpc.server.storage.service.IClientKeyStorageService;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.ICryptoServerConfigurationService;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoGrpcServiceBaseImpl;
-import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoServerConfigurationServiceImpl;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.ECDHKeyServiceImpl;
+import fr.gouv.stopc.robert.crypto.grpc.server.storage.cryptographic.service.ICryptographicStorageService;
+import fr.gouv.stopc.robert.crypto.grpc.server.storage.model.ClientIdentifierBundle;
+import fr.gouv.stopc.robert.crypto.grpc.server.storage.service.IClientKeyStorageService;
+import fr.gouv.stopc.robert.crypto.grpc.server.utils.PropertyLoader;
+import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
+import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
+import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
 import fr.gouv.stopc.robert.server.crypto.service.impl.CryptoServiceImpl;
+import fr.gouv.stopc.robert.server.crypto.structure.CryptoAES;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESECB;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoAESGCM;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoSkinny64;
 import io.grpc.ManagedChannel;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import test.fr.gouv.stopc.robert.crypto.grpc.server.utils.CryptoTestUtils;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.spec.SecretKeySpec;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
@@ -68,6 +85,8 @@ class CryptoServiceGrpcServerTest {
     private final static String UNEXPECTED_FAILURE_MESSAGE = "Should not fail";
     private final static byte[] SERVER_COUNTRY_CODE = new byte[] { (byte) 0x21 };
     private final static int NUMBER_OF_DAYS_FOR_BUNDLES = 4;
+
+    private final static int MAX_EPOCH_DOUBLE_KS_CHECK = 672;
 
     final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
@@ -88,6 +107,9 @@ class CryptoServiceGrpcServerTest {
 
     @Mock
     private ICryptographicStorageService cryptographicStorageService;
+
+    @Mock
+    private PropertyLoader propertyLoader;
 
     private int currentEpochId;
 
@@ -114,10 +136,14 @@ class CryptoServiceGrpcServerTest {
                 cryptoService,
                 keyService,
                 clientStorageService,
-                cryptographicStorageService);
+                cryptographicStorageService,
+                propertyLoader);
 
         when(this.cryptographicStorageService.getServerKeyPair())
         .thenReturn(Optional.ofNullable(CryptoTestUtils.generateECDHKeyPair()));
+
+        when(this.propertyLoader.getHelloMessageTimeStampTolerance())
+        .thenReturn(180);
 
         byte[] keyToEncodeKeys = new byte[32];
         new SecureRandom().nextBytes(keyToEncodeKeys);
@@ -160,10 +186,10 @@ class CryptoServiceGrpcServerTest {
 
         byte[][] serverKeys = generateRandomServerKeys();
 
-        when(this.cryptographicStorageService.getServerKeys(
+        doReturn(serverKeys).when(this.cryptographicStorageService).getServerKeys(
                 this.currentEpochId,
                 this.serverConfigurationService.getServiceTimeStart(),
-                4)).thenReturn(serverKeys);
+                4);
 
         ObserverExecutionResult res = new ObserverExecutionResult(false);
         CreateRegistrationResponse createRegistrationResponse =
@@ -177,10 +203,68 @@ class CryptoServiceGrpcServerTest {
         assertTrue(ByteUtils.isNotEmpty(createRegistrationResponse.getIdA().toByteArray()));
         byte[] tuples = createRegistrationResponse.getTuples().toByteArray();
         assertTrue(ByteUtils.isNotEmpty(tuples));
-        assertTrue(checkTuples(createRegistrationResponse.getIdA().toByteArray(), tuples));
+        assertTrue(checkTuples(createRegistrationResponse.getIdA().toByteArray(), tuples, this.currentEpochId, serverKeys));
     }
 
-    private boolean checkTuples(byte[] id, byte[] tuples) {
+    private byte[] getIdFromDecryptedEBID(byte[] ebid) {
+        byte[] idA = new byte[5];
+        System.arraycopy(ebid, 3, idA, 0, idA.length);
+        return idA;
+    }
+
+    private int getEpochIdFromDecryptedEBID(byte[] ebid) {
+        byte[] epochId = new byte[3];
+        System.arraycopy(ebid, 0, epochId, 0, epochId.length);
+        return ByteUtils.convertEpoch24bitsToInt(epochId);
+    }
+
+    private boolean checkTuplesForDay(List<CryptoGrpcServiceBaseImpl.EphemeralTupleJson> tuples, byte[] key) {
+        byte[] id = null;
+        boolean atLeastOneError = false;
+        for (CryptoGrpcServiceBaseImpl.EphemeralTupleJson tuple : tuples) {
+            int epochIdFromTuple = tuple.getEpochId();
+            try {
+                byte[] decryptedEbid = this.cryptoService.decryptEBID(new CryptoSkinny64(key), tuple.getKey().getEbid());
+                byte[] idFromMessage = getIdFromDecryptedEBID(decryptedEbid);
+                if (id == null) {
+                    id = idFromMessage;
+                } else {
+                    if (!Arrays.equals(id, idFromMessage)) {
+                        log.error("ids do not match from first message {} and from other message {}", id, idFromMessage);
+                        atLeastOneError = true;
+                    }
+                }
+                int epochIdFromMessage = getEpochIdFromDecryptedEBID(decryptedEbid);
+                if (epochIdFromMessage != epochIdFromTuple) {
+                    log.error("epoch ids do not match from message {} and from tuple {}", epochIdFromMessage, epochIdFromTuple);
+                    atLeastOneError = true;
+                }
+            } catch (RobertServerCryptoException e) {
+                atLeastOneError = true;
+            }
+        }
+        return !atLeastOneError;
+    }
+
+    private boolean checkTuplesContentMatchesKeysForDays(Collection<CryptoGrpcServiceBaseImpl.EphemeralTupleJson> decodedTuples,
+                                                      int epochId,
+                                                      byte[][] serverKeys) {
+        ArrayList<CryptoGrpcServiceBaseImpl.EphemeralTupleJson> list = new ArrayList(decodedTuples);
+
+        int offset = TimeUtils.remainingEpochsForToday(epochId);
+        int lowerBound = 0;
+        ArrayList<Boolean> results = new ArrayList<>();
+        for (int i = 0; i < serverKeys.length; i++) {
+            List<CryptoGrpcServiceBaseImpl.EphemeralTupleJson> listToProcess = list.subList(lowerBound, offset);
+            log.info("Chunking list of size {}", listToProcess.size());
+            results.add(checkTuplesForDay(listToProcess, serverKeys[i]));
+            lowerBound = offset;
+            offset += 96;
+        }
+        return results.stream().allMatch(Boolean::valueOf);
+    }
+
+    private boolean checkTuples(byte[] id, byte[] tuples, int epochId, byte[][] serverKeys) {
         CryptoAESGCM aesGcm = new CryptoAESGCM(this.clientStorageService.findKeyById(id).get().getKeyForTuples());
         try {
             byte[] decryptedTuples = aesGcm.decrypt(tuples);
@@ -188,7 +272,9 @@ class CryptoServiceGrpcServerTest {
             Collection<CryptoGrpcServiceBaseImpl.EphemeralTupleJson> decodedTuples = objectMapper.readValue(
                     decryptedTuples,
                     new TypeReference<Collection<CryptoGrpcServiceBaseImpl.EphemeralTupleJson>>(){});
-            return (NUMBER_OF_DAYS_FOR_BUNDLES * 24 * 4) == decodedTuples.size();
+            boolean sizeMatches = ((NUMBER_OF_DAYS_FOR_BUNDLES - 1) * 96 + TimeUtils.remainingEpochsForToday(epochId)) == decodedTuples.size();
+
+            return sizeMatches && checkTuplesContentMatchesKeysForDays(decodedTuples, epochId, serverKeys);
         } catch (RobertServerCryptoException | IOException e) {
             fail(UNEXPECTED_FAILURE_MESSAGE);
         }
@@ -323,21 +409,51 @@ class CryptoServiceGrpcServerTest {
         return System.currentTimeMillis() / 1000 + 2208988800L;
     }
 
-    private AuthRequestBundle generateAuthRequestBundleWithTimeDelta(byte[] id,
+    private AuthRequestBundle generateAuthRequestBundleWithTimeDeltaAndOtherKS(byte[] id,
             byte[] keyForMac,
             DigestSaltEnum digestSalt,
-            long timeDelta) {
+            long timeDelta,
+            OtherKSEnum otherKs) {
+
         long time = getCurrentTimeNTPSeconds();
-        int epochId = TimeUtils.getNumberOfEpochsBetween(this.serverConfigurationService.getServiceTimeStart(), time - timeDelta);
+        int epochId = TimeUtils.getNumberOfEpochsBetween(
+                this.serverConfigurationService.getServiceTimeStart(),
+                time - timeDelta);
 
         // Mock K_S
         byte[] ks = new byte[24];
         new SecureRandom().nextBytes(ks);
-        byte[] ebid = generateEbid(id, epochId, ks);
-        when(this.cryptographicStorageService.getServerKey(
-                epochId,
-                this.serverConfigurationService.getServiceTimeStart()))
-        .thenReturn(ks);
+
+        byte[] ksPrevious = new byte[24];
+        new SecureRandom().nextBytes(ksPrevious);
+        byte[] ksNext = new byte[24];
+        new SecureRandom().nextBytes(ksNext);
+
+        byte[] ksToUseToEncryptEBID;
+        switch(otherKs) {
+            case PREVIOUS:
+                ksToUseToEncryptEBID = ksPrevious;
+                break;
+            case NEXT:
+                ksToUseToEncryptEBID = ksNext;
+                break;
+            case NONE:
+            default:
+                ksToUseToEncryptEBID = ks;
+                break;
+        }
+        
+        byte[] ebid = generateEbid(id, epochId, ksToUseToEncryptEBID);
+        doReturn(Arrays.copyOf(ks, ks.length))
+                .when(this.cryptographicStorageService).getServerKey(
+                        epochId,
+                        this.serverConfigurationService.getServiceTimeStart(),
+                        false);
+        doReturn(Arrays.copyOf(ksPrevious, ksPrevious.length))
+                .when(this.cryptographicStorageService).getServerKey(
+                        epochId,
+                        this.serverConfigurationService.getServiceTimeStart(),
+                        true);
 
         return new AuthRequestBundle().builder()
                 .ebid(ebid)
@@ -350,7 +466,13 @@ class CryptoServiceGrpcServerTest {
     }
 
     private AuthRequestBundle generateAuthRequestBundle(byte[] id, byte[] keyForMac, DigestSaltEnum digestSalt) {
-        return generateAuthRequestBundleWithTimeDelta(id, keyForMac, digestSalt, 0L);
+        return generateAuthRequestBundleWithTimeDeltaAndOtherKS(id, keyForMac, digestSalt, 0L, OtherKSEnum.NONE);
+    }
+
+    private enum OtherKSEnum {
+        NONE,
+        NEXT,
+        PREVIOUS;
     }
 
     @Test
@@ -386,11 +508,12 @@ class CryptoServiceGrpcServerTest {
     @Test
     void testGetIdFromAuthRequestWithOlderEBIDAndEpochSucceeds() {
         Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
-        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDelta(
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
                 clientIdentifierBundle.get().getId(),
                 clientIdentifierBundle.get().getKeyForMac(),
                 DigestSaltEnum.DELETE_HISTORY,
-                900 * 3); // ebid will be 3-epochs old
+                900 * 3,
+                OtherKSEnum.NONE); // ebid will be 3-epochs old
 
         // Given
         GetIdFromAuthRequest request = GetIdFromAuthRequest
@@ -637,6 +760,108 @@ class CryptoServiceGrpcServerTest {
     }
 
     @Test
+    void testGetIdFromAuthWithEbidEncodedWithPreviousKSSucceeds() {
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
+                clientIdentifierBundle.get().getId(),
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.DELETE_HISTORY,
+                0L,
+                OtherKSEnum.PREVIOUS);
+
+        if (bundle.getEpochId() >= MAX_EPOCH_DOUBLE_KS_CHECK) {
+            log.warn("Outside of K_S patch period ({}); current epoch: {}",
+                    MAX_EPOCH_DOUBLE_KS_CHECK,
+                    bundle.getEpochId());
+            return;
+        }
+
+        // Given
+        GetIdFromAuthRequest request = GetIdFromAuthRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
+                .setEpochId(bundle.getEpochId())
+                .setTime(bundle.getTime())
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .setRequestType(bundle.getRequestType().getValue()) // Select a request type
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        GetIdFromAuthResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.getIdFromAuth(req, observer),
+                        (t) -> fail(),
+                        res);
+        assertTrue(!res.isError());
+        assertTrue(ByteUtils.isNotEmpty(response.getIdA().toByteArray()));
+        assertTrue(Arrays.equals(clientIdentifierBundle.get().getId(), response.getIdA().toByteArray()));
+    }
+
+
+    @Test
+    void testGetIdFromAuthWithEbidEncodedWithFutureKSFails() {
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
+                clientIdentifierBundle.get().getId(),
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.DELETE_HISTORY,
+                0L,
+                OtherKSEnum.NEXT);
+
+        // Given
+        GetIdFromAuthRequest request = GetIdFromAuthRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
+                .setEpochId(bundle.getEpochId())
+                .setTime(bundle.getTime())
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .setRequestType(bundle.getRequestType().getValue()) // Select a request type
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        GetIdFromAuthResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.getIdFromAuth(req, observer),
+                        (t) -> {},
+                        res);
+        assertTrue(res.isError());
+    }
+
+    @Test
+    void testGetIdFromAuthWithEbidEncodedWithPreviousKSAfterGracePeriodSucceeds() {
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
+                clientIdentifierBundle.get().getId(),
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.DELETE_HISTORY,
+                -270000L,
+                OtherKSEnum.NONE);
+
+        // Given
+        GetIdFromAuthRequest request = GetIdFromAuthRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
+                .setEpochId(bundle.getEpochId())
+                .setTime(bundle.getTime())
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .setRequestType(bundle.getRequestType().getValue()) // Select a request type
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        GetIdFromAuthResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.getIdFromAuth(req, observer),
+                        (t) -> fail(),
+                        res);
+        assertTrue(!res.isError());
+        assertTrue(ByteUtils.isNotEmpty(response.getIdA().toByteArray()));
+        assertTrue(Arrays.equals(clientIdentifierBundle.get().getId(), response.getIdA().toByteArray()));
+    }
+
+    @Test
     void testDeleteIdSucceeds() {
         Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
         AuthRequestBundle bundle = generateAuthRequestBundle(
@@ -824,6 +1049,73 @@ class CryptoServiceGrpcServerTest {
     }
 
     @Test
+    void tesDeleteIdWithEbidEncodedWithPreviousKSSucceeds() {
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
+                clientIdentifierBundle.get().getId(),
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.UNREGISTER,
+                0L,
+                OtherKSEnum.PREVIOUS);
+
+        if (bundle.getEpochId() >= MAX_EPOCH_DOUBLE_KS_CHECK) {
+            log.warn("Outside of K_S patch period ({}); current epoch: {}",
+                    MAX_EPOCH_DOUBLE_KS_CHECK,
+                    bundle.getEpochId());
+            return;
+        }
+
+        // Given
+        DeleteIdRequest request = DeleteIdRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
+                .setEpochId(bundle.getEpochId())
+                .setTime(bundle.getTime())
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        DeleteIdResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.deleteId(req, observer),
+                        (t) -> fail(),
+                        res);
+        assertTrue(!res.isError());
+        assertTrue(ByteUtils.isNotEmpty(response.getIdA().toByteArray()));
+        assertTrue(Arrays.equals(clientIdentifierBundle.get().getId(), response.getIdA().toByteArray()));
+    }
+
+    @Test
+    void testDeleteIdWithEbidEncodedWithFutureKSFails() {
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
+                clientIdentifierBundle.get().getId(),
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.UNREGISTER,
+                0L,
+                OtherKSEnum.NEXT);
+
+        // Given
+        DeleteIdRequest request = DeleteIdRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
+                .setEpochId(bundle.getEpochId())
+                .setTime(bundle.getTime())
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        DeleteIdResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.deleteId(req, observer),
+                        (t) -> {},
+                        res);
+        assertTrue(res.isError());
+    }
+
+    @Test
     void testGetIdFromStatusSucceeds() {
         Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
         AuthRequestBundle bundle = generateAuthRequestBundle(
@@ -833,7 +1125,10 @@ class CryptoServiceGrpcServerTest {
 
         byte[][] serverKeys = generateRandomServerKeys();
 
-        when(this.cryptographicStorageService.getServerKeys(this.currentEpochId, this.serverConfigurationService.getServiceTimeStart(), 4)).thenReturn(serverKeys);
+        when(this.cryptographicStorageService.getServerKeys(this.currentEpochId,
+                this.serverConfigurationService.getServiceTimeStart(),
+                4))
+                .thenReturn(serverKeys);
 
         // Given
         GetIdFromStatusRequest request = GetIdFromStatusRequest
@@ -857,7 +1152,7 @@ class CryptoServiceGrpcServerTest {
         assertTrue(!res.isError());
         assertTrue(ByteUtils.isNotEmpty(response.getIdA().toByteArray()));
         assertTrue(Arrays.equals(clientIdentifierBundle.get().getId(), response.getIdA().toByteArray()));
-        assertTrue(checkTuples(response.getIdA().toByteArray(), response.getTuples().toByteArray()));
+        assertTrue(checkTuples(response.getIdA().toByteArray(), response.getTuples().toByteArray(), this.currentEpochId, serverKeys));
     }
 
     private byte[][] generateRandomServerKeys() {
@@ -872,11 +1167,12 @@ class CryptoServiceGrpcServerTest {
     @Test
     void testGetIdFromStatusRequestWithOlderEBIDAndEpochSucceeds() {
         Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
-        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDelta(
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
                 clientIdentifierBundle.get().getId(),
                 clientIdentifierBundle.get().getKeyForMac(),
                 DigestSaltEnum.STATUS,
-                900 * 3); // ebid will be 3-epochs old
+                900 * 3,
+                OtherKSEnum.NONE); // ebid will be 3-epochs old
 
         byte[][] serverKeys = generateRandomServerKeys();
         when(this.cryptographicStorageService.getServerKeys(
@@ -1028,6 +1324,94 @@ class CryptoServiceGrpcServerTest {
         assertNull(response);
     }
 
+    @Test
+    void testGetIdFromStatusWithEbidEncodedWithPreviousKSSucceeds() {
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
+                clientIdentifierBundle.get().getId(),
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.STATUS,
+                0L,
+                OtherKSEnum.PREVIOUS);
+
+        if (bundle.getEpochId() >= MAX_EPOCH_DOUBLE_KS_CHECK) {
+            log.warn("Outside of K_S patch period ({}); current epoch: {}",
+                    MAX_EPOCH_DOUBLE_KS_CHECK,
+                    bundle.getEpochId());
+            return;
+        }
+
+        byte[][] serverKeys = generateRandomServerKeys();
+
+        when(this.cryptographicStorageService.getServerKeys(this.currentEpochId,
+                this.serverConfigurationService.getServiceTimeStart(),
+                4))
+                .thenReturn(serverKeys);
+
+        // Given
+        GetIdFromStatusRequest request = GetIdFromStatusRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
+                .setEpochId(bundle.getEpochId())
+                .setTime(bundle.getTime())
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .setFromEpochId(bundle.getEpochId())
+                .setNumberOfDaysForEpochBundles(NUMBER_OF_DAYS_FOR_BUNDLES)
+                .setServerCountryCode(ByteString.copyFrom(SERVER_COUNTRY_CODE))
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        GetIdFromStatusResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.getIdFromStatus(req, observer),
+                        (t) -> fail(),
+                        res);
+        assertTrue(!res.isError());
+        assertTrue(ByteUtils.isNotEmpty(response.getIdA().toByteArray()));
+        assertTrue(Arrays.equals(clientIdentifierBundle.get().getId(), response.getIdA().toByteArray()));
+        assertTrue(checkTuples(response.getIdA().toByteArray(), response.getTuples().toByteArray(), this.currentEpochId, serverKeys));
+    }
+
+    @Test
+    void testGetIdFromStatusWithEbidEncodedWithFutureKSFails() {
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        AuthRequestBundle bundle = generateAuthRequestBundleWithTimeDeltaAndOtherKS(
+                clientIdentifierBundle.get().getId(),
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.STATUS,
+                0L,
+                OtherKSEnum.NEXT);
+
+        byte[][] serverKeys = generateRandomServerKeys();
+
+        when(this.cryptographicStorageService.getServerKeys(this.currentEpochId,
+                this.serverConfigurationService.getServiceTimeStart(),
+                4))
+                .thenReturn(serverKeys);
+
+        // Given
+        GetIdFromStatusRequest request = GetIdFromStatusRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
+                .setEpochId(bundle.getEpochId())
+                .setTime(bundle.getTime())
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .setFromEpochId(bundle.getEpochId())
+                .setNumberOfDaysForEpochBundles(NUMBER_OF_DAYS_FOR_BUNDLES)
+                .setServerCountryCode(ByteString.copyFrom(SERVER_COUNTRY_CODE))
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        GetIdFromStatusResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.getIdFromStatus(req, observer),
+                        (t) -> {},
+                        res);
+        assertTrue(res.isError());
+    }
+
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
@@ -1040,13 +1424,60 @@ class CryptoServiceGrpcServerTest {
         private long timeReceived;
     }
 
-    private HelloMessageBundle generateHelloMessage(byte[] id, byte[] serverKey, byte[] keyForMac, DigestSaltEnum digestSalt) {
-        long time = getCurrentTimeNTPSeconds() - 100000;
-        int epochId = TimeUtils.getNumberOfEpochsBetween(this.serverConfigurationService.getServiceTimeStart(), time);
+    private HelloMessageBundle generateHelloMessage(byte[] id,
+                                                    byte[][] serverKeys,
+                                                    byte[] keyForMac,
+                                                    DigestSaltEnum digestSalt,
+                                                    int delta,
+                                                    OtherKSEnum otherKSEnum) {
+
+        final LocalDateTime ldt = LocalDateTime.of(2020, 6, 1, 00, 00);
+        final ZonedDateTime zdt = ldt.atZone(ZoneId.of("UTC"));
+        long otherTimeStart = TimeUtils.convertUnixMillistoNtpSeconds(zdt.toInstant().toEpochMilli());
+
+        long time = getCurrentTimeNTPSeconds() - delta;
+        int epochId = TimeUtils.getNumberOfEpochsBetween(otherTimeStart, time);
+
+        byte[] ks = ByteUtils.generateRandom(24);
+        byte[] ksPrevious = ByteUtils.generateRandom(24);
+        byte[] ksNext = ByteUtils.generateRandom(24);
+
+        doReturn(ks).when(this.cryptographicStorageService)
+                .getServerKey(epochId,
+                        this.serverConfigurationService.getServiceTimeStart(),
+                        false);
+        doReturn(ksNext).when(this.cryptographicStorageService)
+                .getServerKey(epochId + 1,
+                        this.serverConfigurationService.getServiceTimeStart(),
+                        false);
+        doReturn(ksPrevious).when(this.cryptographicStorageService)
+                .getServerKey(epochId -1,
+                        this.serverConfigurationService.getServiceTimeStart(),
+                        false);
+        doReturn(ksPrevious).when(this.cryptographicStorageService)
+                .getServerKey(epochId,
+                        this.serverConfigurationService.getServiceTimeStart(),
+                        true);
+
+        byte[] serverKey;
+        switch(otherKSEnum) {
+            case PREVIOUS:
+                serverKey = ksPrevious;
+                break;
+            case NEXT:
+                serverKey = ksNext;
+                break;
+            case NONE:
+            default:
+                serverKey = ks;
+                break;
+        }
+
         byte[] ebid = generateEbid(id, epochId, serverKey);
 
-        when(this.cryptographicStorageService.getServerKeys(epochId, this.serverConfigurationService.getServiceTimeStart(), 4)).thenReturn(new byte[][] { serverKey, serverKey, serverKey, serverKey });
-        when(this.cryptographicStorageService.getServerKey(epochId, this.serverConfigurationService.getServiceTimeStart())).thenReturn(serverKey);
+        //when(this.cryptographicStorageService.getServerKeys(epochId, time, 4)).thenReturn(serverKeys);
+//        when(this.cryptographicStorageService.getServerKey(epochId, time, false)).thenReturn(serverKeys[2]);
+//        when(this.cryptographicStorageService.getServerKey(epochId, time, true)).thenReturn(serverKeys[1]);
         when(this.cryptographicStorageService.getFederationKey()).thenReturn(this.federationKey);
 
 
@@ -1078,15 +1509,20 @@ class CryptoServiceGrpcServerTest {
 
     @Test
     void testGetInfoFromHelloMessageSucceeds() {
-        byte[][] serverKeys = new byte[1][24];
+        byte[][] serverKeys = new byte[4][24];
         new SecureRandom().nextBytes(serverKeys[0]);
+        new SecureRandom().nextBytes(serverKeys[1]);
+        new SecureRandom().nextBytes(serverKeys[2]);
+        new SecureRandom().nextBytes(serverKeys[3]);
 
         Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
         HelloMessageBundle bundle = generateHelloMessage(
                 clientIdentifierBundle.get().getId(),
-                serverKeys[0],
+                serverKeys,
                 clientIdentifierBundle.get().getKeyForMac(),
-                DigestSaltEnum.HELLO);
+                DigestSaltEnum.HELLO,
+                3000,
+                OtherKSEnum.NONE);
 
         // Given
         GetInfoFromHelloMessageRequest request = GetInfoFromHelloMessageRequest
@@ -1119,9 +1555,11 @@ class CryptoServiceGrpcServerTest {
         Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
         HelloMessageBundle bundle = generateHelloMessage(
                 clientIdentifierBundle.get().getId(),
-                serverKeys[0],
+                serverKeys,
                 clientIdentifierBundle.get().getKeyForMac(),
-                DigestSaltEnum.HELLO);
+                DigestSaltEnum.HELLO,
+                5000,
+                OtherKSEnum.NONE);
 
         // Mess up with mac
         byte[] mac = new byte[32];
@@ -1156,9 +1594,11 @@ class CryptoServiceGrpcServerTest {
         Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
         HelloMessageBundle bundle = generateHelloMessage(
                 clientIdentifierBundle.get().getId(),
-                serverKeys[0],
+                serverKeys,
                 clientIdentifierBundle.get().getKeyForMac(),
-                DigestSaltEnum.HELLO);
+                DigestSaltEnum.HELLO,
+                5000,
+                OtherKSEnum.NONE);
 
         byte[] fakeEbid = new byte[8];
         new SecureRandom().nextBytes(fakeEbid);
@@ -1167,6 +1607,100 @@ class CryptoServiceGrpcServerTest {
         GetInfoFromHelloMessageRequest request = GetInfoFromHelloMessageRequest
                 .newBuilder()
                 .setEbid(ByteString.copyFrom(fakeEbid))
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .setTimeReceived(bundle.getTimeReceived())
+                .setTimeSent(bundle.getTimeSent())
+                .setEcc(ByteString.copyFrom(bundle.getEcc()))
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        GetInfoFromHelloMessageResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.getInfoFromHelloMessage(req, observer),
+                        (t) -> {},
+                        res);
+        assertTrue(res.isError());
+    }
+
+    @Test
+    void testGetInfoFromHelloMessageWithEbidEncodedWithPreviousKSSucceeds() {
+        byte[][] serverKeys = new byte[4][24];
+        new SecureRandom().nextBytes(serverKeys[0]);
+        new SecureRandom().nextBytes(serverKeys[1]);
+        new SecureRandom().nextBytes(serverKeys[2]);
+        new SecureRandom().nextBytes(serverKeys[3]);
+
+        int delta = 5000;
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        HelloMessageBundle bundle = generateHelloMessage(
+                clientIdentifierBundle.get().getId(),
+                serverKeys,
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.HELLO,
+                delta,
+                OtherKSEnum.PREVIOUS);
+    
+        final LocalDateTime ldt = LocalDateTime.of(2020, 6, 1, 00, 00);
+        final ZonedDateTime zdt = ldt.atZone(ZoneId.of("UTC"));
+        long otherTimeStart = TimeUtils.convertUnixMillistoNtpSeconds(zdt.toInstant().toEpochMilli());
+
+        long time = getCurrentTimeNTPSeconds() - delta;
+        int epochId = TimeUtils.getNumberOfEpochsBetween(otherTimeStart, time);
+
+        if (epochId >= MAX_EPOCH_DOUBLE_KS_CHECK) {
+            log.warn("Outside of K_S patch period ({}); current epoch: {}",
+                    MAX_EPOCH_DOUBLE_KS_CHECK,
+                    epochId);
+            return;
+        }
+
+
+        // Given
+        GetInfoFromHelloMessageRequest request = GetInfoFromHelloMessageRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
+                .setMac(ByteString.copyFrom(bundle.getMac()))
+                .setTimeReceived(bundle.getTimeReceived())
+                .setTimeSent(bundle.getTimeSent())
+                .setEcc(ByteString.copyFrom(bundle.getEcc()))
+                .build();
+
+        ObserverExecutionResult res = new ObserverExecutionResult(false);
+        GetInfoFromHelloMessageResponse response =
+                sendCryptoRequest(
+                        request,
+                        (stub, req, observer) -> stub.getInfoFromHelloMessage(req, observer),
+                        (t) -> fail(),
+                        res);
+        assertTrue(!res.isError());
+        assertTrue(ByteUtils.isNotEmpty(response.getIdA().toByteArray()));
+        assertTrue(Arrays.equals(clientIdentifierBundle.get().getId(), response.getIdA().toByteArray()));
+        assertTrue(Arrays.equals(response.getCountryCode().toByteArray(), SERVER_COUNTRY_CODE));
+
+    }
+
+    @Test
+    void testGetInfoFromHelloMessageWithEbidEncodedWithFutureKSFails() {
+        byte[][] serverKeys = new byte[4][24];
+        new SecureRandom().nextBytes(serverKeys[0]);
+        new SecureRandom().nextBytes(serverKeys[1]);
+        new SecureRandom().nextBytes(serverKeys[2]);
+        new SecureRandom().nextBytes(serverKeys[3]);
+
+        Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
+        HelloMessageBundle bundle = generateHelloMessage(
+                clientIdentifierBundle.get().getId(),
+                serverKeys,
+                clientIdentifierBundle.get().getKeyForMac(),
+                DigestSaltEnum.HELLO,
+                3000,
+                OtherKSEnum.NEXT);
+
+        // Given
+        GetInfoFromHelloMessageRequest request = GetInfoFromHelloMessageRequest
+                .newBuilder()
+                .setEbid(ByteString.copyFrom(bundle.getEbid()))
                 .setMac(ByteString.copyFrom(bundle.getMac()))
                 .setTimeReceived(bundle.getTimeReceived())
                 .setTimeSent(bundle.getTimeSent())

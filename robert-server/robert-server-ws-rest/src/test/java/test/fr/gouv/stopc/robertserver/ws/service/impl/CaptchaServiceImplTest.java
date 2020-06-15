@@ -39,13 +39,6 @@ public class CaptchaServiceImplTest {
     @Value("${captcha.hostname}")
     private String captchaHostname;
 
-    /**
-     *
-     * TODO: Remove this as far as it is no more needed for tests
-     */
-    @Value("${captcha.magicnumber}")
-    private String magicNumber;
-
     @InjectMocks
     private CaptchaServiceImpl captchaServiceImpl;
 
@@ -104,6 +97,7 @@ public class CaptchaServiceImplTest {
         when(this.propertyLoader.getCaptchaVerificationUrl()).thenReturn(this.captchaVerificationUrl);
         when(this.propertyLoader.getCaptchaSecret()).thenReturn(this.captchaSecret);
         when(this.propertyLoader.getCaptchaHostname()).thenReturn(this.captchaHostname);
+
         when(this.propertyLoader.getCaptchaChallengeTimestampTolerance()).thenReturn(3600);
 
         // When
@@ -120,6 +114,7 @@ public class CaptchaServiceImplTest {
         when(this.propertyLoader.getCaptchaVerificationUrl()).thenReturn(this.captchaVerificationUrl);
         when(this.propertyLoader.getCaptchaSecret()).thenReturn(this.captchaSecret);
         when(this.propertyLoader.getCaptchaHostname()).thenReturn(this.captchaHostname);
+
         when(this.propertyLoader.getCaptchaChallengeTimestampTolerance()).thenReturn(3600);
         when(this.restTemplate.postForEntity(any(String.class), any(), any())).thenThrow(RestClientException.class);
 

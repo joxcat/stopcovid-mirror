@@ -20,7 +20,7 @@ public interface CryptoService {
      * @param cryptoForECC  instance of cryptoForECC initialize with the KS key
      * @param epochId    epoch to concat - 24-bits
      * @param idA        permanent identifier to concat 40-bits
-     * @param countryCode         country code 8-bits (ex.: FR => 0x33)
+     * @param countryCode         country code 8-bits (ex.: FR => 0x21)
      * @return return encrypted EphemeralTuple fed with ECC EBDI and epoch
      * @throws RobertServerCryptoException
      */
