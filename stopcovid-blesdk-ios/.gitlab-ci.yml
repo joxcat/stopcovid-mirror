@@ -1,0 +1,26 @@
+stages:
+  - build
+  - verification
+
+# Builds the library with the release configuration
+build-release:
+  stage: build
+  script:
+    - xcodebuild -configuration Release -arch arm64
+  artifacts:
+    expire_in: 2 weeks
+    when: always
+    paths:
+      - build/*/*.a
+  tags:
+    - xcode11.4
+
+# Tests the library
+test:
+  stage: verification
+  script:
+    - xcodebuild build-for-testing -scheme ProximityNotificationTests -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.4' 
+    - xcodebuild test -scheme ProximityNotificationTests -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.4' 
+  tags:
+    - xcode11.4
+

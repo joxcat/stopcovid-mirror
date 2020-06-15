@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Bottom Button Container Controller-->
+        <scene sceneID="Xv1-Su-lSX">
+            <objects>
+                <viewController storyboardIdentifier="BottomButtonContainerController" id="EJz-Ia-0cC" customClass="BottomButtonContainerController" customModule="Stop_Covid_France" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="YFY-K1-OAR">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yap-L7-URr">
+                                <rect key="frame" x="0.0" y="713.5" width="414" height="182.5"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aqT-kT-rOp" userLabel="separator">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="0.5"/>
+                                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="0.5" id="4jb-Xl-jMc"/>
+                                        </constraints>
+                                    </view>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wp0-OI-zei">
+                                        <rect key="frame" x="0.0" y="0.5" width="414" height="148"/>
+                                        <subviews>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="8fH-dP-hFm">
+                                                <rect key="frame" x="20" y="20" width="374" height="108"/>
+                                                <subviews>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JtL-Cr-MSr" customClass="CVButton" customModule="Stop_Covid_France" customModuleProvider="target">
+                                                        <rect key="frame" x="0.0" y="0.0" width="374" height="58"/>
+                                                        <inset key="contentEdgeInsets" minX="0.0" minY="20" maxX="0.0" maxY="20"/>
+                                                        <connections>
+                                                            <action selector="didTouchButton:" destination="EJz-Ia-0cC" eventType="touchUpInside" id="aUe-mj-Thx"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vj5-rh-Pw4">
+                                                        <rect key="frame" x="0.0" y="78" width="374" height="30"/>
+                                                        <connections>
+                                                            <action selector="didTouchSecondaryButton:" destination="EJz-Ia-0cC" eventType="touchUpInside" id="R3p-6x-wtB"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                            </stackView>
+                                        </subviews>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <constraints>
+                                            <constraint firstItem="8fH-dP-hFm" firstAttribute="centerY" secondItem="wp0-OI-zei" secondAttribute="centerY" id="BdU-dT-gaz"/>
+                                            <constraint firstItem="8fH-dP-hFm" firstAttribute="top" secondItem="wp0-OI-zei" secondAttribute="top" constant="20" id="DJi-j7-Jd2"/>
+                                            <constraint firstItem="8fH-dP-hFm" firstAttribute="centerX" secondItem="wp0-OI-zei" secondAttribute="centerX" id="Tuc-io-fSJ"/>
+                                            <constraint firstItem="8fH-dP-hFm" firstAttribute="leading" secondItem="wp0-OI-zei" secondAttribute="leading" constant="20" id="tOI-vD-jTp"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" red="0.97647058823529409" green="0.97647058823529409" blue="0.97647058823529409" alpha="0.93999999999999995" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="wp0-OI-zei" firstAttribute="leading" secondItem="yap-L7-URr" secondAttribute="leading" id="4T7-dW-XuV"/>
+                                    <constraint firstItem="aqT-kT-rOp" firstAttribute="leading" secondItem="yap-L7-URr" secondAttribute="leading" id="60F-28-jM3"/>
+                                    <constraint firstItem="wp0-OI-zei" firstAttribute="top" secondItem="aqT-kT-rOp" secondAttribute="bottom" id="Lq1-3z-ItR"/>
+                                    <constraint firstAttribute="trailing" secondItem="wp0-OI-zei" secondAttribute="trailing" id="TNr-3o-4la"/>
+                                    <constraint firstAttribute="trailing" secondItem="aqT-kT-rOp" secondAttribute="trailing" id="WAA-WJ-zNQ"/>
+                                    <constraint firstItem="aqT-kT-rOp" firstAttribute="top" secondItem="yap-L7-URr" secondAttribute="top" id="nbk-dQ-6mx"/>
+                                </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2RV-Tl-X7h">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="713.5"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="yap-L7-URr" firstAttribute="top" secondItem="2RV-Tl-X7h" secondAttribute="bottom" id="3FW-fP-JcM"/>
+                            <constraint firstItem="2RV-Tl-X7h" firstAttribute="leading" secondItem="YFY-K1-OAR" secondAttribute="leading" id="E3a-JC-y20"/>
+                            <constraint firstItem="2RV-Tl-X7h" firstAttribute="top" secondItem="YFY-K1-OAR" secondAttribute="top" id="Jfn-BG-Rd5"/>
+                            <constraint firstAttribute="trailing" secondItem="yap-L7-URr" secondAttribute="trailing" id="Y8v-kR-0uQ"/>
+                            <constraint firstAttribute="bottom" secondItem="yap-L7-URr" secondAttribute="bottom" id="otc-YS-Ve7"/>
+                            <constraint firstItem="wp0-OI-zei" firstAttribute="bottom" secondItem="kJK-Rf-Eda" secondAttribute="bottom" id="pXU-vB-99u"/>
+                            <constraint firstItem="yap-L7-URr" firstAttribute="leading" secondItem="YFY-K1-OAR" secondAttribute="leading" id="s3U-gc-eBu"/>
+                            <constraint firstAttribute="trailing" secondItem="2RV-Tl-X7h" secondAttribute="trailing" id="w4I-oM-xVE"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="kJK-Rf-Eda"/>
+                    </view>
+                    <connections>
+                        <outlet property="bottomBarView" destination="yap-L7-URr" id="99G-gi-DeR"/>
+                        <outlet property="button" destination="JtL-Cr-MSr" id="pEJ-Fz-1pk"/>
+                        <outlet property="containerView" destination="2RV-Tl-X7h" id="ac4-zg-AgC"/>
+                        <outlet property="secondaryButton" destination="vj5-rh-Pw4" id="hda-jP-aCw"/>
+                        <outlet property="separator" destination="aqT-kT-rOp" id="BRM-02-h9C"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Vji-HV-VNb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="142" y="157"/>
+        </scene>
+    </scenes>
+</document>

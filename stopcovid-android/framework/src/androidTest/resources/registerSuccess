@@ -1,0 +1,11 @@
+{
+    "message": "The application did register successfully",
+    "tuples": "",
+    "timeStart": 3796669679,
+    "config": [
+        {
+            "name": "distance",
+            "value": 12
+        }
+    ]
+}

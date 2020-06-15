@@ -1,0 +1,4 @@
+include:
+  - project: 'covid-19alertproject/ci/android-sdk-build' 
+    ref: 'master'
+    file: '.gitlab-ci.yml'

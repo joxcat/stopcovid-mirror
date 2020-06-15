@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Child Controller-->
+        <scene sceneID="Yij-Y3-Gfq">
+            <objects>
+                <viewController storyboardIdentifier="CVNavigationChildController" id="YHb-dk-HAD" customClass="CVNavigationChildController" customModule="COVID_19_Studio" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="NVS-xQ-8wi">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fEG-W4-12U">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WlO-Y4-9b7">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="88"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="cpo-bg-SEu">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="88"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                </view>
+                                <blurEffect style="prominent"/>
+                            </visualEffectView>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bT5-DJ-IHd">
+                                <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                                <items>
+                                    <navigationItem title="Title" id="dMk-XJ-6k8"/>
+                                </items>
+                            </navigationBar>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dH5-pN-HNY">
+                                <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                                <items>
+                                    <navigationItem id="NO8-zy-jdp"/>
+                                </items>
+                            </navigationBar>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="fEG-W4-12U" firstAttribute="top" secondItem="NVS-xQ-8wi" secondAttribute="top" id="1y0-hv-EVX"/>
+                            <constraint firstItem="WlO-Y4-9b7" firstAttribute="top" secondItem="NVS-xQ-8wi" secondAttribute="top" id="8HA-uU-mbL"/>
+                            <constraint firstItem="WlO-Y4-9b7" firstAttribute="bottom" secondItem="bT5-DJ-IHd" secondAttribute="bottom" id="O17-ud-GyF"/>
+                            <constraint firstItem="bT5-DJ-IHd" firstAttribute="leading" secondItem="NVS-xQ-8wi" secondAttribute="leading" id="SSu-19-ZLY"/>
+                            <constraint firstAttribute="trailing" secondItem="WlO-Y4-9b7" secondAttribute="trailing" id="YgS-Zy-mp6"/>
+                            <constraint firstItem="dH5-pN-HNY" firstAttribute="bottom" secondItem="bT5-DJ-IHd" secondAttribute="bottom" id="Z7m-rk-pbK"/>
+                            <constraint firstItem="WlO-Y4-9b7" firstAttribute="leading" secondItem="NVS-xQ-8wi" secondAttribute="leading" id="eZ3-Yg-GKJ"/>
+                            <constraint firstItem="dH5-pN-HNY" firstAttribute="top" secondItem="bT5-DJ-IHd" secondAttribute="top" id="g5k-KN-rGs"/>
+                            <constraint firstAttribute="bottom" secondItem="fEG-W4-12U" secondAttribute="bottom" id="kOy-w7-b0A"/>
+                            <constraint firstAttribute="trailing" secondItem="fEG-W4-12U" secondAttribute="trailing" id="lud-xI-Jyc"/>
+                            <constraint firstItem="fEG-W4-12U" firstAttribute="leading" secondItem="NVS-xQ-8wi" secondAttribute="leading" id="rKc-pG-Jfl"/>
+                            <constraint firstItem="dH5-pN-HNY" firstAttribute="trailing" secondItem="bT5-DJ-IHd" secondAttribute="trailing" id="t7o-Wo-hhm"/>
+                            <constraint firstItem="bT5-DJ-IHd" firstAttribute="top" secondItem="V8c-aK-s5a" secondAttribute="top" id="v3f-Fh-wN7"/>
+                            <constraint firstItem="dH5-pN-HNY" firstAttribute="leading" secondItem="bT5-DJ-IHd" secondAttribute="leading" id="wJx-Qv-Pl0"/>
+                            <constraint firstAttribute="trailing" secondItem="bT5-DJ-IHd" secondAttribute="trailing" id="z8S-lN-Rbq"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="V8c-aK-s5a"/>
+                    </view>
+                    <connections>
+                        <outlet property="containerView" destination="fEG-W4-12U" id="Taq-Gz-aOa"/>
+                        <outlet property="fakeNavigationBar" destination="dH5-pN-HNY" id="0Cv-bg-Oya"/>
+                        <outlet property="fakeNavigationItem" destination="NO8-zy-jdp" id="Y9i-Kg-UCs"/>
+                        <outlet property="navigationBar" destination="bT5-DJ-IHd" id="rq8-e3-Zeu"/>
+                        <outlet property="navigationBarBackgroundView" destination="WlO-Y4-9b7" id="LvP-FQ-Ed8"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Rhm-X2-OFB" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="111.59420289855073" y="125.89285714285714"/>
+        </scene>
+    </scenes>
+</document>
