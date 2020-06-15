@@ -5,3 +5,11 @@ Just a mirror, (updated daily) of the currently three repositories of [StopCovid
 - https://gitlab.inria.fr/stopcovid19/accueil
 - https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-android
 - https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-ios
+- https://gitlab.inria.fr/stopcovid19/robert-client-api-spec
+- https://gitlab.inria.fr/stopcovid19/robert-server
+- https://gitlab.inria.fr/stopcovid19/stopcovid-blesdk-android
+- https://gitlab.inria.fr/stopcovid19/stopcovid-blesdk-ios
+- https://gitlab.inria.fr/stopcovid19/submission-code-server
+- https://gitlab.inria.fr/stopcovid19/submission-code-server-client-api-spec
+- https://gitlab.inria.fr/stopcovid19/stopcovid-android
+- https://gitlab.inria.fr/stopcovid19/stopcovid-ios

@@ -12,15 +12,21 @@ steps:
     commands:
       - git remote set-url origin https://$GH_TOKEN@github.com/joxcat/stopcovid-mirror.git
       - git pull origin master
-      - rm -rf accueil stopcovid-robertsdk-android stopcovid-robertsdk-ios robert-client-api-spec robert-server
+      - rm -rf $$(ls | grep -Ev "(:?Readme\.md|\.drone\.yml|\.git|\.\.?)")
       - git clone https://gitlab.inria.fr/stopcovid19/accueil.git
       - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-android.git
       - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-robertsdk-ios.git
       - git clone https://gitlab.inria.fr/stopcovid19/robert-client-api-spec.git
       - git clone https://gitlab.inria.fr/stopcovid19/robert-server.git
+      - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-blesdk-android.git
+      - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-blesdk-ios.git
+      - git clone https://gitlab.inria.fr/stopcovid19/submission-code-server.git
+      - git clone https://gitlab.inria.fr/stopcovid19/submission-code-server-client-api-spec.git
+      - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-android.git
+      - git clone https://gitlab.inria.fr/stopcovid19/stopcovid-ios.git
       - rm -rf */.git
       - git add .
-      - git diff-index --quiet HEAD || git commit -m "Mirroring $(date +"%Y-%m-%d")" && git push --set-upstream origin master
+      - git diff-index --quiet HEAD || git commit -m "Mirroring $$(date +"%Y-%m-%d")" && git push --set-upstream origin master
 
 trigger:
   event:
