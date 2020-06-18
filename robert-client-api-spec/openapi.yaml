@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: "#STOPCOVID, Robert Proximity Tracing Client API"
-  version: 2.0.0
+  version: 2.0.1
   title: "#STOPCOVID, Robert Proximity Tracing"
   termsOfService: https://github.com/ROBERT-proximity-tracing/
   contact:
@@ -389,18 +389,18 @@ components:
 
             Supported locales for IMAGE: "ar" for arabic alphabet; defaults to latin characters
 
-            Supported locales for AUDIO: "en", "fr"; defaults to "fr"
+            Supported locales for AUDIO: "en", "es", "ar", "pt", "de", "it", "fr"; defaults to "fr"
       required:
         - type
         - locale
     CaptchaGenerationSuccessResponse:
       type: object
       properties:
-        captchaId:
+        id:
           type: string
           description: The ID of the generated CAPTCHA
       required:
-        - captchaId
+        - id
     ReportBatchRequest:
       type: object
       properties:
