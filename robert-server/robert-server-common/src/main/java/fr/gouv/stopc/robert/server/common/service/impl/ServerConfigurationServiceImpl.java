@@ -18,6 +18,7 @@ import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 @Service
 public class ServerConfigurationServiceImpl implements IServerConfigurationService {
 
+
     @Value("${robert.server.time-start:20200601}")
     private String timeStart;
 

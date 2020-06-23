@@ -1,8 +1,8 @@
 package test.fr.gouv.stopc.robert.crypto.grpc.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doReturn;
@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -44,9 +43,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.CryptoServiceGrpcServer;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CreateRegistrationRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CreateRegistrationResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplStub;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetInfoFromHelloMessageRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetInfoFromHelloMessageResponse;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.ICryptoServerConfigurationService;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.CryptoGrpcServiceBaseImpl;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.impl.ECDHKeyServiceImpl;
@@ -410,11 +419,10 @@ class CryptoServiceGrpcServerTest {
     }
 
     private AuthRequestBundle generateAuthRequestBundleWithTimeDeltaAndOtherKS(byte[] id,
-            byte[] keyForMac,
-            DigestSaltEnum digestSalt,
-            long timeDelta,
-            OtherKSEnum otherKs) {
-
+                                                                               byte[] keyForMac,
+                                                                               DigestSaltEnum digestSalt,
+                                                                               long timeDelta,
+                                                                               OtherKSEnum otherKs) {
         long time = getCurrentTimeNTPSeconds();
         int epochId = TimeUtils.getNumberOfEpochsBetween(
                 this.serverConfigurationService.getServiceTimeStart(),
@@ -423,7 +431,6 @@ class CryptoServiceGrpcServerTest {
         // Mock K_S
         byte[] ks = new byte[24];
         new SecureRandom().nextBytes(ks);
-
         byte[] ksPrevious = new byte[24];
         new SecureRandom().nextBytes(ksPrevious);
         byte[] ksNext = new byte[24];

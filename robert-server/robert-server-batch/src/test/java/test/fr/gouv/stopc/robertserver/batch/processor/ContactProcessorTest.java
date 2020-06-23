@@ -67,7 +67,7 @@ import javax.crypto.spec.SecretKeySpec;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { RobertServerBatchApplication.class })
-@TestPropertySource("classpath:application.properties")
+@TestPropertySource(locations = "classpath:application.properties", properties = "robert.scoring.algo-version=0")
 public class ContactProcessorTest {
 
 	@Autowired

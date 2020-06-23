@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>fr.gouv.stopc</groupId>
 		<artifactId>robert-server</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.1.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>robert-server-batch</artifactId>
@@ -81,6 +81,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>5.2</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>de.flapdoodle.embed</groupId>
 			<artifactId>de.flapdoodle.embed.mongo</artifactId>
 			<scope>test</scope>
@@ -98,6 +105,11 @@
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -107,30 +119,11 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<!-- Disabled because fails when not executed from each module's directory -->
-			<!--
-			<plugin>
-				<groupId>org.complykit</groupId>
-				<artifactId>license-check-maven-plugin</artifactId>
-				<version>0.5.3</version>
-				<executions>
-					<execution>
-						<phase>verify</phase>
-						<goals>
-							<goal>os-check</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<blacklist>
-						<param>agpl-3.0</param>
-						<param>gpl-2.0</param>
-						<param>gpl-3.0</param>
-					</blacklist>
-					<excludes>
-					</excludes>
-				</configuration>
-			</plugin>
-			-->
+			<!-- <plugin> <groupId>org.complykit</groupId> <artifactId>license-check-maven-plugin</artifactId> 
+				<version>0.5.3</version> <executions> <execution> <phase>verify</phase> <goals> 
+				<goal>os-check</goal> </goals> </execution> </executions> <configuration> 
+				<blacklist> <param>agpl-3.0</param> <param>gpl-2.0</param> <param>gpl-3.0</param> 
+				</blacklist> <excludes> </excludes> </configuration> </plugin> -->
 		</plugins>
 	</build>
 

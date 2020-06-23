@@ -4,11 +4,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import fr.gouv.stopc.robert.server.batch.exception.RobertScoringException;
 import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
 import fr.gouv.stopc.robert.server.batch.utils.PropertyLoader;
+import fr.gouv.stopc.robert.server.batch.model.ScoringResult;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robertserver.database.model.Contact;
 import fr.gouv.stopc.robertserver.database.model.HelloMessageDetail;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "robert.scoring.algo-version", havingValue = "0")
 public class ScoringStrategyServiceImpl implements ScoringStrategyService {
 
     private final IServerConfigurationService serverConfigurationService;
@@ -36,7 +39,23 @@ public class ScoringStrategyServiceImpl implements ScoringStrategyService {
     }
 
     @Override
-    public Double execute(Contact contact) throws RobertScoringException {
+    public int getScoringStrategyVersion() {
+        return 1;
+    }
+
+    @Override
+    public double aggregate(List<Double> scores) {
+        return scores.stream().mapToDouble(Double::doubleValue).sum();
+
+    }
+
+    @Override
+    public int getNbEpochsScoredAtRiskThreshold() {
+        return 1;
+    }
+
+    @Override
+    public ScoringResult execute(Contact contact) throws RobertScoringException {
         List<HelloMessageDetail> messageDetails = contact.getMessageDetails();
 
         final int alpha = initAlpha();
@@ -66,7 +85,7 @@ public class ScoringStrategyServiceImpl implements ScoringStrategyService {
             throw new RobertScoringException(errorMessage);
         }
 
-        return 0 - acc;
+        return ScoringResult.builder().rssiScore(0 - acc).build();
     }
 
     private int initAlpha() {

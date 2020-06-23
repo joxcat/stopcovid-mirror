@@ -10,7 +10,7 @@
         <file>${LOG_DIR}/${LOG_FILENAME}.log</file>
         <encoder
             class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+            <Pattern>%d %p %C{1.} [%t][%file:%line] %m%n</Pattern>
         </encoder>
  
         <rollingPolicy
@@ -27,7 +27,7 @@
         <file>${LOG_DIR}/${ERROR_LOG_FILENAME}.log</file>
         <encoder
             class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+            <Pattern>%d %p %C{1.} [%t][%file:%line] %m%n</Pattern>
         </encoder>
  
         <rollingPolicy

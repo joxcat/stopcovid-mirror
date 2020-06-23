@@ -7,18 +7,15 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.bson.internal.Base64;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.google.protobuf.ByteString;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
+
 import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
@@ -32,6 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class AuthRequestValidationServiceImpl implements AuthRequestValidationService {
+
+    @Value("${robert.server.request-time-delta-tolerance:60}")
+    private Integer timeDeltaTolerance;
 
     private final IServerConfigurationService serverConfigurationService;
 
@@ -226,6 +226,15 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
     private boolean checkTime(byte[] timeA, long timeCurrent) {
         byte[] timeAIn64bits = ByteUtils.addAll(new byte[] { 0, 0, 0, 0 }, timeA);
         long timeASeconds = ByteUtils.bytesToLong(timeAIn64bits);
-        return Math.abs(timeASeconds - timeCurrent) < this.propertyLoader.getRequestTimeDeltaTolerance();
+        long delta = Math.abs(timeASeconds - timeCurrent);
+        if (delta < this.timeDeltaTolerance) {
+            return true;
+        } else {
+            log.warn("Witnessing abnormal time difference {} between client: {} and server: {}",
+                    delta,
+                    timeASeconds,
+                    timeCurrent);
+            return false;
+        }
     }
 }

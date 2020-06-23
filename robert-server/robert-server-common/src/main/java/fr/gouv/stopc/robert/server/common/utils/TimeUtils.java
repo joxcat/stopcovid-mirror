@@ -83,4 +83,44 @@ public final class TimeUtils {
             return 1 + (EPOCHS_PER_DAY + 87 - (epochId % EPOCHS_PER_DAY)) % EPOCHS_PER_DAY;
         }
     }
+
+    public static int USHORT_MAX = 65535;
+    public static boolean toleranceCheckWithWrap(long ts, long tr, int tolerance) {
+        if (tr == ts) {
+            return true;
+        }
+
+        // ts will always be inferior to tr
+        if (tr < ts) {
+            long temp = ts;
+            ts = tr;
+            tr = temp;
+        }
+
+        // If value is not in min/max zones that may cause overflow
+        if (Math.abs(tr - ts) <= tolerance) {
+            return true;
+        } else {
+            // Overflow risk
+
+            // ts is in min zone, value may overflow to max zone
+            if (ts < tolerance) {
+                // tr is between 0 and ts
+                if (tr < ts) {
+                    return true;
+                }
+                else {
+                    // tr is in max zone but within tolerance
+                    if (tr > USHORT_MAX - (tolerance - ts)) {
+                        return true;
+                    } else {
+                        // tr is in max zone but outside tolerance
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
+
+    }
 }

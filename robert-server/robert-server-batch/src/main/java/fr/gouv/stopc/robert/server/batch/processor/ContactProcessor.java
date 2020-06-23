@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
+import fr.gouv.stopc.robert.server.batch.service.impl.ScoringStrategyV2ServiceImpl;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.util.CollectionUtils;
 
@@ -17,6 +18,7 @@ import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcC
 import fr.gouv.stopc.robert.server.batch.exception.RobertScoringException;
 import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
 import fr.gouv.stopc.robert.server.batch.utils.PropertyLoader;
+import fr.gouv.stopc.robert.server.batch.model.ScoringResult;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
@@ -137,12 +139,21 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
                 .filter(ep -> ep.getEpochId() > latestRiskEpoch)
                 .collect(Collectors.toList());
 
-        Double totalRisk = scoresSinceLastNotif.stream()
-                .map(EpochExposition::getExpositionScores)
-                .map(item -> item.stream().mapToDouble(Double::doubleValue).sum())
-                .reduce(0.0, (a,b) -> a + b);
+        // TODO: delay to end of batch for all registrations and epochs that have been affected
+        // If at risk detection is delayed to end of batch, no aggregate scoring here
+        // If not, scoring must be done here. If at risk trigger on single exposed epoch,
+        // then remove loop and get epochExposition[epoch] and launch aggregate but protect setAtRisk if set to true
+        int numberOfAtRiskExposedEpochs = 0;
+        for (EpochExposition epochExposition : scoresSinceLastNotif) {
+            double finalRiskForEpoch = this.scoringStrategy.aggregate(epochExposition.getExpositionScores());
+            if (finalRiskForEpoch > this.propertyLoader.getRiskThreshold()) {
+                log.info("Risk detected. Scored aggregate risk for epoch {}: {}", epochExposition.getEpochId(), finalRiskForEpoch);
+                numberOfAtRiskExposedEpochs++;
+                break;
+            }
+        }
 
-        registration.setAtRisk(totalRisk > this.propertyLoader.getRiskThreshold());
+        registration.setAtRisk(numberOfAtRiskExposedEpochs >= this.scoringStrategy.getNbEpochsScoredAtRiskThreshold());
 
         this.registrationService.saveRegistration(registration);
         this.contactService.delete(contact);
@@ -159,16 +170,18 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
         final long timeFromDeviceAs16bits = castLong(helloMessageDetail.getTimeCollectedOnDevice(), 2);
         final int timeDiffTolerance = this.propertyLoader.getHelloMessageTimeStampTolerance();
 
-        // TODO: fix this as overflow of 16bits may cause rejection of valid messages
-        if (Math.abs(timeFromHelloNTPsecAs16bits - timeFromDeviceAs16bits) > timeDiffTolerance) {
-            log.warn("Time tolerance was exceeded: |{} (HELLO) vs {} (receiving device)| > {}; discarding HELLO message",
-                    timeFromHelloNTPsecAs16bits,
-                    timeFromDeviceAs16bits,
-                    timeDiffTolerance);
-            return false;
+        if (TimeUtils.toleranceCheckWithWrap(timeFromHelloNTPsecAs16bits, timeFromDeviceAs16bits, timeDiffTolerance)) {
+            return true;
         }
-        return true;
+
+        log.warn("Time tolerance was exceeded: |{} (HELLO) vs {} (receiving device)| > {}; discarding HELLO message",
+                timeFromHelloNTPsecAs16bits,
+                timeFromDeviceAs16bits,
+                timeDiffTolerance);
+        return false;
     }
+
+
 
     /**
      *  Robert Spec Step #6
@@ -203,13 +216,13 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
                 .filter(item -> item.getEpochId() == epochIdFromEBID)
                 .findFirst();
 
-        Double scoredRisk =  this.scoringStrategy.execute(contact);
+        ScoringResult scoredRisk =  this.scoringStrategy.execute(contact);
         if (epochToAddTo.isPresent()) {
             List<Double> epochScores = epochToAddTo.get().getExpositionScores();
-            epochScores.add(scoredRisk);
+            epochScores.add(scoredRisk.getRssiScore());
         } else {
             exposedEpochs.add(EpochExposition.builder()
-                    .expositionScores(Arrays.asList(scoredRisk))
+                    .expositionScores(Arrays.asList(scoredRisk.getRssiScore()))
                     .epochId(epochIdFromEBID)
                     .build());
         }
