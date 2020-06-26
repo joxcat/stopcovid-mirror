@@ -34,10 +34,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             BluetoothStateManager.shared.start()
         }
         RBManager.shared.start(isFirstInstall: !isAppAlreadyInstalled,
-                               server: Server(baseUrl: Constant.Server.baseUrl,
+                               server: Server(baseUrl: { Constant.Server.baseUrl },
                                               publicKey: Constant.Server.publicKey,
                                               certificateFile: Constant.Server.certificate,
                                               configUrl: Constant.Server.configUrl,
+                                              configCertificateFile: Constant.Server.resourcesCertificate,
                                               deviceTimeNotAlignedToServerTimeDetected: {
                                     if UIApplication.shared.applicationState != .active {
                                         NotificationsManager.shared.triggerDeviceTimeErrorNotification()
@@ -45,12 +46,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                                }),
                                storage: StorageManager(),
                                bluetooth: BluetoothManager(),
+                               filter: FilteringManager(),
                                isAtRiskDidChangeHandler: { isAtRisk in
             if isAtRisk == true {
                 NotificationsManager.shared.scheduleAtRiskNotification(minHour: ParametersManager.shared.minHourContactNotif, maxHour: ParametersManager.shared.maxHourContactNotif)
             }
         }, didStopProximityDueToLackOfEpochsHandler: {
             NotificationsManager.shared.triggerRestartNotification()
+        }, didReceiveProximityHandler: {
+            self.triggerStatusRequestIfNeeded()
         })
         ParametersManager.shared.start()
         isAppAlreadyInstalled = true
@@ -73,7 +77,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         triggerStatusRequestIfNeeded() { error in
-            completionHandler(error == nil ? .newData : .failed)
+            completionHandler(.newData)
         }
     }
     
@@ -93,12 +97,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     private func triggerStatusRequestIfNeeded(completion: ((_ error: Error?) -> ())? = nil) {
         if RBManager.shared.isRegistered {
-            let lastStatusRequestTimestamp: Double = RBManager.shared.lastStatusReceivedDate?.timeIntervalSince1970 ?? 0.0
+            let lastStatusRequestTimestamp: Double = RBManager.shared.lastStatusRequestDate?.timeIntervalSince1970 ?? 0.0
+            let lastStatusSuccessTimestamp: Double = RBManager.shared.lastStatusReceivedDate?.timeIntervalSince1970 ?? 0.0
             let nowTimestamp: Double = Date().timeIntervalSince1970
-            if nowTimestamp - lastStatusRequestTimestamp >= ParametersManager.shared.statusTimeInterval {
+            if nowTimestamp - lastStatusRequestTimestamp >= ParametersManager.shared.minStatusRetryTimeInterval && nowTimestamp - lastStatusSuccessTimestamp >= ParametersManager.shared.statusTimeInterval {
                 RBManager.shared.status { error in
-                    self.lastStatusBackgroundFetchTimestamp = Date().timeIntervalSince1970
-                    self.lastStatusBackgroundFetchDidSucceed = error == nil
                     completion?(error)
                 }
             } else {

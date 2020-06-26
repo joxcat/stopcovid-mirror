@@ -12,14 +12,16 @@ import UIKit
 import PKHUD
 import RobertSDK
 import StorageSDK
+import ServerSDK
 
 final class ProximityController: CVTableViewController {
     
     var canActivateProximity: Bool = false
-    var didTouchManageData: (() -> ())?
-    var didTouchPrivacy: (() -> ())?
-    var didTouchAbout: (() -> ())?
-    var deinitBlock: (() -> ())?
+    private let showCaptchaChallenge: (_ captcha: Captcha, _ didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), _ didCancelCaptcha: @escaping () -> ()) -> ()
+    private let didTouchManageData: () -> ()
+    private let didTouchPrivacy: () -> ()
+    private let didTouchAbout: () -> ()
+    private let deinitBlock: () -> ()
     
     private var popRecognizer: InteractivePopGestureRecognizer?
     private var initialContentOffset: CGFloat?
@@ -28,10 +30,15 @@ final class ProximityController: CVTableViewController {
     
     private var areNotificationsAuthorized: Bool = false
     
-    init(didTouchAbout: (() -> ())?, didTouchManageData: (() -> ())?, didTouchPrivacy: (() -> ())?, deinitBlock: (() -> ())?) {
+    init(didTouchAbout: @escaping () -> (),
+         showCaptchaChallenge: @escaping (_ captcha: Captcha, _ didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), _ didCancelCaptcha: @escaping () -> ()) -> (),
+         didTouchManageData: @escaping () -> (),
+         didTouchPrivacy: @escaping () -> (),
+         deinitBlock: @escaping () -> ()) {
         self.didTouchAbout = didTouchAbout
         self.didTouchManageData = didTouchManageData
         self.didTouchPrivacy = didTouchPrivacy
+        self.showCaptchaChallenge = showCaptchaChallenge
         self.deinitBlock = deinitBlock
         super.init(style: .plain)
     }
@@ -58,7 +65,7 @@ final class ProximityController: CVTableViewController {
     
     deinit {
         removeObservers()
-        deinitBlock?()
+        deinitBlock()
     }
     
     private func initInitialContentOffset() {
@@ -113,6 +120,11 @@ final class ProximityController: CVTableViewController {
                                                                  font: messageFont,
                                                                  textColor: messageTextColor,
                                                                  backgroundColor: messageBackgroundColor)
+        } else if UIApplication.shared.backgroundRefreshStatus == .denied {
+            self.bottomMessageContainerController?.updateMessage(text: "proximityController.error.noBackgroundAppRefresh".localized,
+                                                                 font: messageFont,
+                                                                 textColor: messageTextColor,
+                                                                 backgroundColor: messageBackgroundColor)
         } else {
             self.bottomMessageContainerController?.updateMessage()
         }
@@ -164,7 +176,7 @@ final class ProximityController: CVTableViewController {
                                                          imageSize: Appearance.Cell.Image.size,
                                                          separatorLeftInset: Appearance.Cell.leftMargin),
                                       selectionAction: { [weak self] in
-                                        self?.didTouchPrivacy?()
+                                        self?.didTouchPrivacy()
         }, willDisplay: { cell in
             cell.cvTitleLabel?.accessibilityTraits = .button
         })
@@ -181,7 +193,7 @@ final class ProximityController: CVTableViewController {
                                                             imageSize: Appearance.Cell.Image.size,
                                                             separatorLeftInset: 0.0),
                                          selectionAction: { [weak self] in
-            self?.didTouchManageData?()
+            self?.didTouchManageData()
         }, willDisplay: { cell in
             cell.cvTitleLabel?.accessibilityTraits = .button
         })
@@ -221,7 +233,11 @@ final class ProximityController: CVTableViewController {
         bottomMessageContainerController?.messageDidTouch = { [weak self] in
             guard let self = self else { return }
             if self.canActivateProximity {
-                self.didChangeSwitchValue(isOn: true)
+                if UIApplication.shared.backgroundRefreshStatus == .denied {
+                    UIApplication.shared.openSettings()
+                } else {
+                    self.didChangeSwitchValue(isOn: true)
+                }
             } else if !self.areNotificationsAuthorized || !BluetoothStateManager.shared.isAuthorized {
                 UIApplication.shared.openSettings()
             }
@@ -270,18 +286,64 @@ final class ProximityController: CVTableViewController {
                     isChangingState = false
                 }
             } else {
-                ReCaptchaManager.shared.validate(on: self) { token in
-                    guard let token = token else {
-                        self.showAlert(title: "common.error".localized,
-                                       message: "proximityService.error.captchaError".localized,
-                                       okTitle: "common.ok".localized)
+                switch ParametersManager.shared.apiVersion {
+                case .v1:
+                    processRegisterWithReCaptcha {
                         self.isChangingState = false
-                        return
                     }
-                    HUD.show(.progress)
-                    RBManager.shared.register(token: token) { error in
-                        HUD.hide()
+                case .v2:
+                    processRegisterWithCaptcha {
                         self.isChangingState = false
+                    }
+                }
+            }
+        } else {
+            RBManager.shared.isProximityActivated = false
+            RBManager.shared.stopProximityDetection()
+            isChangingState = false
+        }
+    }
+    
+    private func processRegisterWithReCaptcha(_ completion: @escaping () -> ()) {
+        ReCaptchaManager.shared.validate(on: self) { token in
+            guard let token = token else {
+                self.showAlert(title: "common.error".localized,
+                               message: "proximityService.error.captchaError".localized,
+                               okTitle: "common.ok".localized)
+                completion()
+                return
+            }
+            HUD.show(.progress)
+            RBManager.shared.register(token: token) { error in
+                HUD.hide()
+                if let error = error {
+                    if (error as NSError).code == -1 {
+                        self.showAlert(title: "common.error.clockNotAligned.title".localized,
+                                       message: "common.error.clockNotAligned.message".localized,
+                                       okTitle: "common.ok".localized)
+                    } else {
+                        self.showAlert(title: "common.error".localized,
+                                       message: "common.error.server".localized,
+                                       okTitle: "common.ok".localized)
+                    }
+                } else {
+                    self.processRegistrationDone()
+                }
+                completion()
+            }
+        }
+    }
+    
+    private func processRegisterWithCaptcha(_ completion: @escaping () -> ()) {
+        HUD.show(.progress)
+        generateCaptcha { result in
+            HUD.hide()
+            switch result {
+            case let .success(captcha):
+                self.showCaptchaChallenge(captcha, { id, answer in
+                    HUD.show(.progress)
+                    RBManager.shared.registerV2(captcha: answer, captchaId: id) { error in
+                        HUD.hide()
                         if let error = error {
                             if (error as NSError).code == -1 {
                                 self.showAlert(title: "common.error.clockNotAligned.title".localized,
@@ -295,13 +357,29 @@ final class ProximityController: CVTableViewController {
                         } else {
                             self.processRegistrationDone()
                         }
+                        completion()
                     }
-                }
+                }, { [weak self] in
+                    self?.isChangingState = false
+                })
+            case .failure:
+                self.showAlert(title: "common.error".localized,
+                               message: "common.error.server".localized,
+                               okTitle: "common.ok".localized)
+                completion()
+            }
+        }
+    }
+    
+    private func generateCaptcha(_ completion: @escaping (_ result: Result<Captcha, Error>) -> ()) {
+        if UIAccessibility.isVoiceOverRunning {
+            CaptchaManager.shared.generateCaptchaAudio { result in
+                completion(result)
             }
         } else {
-            RBManager.shared.isProximityActivated = false
-            RBManager.shared.stopProximityDetection()
-            isChangingState = false
+            CaptchaManager.shared.generateCaptchaImage { result in
+               completion(result)
+           }
         }
     }
     
@@ -311,7 +389,7 @@ final class ProximityController: CVTableViewController {
     }
     
     @objc private func didTouchAboutButton() {
-        didTouchAbout?()
+        didTouchAbout()
     }
     
     @objc private func appDidBecomeActive() {

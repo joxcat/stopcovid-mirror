@@ -18,6 +18,8 @@ public final class RBManager {
     private var server: RBServer!
     private var storage: RBStorage!
     private var bluetooth: RBBluetooth!
+    private var filter: RBFiltering!
+    
     private var ka: Data? { storage.getKa() }
     private var kea: Data? { storage.getKea() }
     
@@ -37,6 +39,10 @@ public final class RBManager {
             isAtRiskDidChangeHandler?(newValue)
         }
     }
+    public var lastStatusRequestDate: Date? {
+        get { storage.lastStatusRequestDate() }
+        set { storage.saveLastStatusRequestDate(newValue) }
+    }
     public var lastStatusReceivedDate: Date? {
         get { storage.lastStatusReceivedDate() }
         set { storage.saveLastStatusReceivedDate(newValue) }
@@ -55,16 +61,20 @@ public final class RBManager {
     
     private var isAtRiskDidChangeHandler: ((_ isAtRisk: Bool?) -> ())?
     private var didStopProximityDueToLackOfEpochsHandler: (() -> ())?
+    private var didReceiveProximityHandler: (() -> ())?
+
     
     // Prevent any other instantiations.
     private init() {}
     
-    public func start(isFirstInstall: Bool = false, server: RBServer, storage: RBStorage, bluetooth: RBBluetooth, restartProximityIfPossible: Bool = true, isAtRiskDidChangeHandler: @escaping (_ isAtRisk: Bool?) -> (), didStopProximityDueToLackOfEpochsHandler: @escaping () -> ()) {
+    public func start(isFirstInstall: Bool = false, server: RBServer, storage: RBStorage, bluetooth: RBBluetooth, filter: RBFiltering, restartProximityIfPossible: Bool = true, isAtRiskDidChangeHandler: @escaping (_ isAtRisk: Bool?) -> (), didStopProximityDueToLackOfEpochsHandler: @escaping () -> (), didReceiveProximityHandler: @escaping () -> ()) {
         self.server = server
         self.storage = storage
         self.bluetooth = bluetooth
+        self.filter = filter
         self.isAtRiskDidChangeHandler = isAtRiskDidChangeHandler
         self.didStopProximityDueToLackOfEpochsHandler = didStopProximityDueToLackOfEpochsHandler
+        self.didReceiveProximityHandler = didReceiveProximityHandler
         if isFirstInstall {
             self.storage.clearAll(includingDBKey: true)
         }
@@ -114,6 +124,7 @@ public final class RBManager {
                                                                         rssiCalibrated: receivedProximity.rssiCalibrated,
                                                                         tx: receivedProximity.tx)
                 self?.storage.save(localProximity: localProximity)
+                self?.didReceiveProximityHandler?()
             }
         })
     }
@@ -143,6 +154,7 @@ extension RBManager {
         do {
             let ntpTimestamp: Int = Date().timeIntervalSince1900
             let statusMessage: RBStatusMessage = try RBMessageGenerator.generateStatusMessage(for: epoch, ntpTimestamp: ntpTimestamp, key: ka)
+            lastStatusRequestDate = Date()
             server.status(epochId: statusMessage.epochId, ebid: statusMessage.ebid, time: statusMessage.time, mac: statusMessage.mac) { result in
                 switch result {
                 case let .success(response):
@@ -165,14 +177,19 @@ extension RBManager {
     public func report(code: String, symptomsOrigin: Date?, completion: @escaping (_ error: Error?) -> ()) {
         let origin: Date = symptomsOrigin?.rbDateByAddingDays(-(preSymptomsSpan ?? 0)) ?? .distantPast
         let localHelloMessages: [RBLocalProximity] = storage.getLocalProximityList(from: origin, to: Date())
-        server.report(code: code, helloMessages: localHelloMessages) { error in
-            if let error = error {
-                completion(error)
-            } else {
-                self.clearLocalProximityList()
-                self.isSick = true
-                completion(nil)
+        do {
+            let filteredProximities: [RBLocalProximity] = try filter.filter(proximities: localHelloMessages)
+            server.report(code: code, helloMessages: filteredProximities) { error in
+                if let error = error {
+                    completion(error)
+                } else {
+                    self.clearLocalProximityList()
+                    self.isSick = true
+                    completion(nil)
+                }
             }
+        } catch {
+            completion(NSError.rbLocalizedError(message: "Filtering of hello messages failed: \(error.localizedDescription)", code: 0))
         }
     }
     
@@ -189,7 +206,28 @@ extension RBManager {
             completion(NSError.rbLocalizedError(message: "Impossible to set keys up.", code: 0))
             return
         }
+        lastStatusRequestDate = Date()
         server.register(token: token, publicKey: keys.publicKeyBase64) { result in
+            switch result {
+            case let .success(response):
+                do {
+                    try self.processRegisterResponse(response, keys: keys)
+                    completion(nil)
+                } catch {
+                    completion(error)
+                }
+            case let .failure(error):
+                completion(error)
+            }
+        }
+    }
+    
+    public func registerV2(captcha: String, captchaId: String, completion: @escaping (_ error: Error?) -> ()) {
+        guard let keys: RBECKeys = try? RBKeysManager.generateKeys() else {
+            completion(NSError.rbLocalizedError(message: "Impossible to set keys up.", code: 0))
+            return
+        }
+        server.registerV2(captcha: captcha, captchaId: captchaId, publicKey: keys.publicKeyBase64) { result in
             switch result {
             case let .success(response):
                 do {

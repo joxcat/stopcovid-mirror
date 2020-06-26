@@ -30,5 +30,6 @@ enum XibName: String {
     case centeredImageTextCell = "CenteredImageTextCell"
     case callCell = "CallCell"
     case emptyCell = "EmptyCell"
+    case audioCell = "AudioCell"
     
 }

@@ -7,18 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AF114A6D248A695D00736059 /* TimestampedRSSIDataSet.csv in Resources */ = {isa = PBXBuildFile; fileRef = AF114A6C248A695D00736059 /* TimestampedRSSIDataSet.csv */; };
+		AF114A6F248E2EC700736059 /* ProximityFilterConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF114A6E248E2EC700736059 /* ProximityFilterConfiguration.swift */; };
+		AF114A71248E2F0E00736059 /* ProximityFilterOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF114A70248E2F0E00736059 /* ProximityFilterOutput.swift */; };
+		AF114A73248E2FDC00736059 /* ProximityFilterError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF114A72248E2FDC00736059 /* ProximityFilterError.swift */; };
+		AF114A75248E313400736059 /* ProximityFilterMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF114A74248E313400736059 /* ProximityFilterMode.swift */; };
+		AF114A77248E38EE00736059 /* RSSIClipperOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF114A76248E38EE00736059 /* RSSIClipperOutput.swift */; };
+		AF401CBA247E65DB00CFDD4B /* RSSIClipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF401CB9247E65DB00CFDD4B /* RSSIClipper.swift */; };
+		AF401CBE247E952F00CFDD4B /* ProximityFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF401CBD247E952F00CFDD4B /* ProximityFilter.swift */; };
 		AF51E485247418E000645356 /* ProximityPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E484247418E000645356 /* ProximityPayload.swift */; };
 		AF51E4892474242F00645356 /* ProximityPayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E4882474242F00645356 /* ProximityPayloadTests.swift */; };
 		AF51E490247444A300645356 /* BluetoothPeripheralManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E48D247444A300645356 /* BluetoothPeripheralManagerMock.swift */; };
 		AF51E492247444A300645356 /* BluetoothCentralManagerMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E48F247444A300645356 /* BluetoothCentralManagerMock.swift */; };
-		AF51E4972474475300645356 /* ProximityInfoRiskComputerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E4932474475300645356 /* ProximityInfoRiskComputerTests.swift */; };
+		AF51E4972474475300645356 /* RiskComputerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E4932474475300645356 /* RiskComputerTests.swift */; };
 		AF51E4982474475300645356 /* BluetoothProximityNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E4942474475300645356 /* BluetoothProximityNotificationTests.swift */; };
 		AF51E4992474475300645356 /* BluetoothProximityPayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E4952474475300645356 /* BluetoothProximityPayloadTests.swift */; };
 		AF51E49A2474475300645356 /* CacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E4962474475300645356 /* CacheTests.swift */; };
 		AF51E49D24744D5200645356 /* BluetoothPeripheralManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E49C24744D5200645356 /* BluetoothPeripheralManagerProtocol.swift */; };
 		AF51E49F24744D6F00645356 /* BluetoothCentralManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E49E24744D6F00645356 /* BluetoothCentralManagerDelegate.swift */; };
 		AF51E4A124744D8900645356 /* BluetoothCentralManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF51E4A024744D8900645356 /* BluetoothCentralManagerProtocol.swift */; };
+		AF670FA0248794AA00F4C5F0 /* RSSIClipperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF670F9F248794AA00F4C5F0 /* RSSIClipperTests.swift */; };
 		AF848871246D8BD700117176 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF848870246D8BD700117176 /* Cache.swift */; };
+		AFAD13942487D8C400058D6A /* ProximityFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAD13932487D8C300058D6A /* ProximityFilterTests.swift */; };
 		AFB3939D24631533003A7D58 /* BluetoothCentralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB3939124630F8F003A7D58 /* BluetoothCentralManager.swift */; };
 		AFB3939F24631533003A7D58 /* BluetoothPeripheralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB3939224630F8F003A7D58 /* BluetoothPeripheralManager.swift */; };
 		AFB393A124631533003A7D58 /* BluetoothProximityMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB3939624630F8F003A7D58 /* BluetoothProximityMetadata.swift */; };
@@ -33,9 +43,10 @@
 		AFB393AE24631533003A7D58 /* ProximityNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB3938A24630F8F003A7D58 /* ProximityNotificationService.swift */; };
 		AFB393AF24631533003A7D58 /* ProximityNotificationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFB3939B24630F8F003A7D58 /* ProximityNotificationSettings.swift */; };
 		AFC9D3AC246B06C5001B7F5B /* ProximityNotificationVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC9D3AB246B06C5001B7F5B /* ProximityNotificationVersion.swift */; };
-		AFC9D3B3246B181A001B7F5B /* ProximityInfoRiskComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC9D3B2246B181A001B7F5B /* ProximityInfoRiskComputer.swift */; };
+		AFC9D3B3246B181A001B7F5B /* RiskComputer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC9D3B2246B181A001B7F5B /* RiskComputer.swift */; };
 		AFC9D3C2246C413F001B7F5B /* libProximityNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AFB3937E24630DF8003A7D58 /* libProximityNotification.a */; };
-		AFC9D3CE246C4940001B7F5B /* RiskComputerDataset.csv in Resources */ = {isa = PBXBuildFile; fileRef = AFC9D3C9246C46F5001B7F5B /* RiskComputerDataset.csv */; };
+		AFF54C702481165100B6B411 /* TimestampedRSSI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFF54C6F2481165100B6B411 /* TimestampedRSSI.swift */; };
+		AFF54C72248123EA00B6B411 /* Collection+ProximityFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFF54C71248123EA00B6B411 /* Collection+ProximityFilter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,18 +72,28 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AF114A6C248A695D00736059 /* TimestampedRSSIDataSet.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TimestampedRSSIDataSet.csv; sourceTree = "<group>"; };
+		AF114A6E248E2EC700736059 /* ProximityFilterConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityFilterConfiguration.swift; sourceTree = "<group>"; };
+		AF114A70248E2F0E00736059 /* ProximityFilterOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityFilterOutput.swift; sourceTree = "<group>"; };
+		AF114A72248E2FDC00736059 /* ProximityFilterError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityFilterError.swift; sourceTree = "<group>"; };
+		AF114A74248E313400736059 /* ProximityFilterMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityFilterMode.swift; sourceTree = "<group>"; };
+		AF114A76248E38EE00736059 /* RSSIClipperOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSIClipperOutput.swift; sourceTree = "<group>"; };
+		AF401CB9247E65DB00CFDD4B /* RSSIClipper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSIClipper.swift; sourceTree = "<group>"; };
+		AF401CBD247E952F00CFDD4B /* ProximityFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityFilter.swift; sourceTree = "<group>"; };
 		AF51E484247418E000645356 /* ProximityPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityPayload.swift; sourceTree = "<group>"; };
 		AF51E4882474242F00645356 /* ProximityPayloadTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProximityPayloadTests.swift; sourceTree = "<group>"; };
 		AF51E48D247444A300645356 /* BluetoothPeripheralManagerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothPeripheralManagerMock.swift; sourceTree = "<group>"; };
 		AF51E48F247444A300645356 /* BluetoothCentralManagerMock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothCentralManagerMock.swift; sourceTree = "<group>"; };
-		AF51E4932474475300645356 /* ProximityInfoRiskComputerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProximityInfoRiskComputerTests.swift; sourceTree = "<group>"; };
+		AF51E4932474475300645356 /* RiskComputerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RiskComputerTests.swift; sourceTree = "<group>"; };
 		AF51E4942474475300645356 /* BluetoothProximityNotificationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothProximityNotificationTests.swift; sourceTree = "<group>"; };
 		AF51E4952474475300645356 /* BluetoothProximityPayloadTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothProximityPayloadTests.swift; sourceTree = "<group>"; };
 		AF51E4962474475300645356 /* CacheTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CacheTests.swift; sourceTree = "<group>"; };
 		AF51E49C24744D5200645356 /* BluetoothPeripheralManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothPeripheralManagerProtocol.swift; sourceTree = "<group>"; };
 		AF51E49E24744D6F00645356 /* BluetoothCentralManagerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothCentralManagerDelegate.swift; sourceTree = "<group>"; };
 		AF51E4A024744D8900645356 /* BluetoothCentralManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothCentralManagerProtocol.swift; sourceTree = "<group>"; };
+		AF670F9F248794AA00F4C5F0 /* RSSIClipperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSIClipperTests.swift; sourceTree = "<group>"; };
 		AF848870246D8BD700117176 /* Cache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
+		AFAD13932487D8C300058D6A /* ProximityFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityFilterTests.swift; sourceTree = "<group>"; };
 		AFB3937E24630DF8003A7D58 /* libProximityNotification.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libProximityNotification.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFB3938924630F8F003A7D58 /* ProximityInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityInfo.swift; sourceTree = "<group>"; };
 		AFB3938A24630F8F003A7D58 /* ProximityNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityNotificationService.swift; sourceTree = "<group>"; };
@@ -88,10 +109,11 @@
 		AFB3939B24630F8F003A7D58 /* ProximityNotificationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityNotificationSettings.swift; sourceTree = "<group>"; };
 		AFB3939C24630F90003A7D58 /* ProximityNotification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityNotification.swift; sourceTree = "<group>"; };
 		AFC9D3AB246B06C5001B7F5B /* ProximityNotificationVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityNotificationVersion.swift; sourceTree = "<group>"; };
-		AFC9D3B2246B181A001B7F5B /* ProximityInfoRiskComputer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProximityInfoRiskComputer.swift; sourceTree = "<group>"; };
+		AFC9D3B2246B181A001B7F5B /* RiskComputer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RiskComputer.swift; sourceTree = "<group>"; };
 		AFC9D3BD246C413F001B7F5B /* ProximityNotificationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProximityNotificationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFC9D3C1246C413F001B7F5B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AFC9D3C9246C46F5001B7F5B /* RiskComputerDataset.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RiskComputerDataset.csv; sourceTree = "<group>"; };
+		AFF54C6F2481165100B6B411 /* TimestampedRSSI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimestampedRSSI.swift; sourceTree = "<group>"; };
+		AFF54C71248123EA00B6B411 /* Collection+ProximityFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+ProximityFilter.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,9 +157,9 @@
 			isa = PBXGroup;
 			children = (
 				AFB3938D24630F8F003A7D58 /* Bluetooth */,
+				AFF54C6E2481144100B6B411 /* Filter */,
 				AF848870246D8BD700117176 /* Cache.swift */,
 				AFB3938924630F8F003A7D58 /* ProximityInfo.swift */,
-				AFC9D3B2246B181A001B7F5B /* ProximityInfoRiskComputer.swift */,
 				AFB3939C24630F90003A7D58 /* ProximityNotification.swift */,
 				AFB3938B24630F8F003A7D58 /* ProximityNotificationLogger.swift */,
 				AFB3938A24630F8F003A7D58 /* ProximityNotificationService.swift */,
@@ -175,11 +197,30 @@
 				AF51E4952474475300645356 /* BluetoothProximityPayloadTests.swift */,
 				AF51E4962474475300645356 /* CacheTests.swift */,
 				AFC9D3C1246C413F001B7F5B /* Info.plist */,
-				AF51E4932474475300645356 /* ProximityInfoRiskComputerTests.swift */,
+				AFAD13932487D8C300058D6A /* ProximityFilterTests.swift */,
 				AF51E4882474242F00645356 /* ProximityPayloadTests.swift */,
-				AFC9D3C9246C46F5001B7F5B /* RiskComputerDataset.csv */,
+				AF51E4932474475300645356 /* RiskComputerTests.swift */,
+				AF670F9F248794AA00F4C5F0 /* RSSIClipperTests.swift */,
+				AF114A6C248A695D00736059 /* TimestampedRSSIDataSet.csv */,
 			);
 			path = ProximityNotificationTests;
+			sourceTree = "<group>";
+		};
+		AFF54C6E2481144100B6B411 /* Filter */ = {
+			isa = PBXGroup;
+			children = (
+				AFF54C71248123EA00B6B411 /* Collection+ProximityFilter.swift */,
+				AF401CBD247E952F00CFDD4B /* ProximityFilter.swift */,
+				AF114A6E248E2EC700736059 /* ProximityFilterConfiguration.swift */,
+				AF114A72248E2FDC00736059 /* ProximityFilterError.swift */,
+				AF114A74248E313400736059 /* ProximityFilterMode.swift */,
+				AF114A70248E2F0E00736059 /* ProximityFilterOutput.swift */,
+				AFC9D3B2246B181A001B7F5B /* RiskComputer.swift */,
+				AF401CB9247E65DB00CFDD4B /* RSSIClipper.swift */,
+				AF114A76248E38EE00736059 /* RSSIClipperOutput.swift */,
+				AFF54C6F2481165100B6B411 /* TimestampedRSSI.swift */,
+			);
+			path = Filter;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -262,7 +303,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AFC9D3CE246C4940001B7F5B /* RiskComputerDataset.csv in Resources */,
+				AF114A6D248A695D00736059 /* TimestampedRSSIDataSet.csv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -275,21 +316,30 @@
 			files = (
 				AFB3939D24631533003A7D58 /* BluetoothCentralManager.swift in Sources */,
 				AFB3939F24631533003A7D58 /* BluetoothPeripheralManager.swift in Sources */,
+				AF401CBA247E65DB00CFDD4B /* RSSIClipper.swift in Sources */,
 				AFB393A124631533003A7D58 /* BluetoothProximityMetadata.swift in Sources */,
-				AFC9D3B3246B181A001B7F5B /* ProximityInfoRiskComputer.swift in Sources */,
+				AFC9D3B3246B181A001B7F5B /* RiskComputer.swift in Sources */,
 				AFB393A224631533003A7D58 /* BluetoothProximityNotification.swift in Sources */,
+				AF114A71248E2F0E00736059 /* ProximityFilterOutput.swift in Sources */,
+				AF114A75248E313400736059 /* ProximityFilterMode.swift in Sources */,
 				AFB393A324631533003A7D58 /* BluetoothProximityPayload.swift in Sources */,
+				AF114A77248E38EE00736059 /* RSSIClipperOutput.swift in Sources */,
 				AF51E49F24744D6F00645356 /* BluetoothCentralManagerDelegate.swift in Sources */,
+				AFF54C72248123EA00B6B411 /* Collection+ProximityFilter.swift in Sources */,
+				AF114A73248E2FDC00736059 /* ProximityFilterError.swift in Sources */,
 				AFB393A524631533003A7D58 /* BluetoothScannedPeripheral.swift in Sources */,
 				AFB393A724631533003A7D58 /* BluetoothSettings.swift in Sources */,
+				AF401CBE247E952F00CFDD4B /* ProximityFilter.swift in Sources */,
 				AFB393A824631533003A7D58 /* CBManagerState+BluetoothProximityNotification.swift in Sources */,
 				AFB393AA24631533003A7D58 /* ProximityInfo.swift in Sources */,
+				AFF54C702481165100B6B411 /* TimestampedRSSI.swift in Sources */,
 				AF848871246D8BD700117176 /* Cache.swift in Sources */,
 				AF51E4A124744D8900645356 /* BluetoothCentralManagerProtocol.swift in Sources */,
 				AFC9D3AC246B06C5001B7F5B /* ProximityNotificationVersion.swift in Sources */,
 				AF51E49D24744D5200645356 /* BluetoothPeripheralManagerProtocol.swift in Sources */,
 				AFB393AC24631533003A7D58 /* ProximityNotification.swift in Sources */,
 				AFB393AD24631533003A7D58 /* ProximityNotificationLogger.swift in Sources */,
+				AF114A6F248E2EC700736059 /* ProximityFilterConfiguration.swift in Sources */,
 				AFB393AE24631533003A7D58 /* ProximityNotificationService.swift in Sources */,
 				AFB393AF24631533003A7D58 /* ProximityNotificationSettings.swift in Sources */,
 				AF51E485247418E000645356 /* ProximityPayload.swift in Sources */,
@@ -304,8 +354,10 @@
 				AF51E490247444A300645356 /* BluetoothPeripheralManagerMock.swift in Sources */,
 				AF51E4892474242F00645356 /* ProximityPayloadTests.swift in Sources */,
 				AF51E492247444A300645356 /* BluetoothCentralManagerMock.swift in Sources */,
-				AF51E4972474475300645356 /* ProximityInfoRiskComputerTests.swift in Sources */,
+				AF670FA0248794AA00F4C5F0 /* RSSIClipperTests.swift in Sources */,
+				AF51E4972474475300645356 /* RiskComputerTests.swift in Sources */,
 				AF51E4982474475300645356 /* BluetoothProximityNotificationTests.swift in Sources */,
+				AFAD13942487D8C400058D6A /* ProximityFilterTests.swift in Sources */,
 				AF51E4992474475300645356 /* BluetoothProximityPayloadTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

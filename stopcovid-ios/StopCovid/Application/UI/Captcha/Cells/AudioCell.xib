@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="89" id="BUK-fb-yXG" customClass="AudioCell" customModule="StopCovid" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="89"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="BUK-fb-yXG" id="4JK-sJ-NGv">
+                <rect key="frame" x="0.0" y="0.0" width="414" height="89"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1sQ-HD-dIG">
+                        <rect key="frame" x="176" y="13.5" width="62" height="62"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="62" id="5Xt-fL-jv7"/>
+                            <constraint firstAttribute="height" constant="62" id="89Z-x3-2Jl"/>
+                        </constraints>
+                        <connections>
+                            <action selector="didTouchButton:" destination="BUK-fb-yXG" eventType="touchUpInside" id="khK-d3-H9G"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="1sQ-HD-dIG" firstAttribute="centerX" secondItem="4JK-sJ-NGv" secondAttribute="centerX" id="9wE-Rt-pYf"/>
+                    <constraint firstItem="1sQ-HD-dIG" firstAttribute="top" secondItem="4JK-sJ-NGv" secondAttribute="top" constant="13.5" id="Rrk-6j-QFh"/>
+                    <constraint firstAttribute="bottom" secondItem="1sQ-HD-dIG" secondAttribute="bottom" constant="13.5" id="eW0-5X-alz"/>
+                </constraints>
+            </tableViewCellContentView>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="bottomConstraint" destination="eW0-5X-alz" id="rSr-WR-RDS"/>
+                <outlet property="button" destination="1sQ-HD-dIG" id="h44-k9-U1c"/>
+                <outlet property="imageHeightConstraint" destination="89Z-x3-2Jl" id="6Jn-Ds-aoc"/>
+                <outlet property="imageWidthConstraint" destination="5Xt-fL-jv7" id="Iuj-xg-CcQ"/>
+                <outlet property="topConstraint" destination="Rrk-6j-QFh" id="2Vz-gZ-2i1"/>
+            </connections>
+            <point key="canvasLocation" x="218.84057971014494" y="71.986607142857139"/>
+        </tableViewCell>
+    </objects>
+</document>

@@ -48,8 +48,14 @@ final class LocalizationsManager: RemoteFileSyncManager {
         URL(string: "\(RemoteFileConstant.baseUrl)/strings-\(languageCode).json")!
     }
     
-    override func processReceivedData(_ data: Data) {
-        strings = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: String] ?? [:]
+    override func processReceivedData(_ data: Data) -> Bool {
+        do {
+            guard let stringsDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String] else { return false }
+            strings = stringsDict
+            return true
+        } catch {
+            return false
+        }
     }
     
     override func notifyObservers() {

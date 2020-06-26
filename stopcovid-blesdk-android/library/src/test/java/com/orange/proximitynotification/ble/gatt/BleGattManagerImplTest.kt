@@ -50,9 +50,60 @@ class BleGattManagerImplTest {
         context = context,
         bluetoothManager = bluetoothManager,
         gattClientProvider = bleGattClientProvider,
-        coroutineScope = testCoroutineRule,
         coroutineContextProvider = testCoroutineRule
     )
+
+    @Test
+    fun start_should_return_true() {
+
+        // Given
+
+        // When
+        val result  = bleGattManager.start(mock())
+
+        // Then
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun start_given_openGattServer_return_null_should_return_false() {
+
+        // Given
+        doReturn(null).whenever(bluetoothManager).openGattServer(any(), any())
+
+        // When
+        val result  = bleGattManager.start(mock())
+
+        // Then
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun start_given_bluetoothGattServer_throws_exception_should_close_opened_gatt_server_and_return_false() {
+
+        // Given
+        doThrow(RuntimeException::class).whenever(bluetoothGattServer).addService(any())
+
+        // When
+        val result  = bleGattManager.start(mock())
+
+        // Then
+        assertThat(result).isFalse()
+        verify(bluetoothGattServer, times(1)).close()
+    }
+
+    @Test
+    fun stop_given_exception_should_not_throw_exception() {
+
+        // Given
+        doThrow(RuntimeException::class).whenever(bluetoothGattServer).close()
+
+        // When
+        val result = runCatching { bleGattManager.stop() }
+
+        // Then
+        assertThat(result.isSuccess).isTrue()
+    }
 
     @Test
     fun requestRemoteRssi_multiple_times_for_a_same_device_should_request_a_new_one_every_time() =
@@ -64,9 +115,9 @@ class BleGattManagerImplTest {
 
             // When
             onLifecycle(mock()) {
-                it.requestRemoteRssi(device)
-                it.requestRemoteRssi(device)
-                it.requestRemoteRssi(device)
+                it.requestRemoteRssi(device, false)
+                it.requestRemoteRssi(device, false)
+                it.requestRemoteRssi(device, false)
             }
 
             // Then
@@ -82,9 +133,9 @@ class BleGattManagerImplTest {
 
             // When
             onLifecycle(mock()) {
-                it.requestRemoteRssi(mock())
-                it.requestRemoteRssi(mock())
-                it.requestRemoteRssi(mock())
+                it.requestRemoteRssi(mock(), false)
+                it.requestRemoteRssi(mock(), false)
+                it.requestRemoteRssi(mock(), false)
             }
 
             // Then
@@ -104,14 +155,35 @@ class BleGattManagerImplTest {
             doReturn(rssi).whenever(client).readRemoteRssi()
 
             // When
-            val result = onLifecycle(mock()) { it.requestRemoteRssi(device) }
+            val result = onLifecycle(mock()) { it.requestRemoteRssi(device, false) }
+
+            // Then
+            verify(bleGattClientProvider).fromDevice(eq(device))
+            verify(client, times(1)).readRemoteRssi()
+            verify(client, times(1)).open()
+            verify(client, never()).close()
+            assertThat(result).isEqualTo(rssi)
+        }
+
+    @Test
+    fun requestRemoteRssi_with_close_given_gattClient_in_success_should_return_remote_rssi_and_close_client() =
+        testCoroutineRule.runBlockingTest {
+
+            // Given
+            val device = bluetoothDevice()
+            val client: BleGattClient = mock()
+            val rssi = 5
+            doReturn(client).whenever(bleGattClientProvider).fromDevice(eq(device))
+            doReturn(rssi).whenever(client).readRemoteRssi()
+
+            // When
+            val result = onLifecycle(mock()) { it.requestRemoteRssi(device, true) }
 
             // Then
             verify(bleGattClientProvider).fromDevice(eq(device))
             verify(client, times(1)).readRemoteRssi()
             verify(client, times(1)).open()
             verify(client, times(1)).close()
-            verify(client, atLeastOnce()).close()
             assertThat(result).isEqualTo(rssi)
         }
 
@@ -127,14 +199,34 @@ class BleGattManagerImplTest {
             doAnswer { throw BleGattClientException() }.whenever(client).readRemoteRssi()
 
             // When
-            val result = onLifecycle(mock()) { it.requestRemoteRssi(device) }
+            val result = onLifecycle(mock()) { it.requestRemoteRssi(device, false) }
+
+            // Then
+            verify(bleGattClientProvider).fromDevice(eq(device))
+            verify(client, times(1)).readRemoteRssi()
+            verify(client, times(1)).open()
+            verify(client, never()).close()
+            assertThat(result).isNull()
+        }
+
+    @Test
+    fun requestRemoteRssi_with_close_given_gattClient_with_error_should_close_client_and_return_null() =
+        testCoroutineRule.runBlockingTest {
+
+            // Given
+            val device = bluetoothDevice()
+            val client: BleGattClient = mock()
+            doReturn(client).whenever(bleGattClientProvider).fromDevice(eq(device))
+            doAnswer { throw BleGattClientException() }.whenever(client).readRemoteRssi()
+
+            // When
+            val result = onLifecycle(mock()) { it.requestRemoteRssi(device, true) }
 
             // Then
             verify(bleGattClientProvider).fromDevice(eq(device))
             verify(client, times(1)).readRemoteRssi()
             verify(client, times(1)).open()
             verify(client, times(1)).close()
-            verify(client, atLeastOnce()).close()
             assertThat(result).isNull()
         }
 

@@ -185,7 +185,6 @@
     "accessibility.hint.proximity.buttonDescription": "زر تفعيل تطبيق StopCovid",
     "accessibility.hint.proximity.buttonState.activated": "تم التفعيل!",
     "accessibility.hint.proximity.buttonState.deactivated": "توقف التفعيل!",
-    "captchaController.title": "الفحص",
     "captchaController.mainMessage.title": "لأمان التطبيق، يرجى إثبات أنك إنسان",
     "captchaController.mainMessage.subtitle": "من خلال الإجابة على هذه الأسئلة",
     "captchaController.mainMessage.action": "اضغط على صورة",
@@ -272,6 +271,34 @@
     "common.error.proximityNotification": "فشل إصدار إشعار Bluetooth. حاول مرة أخرى أو أعد تشغيل هاتفك.",
     "proximityController.error.bluetoothOff": "عليك تفعيل تقنية Bluetooth ليعمل تطبيق StopCovid",
     "onboarding.gesturesController.gesture7": "يجب ارتداء القناع حين لا يمكن احترام مسافة 1 متر",
-    "common.error.clockNotAligned.title": "Veuillez utiliser l'horloge automatique",
-    "common.error.clockNotAligned.message": "Votre téléphone n’est pas à l’heure précise. Pour votre sécurité, StopCovid ne pourra pas fonctionner correctement avec une heure imprécise."
+    
+    "notification.channel.upgrade.title": "التحديث",
+    "notification.upgrade.title": "التحديث",
+    "notification.upgrade.message": "StopCovid بحاجة لك: يرجى تشغيل التطبيق، فمن الضروري تحديث StopCovid لضمان عملها السليم.",
+    "common.error.clockNotAligned.title": "يرجى استخدام الساعة التلقائية",
+    "common.error.clockNotAligned.message": "توقيت هاتفك ليس مضبوطًا. حفاظًا على سلامتك، لا يمكن لـStopCovid أن تعمل بشكل سليم مع توقيت خاطئ.",
+    
+    "captchaController.title": "فحص المعلومات",
+    "captchaController.mainMessage.image.title": "يرجى في ما بعد إدخال ما تراه من نص في الصورة (مع احترام شكل الحروف)",
+    "captchaController.mainMessage.image.subtitle": "هذا الإجراء يسمح بتأمين الوصول إلى StopCovid.",
+    "captchaController.mainMessage.audio.title": "يرجى في ما بعد إدخال ما تسمعه من ألفاظ",
+    "captchaController.mainMessage.audio.subtitle": "هذا الإجراء يسمح بتأمين الوصول إلى StopCovid.",
+    "captchaController.textField.image.placeholder": "أدخل النص البصري",
+    "captchaController.textField.audio.placeholder": "أدخل ما تسمعه",
+    "captchaController.button.title": "التأكيد",
+    "captchaController.alert.noAnswer.title": "انتبه",
+    "captchaController.alert.noAnswer.message": "من أجل التأكيد، يرجى إدخال الإجابة.",
+    "captchaController.generate.image": "عرض صورة أخرى",
+    "captchaController.generate.sound": "إصدار صوت آخر",
+    "captchaController.switchToImage": "استعمال النسخة البصرية",
+    "captchaController.switchToAudio": "استعمال النسخة السمعية",
+    "accessibility.hint.captcha.image": "صورة تمثل حروف التحقق",
+    "accessibility.hint.captcha.audio.button.play": "استماع حروف التحقق السمعية",
+    "accessibility.hint.captcha.audio.button.pause": "إيقاف قراءة حروف التحقق السمعية",
+
+    
+     "captchaController.alert.invalidCode.title": "Attention",
+    "captchaController.alert.invalidCode.message": "The code you entered is not valid.",
+    
+    "proximityController.error.noBackgroundAppRefresh" : "The background app refresh is necessary. Tap to change this parameter."
 }

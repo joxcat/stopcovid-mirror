@@ -13,7 +13,7 @@ import Foundation
 public enum ServerConstant {
     
     static let timeout: Double = 30.0
-    static let maxClockShiftToleranceInSeconds: Double = 30.0
+    static let maxClockShiftToleranceInSeconds: Double = 120.0
     public static let acceptedReportCodeLength: [Int] = [6, 36]
     
 }

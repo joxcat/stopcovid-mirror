@@ -23,6 +23,7 @@ class TextFieldCell: CVTableViewCell {
         cvTextField.returnKeyType = row.textFieldReturnKeyType ?? .default
         cvTextField.tintColor = Asset.Colors.tint.color
         cvTextField.text = row.subtitle
+        cvTextField.autocorrectionType = .no
     }
     
     @IBAction private func textFieldValueChanged() {

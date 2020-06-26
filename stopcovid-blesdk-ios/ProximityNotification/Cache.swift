@@ -18,12 +18,18 @@ final class Cache<Key: Hashable, Value>: NSObject, NSCacheDelegate {
     
     private var keys = Set<Key>()
     
+    private let dispatchQueue = DispatchQueue(label: UUID().uuidString, attributes: .concurrent)
+    
     init(expirationDelay: TimeInterval = .infinity) {
         self.expirationDelay = expirationDelay
         
         super.init()
         
         cache.delegate = self
+    }
+    
+    deinit {
+        cache.delegate = nil
     }
     
     subscript(key: Key) -> Value? {
@@ -43,7 +49,9 @@ final class Cache<Key: Hashable, Value>: NSObject, NSCacheDelegate {
         let expirationDate = Date(timeIntervalSinceNow: expirationDelay)
         let entry = Entry(key: key, value: value, expirationDate: expirationDate)
         cache.setObject(entry, forKey: KeyWrapper(key))
-        keys.insert(key)
+        dispatchQueue.async(flags: .barrier) {
+            self.keys.insert(key)
+        }
     }
     
     func value(forKey key: Key) -> Value? {
@@ -69,7 +77,11 @@ final class Cache<Key: Hashable, Value>: NSObject, NSCacheDelegate {
     }
     
     func removeExpiredValues() {
-        keys.forEach { _ = self.value(forKey: $0) }
+        dispatchQueue.sync {
+            keys.forEach { key in
+                _ = self.value(forKey: key)
+            }
+        }
     }
     
     func cache(_ cache: NSCache<AnyObject, AnyObject>, willEvictObject object: Any) {
@@ -77,7 +89,9 @@ final class Cache<Key: Hashable, Value>: NSObject, NSCacheDelegate {
             return
         }
         
-        keys.remove(entry.key)
+        dispatchQueue.async(flags: .barrier) {
+            self.keys.remove(entry.key)
+        }
     }
 }
 

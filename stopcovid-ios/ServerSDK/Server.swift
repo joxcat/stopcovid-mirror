@@ -21,7 +21,7 @@ public final class Server: NSObject, RBServer {
     typealias ProcessRequestCompletion = (_ result: Result<Data, Error>) -> ()
     
     public let publicKey: Data
-    private let baseUrl: URL
+    private let baseUrl: () -> URL
     private let certificateFile: Data
     private let deviceTimeNotAlignedToServerTimeDetected: () -> ()
     
@@ -34,12 +34,13 @@ public final class Server: NSObject, RBServer {
     private var receivedData: [String: Data] = [:]
     private var completions: [String: ProcessRequestCompletion] = [:]
     
-    public init(baseUrl: URL, publicKey: Data, certificateFile: Data, configUrl: URL, deviceTimeNotAlignedToServerTimeDetected: @escaping () -> ()) {
+    public init(baseUrl: @escaping () -> URL, publicKey: Data, certificateFile: Data, configUrl: URL, configCertificateFile: Data, deviceTimeNotAlignedToServerTimeDetected: @escaping () -> ()) {
         self.baseUrl = baseUrl
         self.publicKey = publicKey
         self.certificateFile = certificateFile
         self.deviceTimeNotAlignedToServerTimeDetected = deviceTimeNotAlignedToServerTimeDetected
         ParametersManager.shared.url = configUrl
+        ParametersManager.shared.certificateFile = configCertificateFile
     }
     
     public func status(epochId: Int, ebid: String, time: String, mac: String, completion: @escaping (_ result: Result<RBStatusResponse, Error>) -> ()) {
@@ -52,7 +53,7 @@ public final class Server: NSObject, RBServer {
                     completion(.failure(NSError.deviceTime))
                 } else {
                     let body: RBServerStatusBody = RBServerStatusBody(epochId: epochId, ebid: ebid, time: time, mac: mac)
-                    self.processRequest(url: self.baseUrl.appendingPathComponent("status"), method: .post, body: body) { result in
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("status"), method: .post, body: body) { result in
                         switch result {
                         case let .success(data):
                             do {
@@ -86,7 +87,7 @@ public final class Server: NSObject, RBServer {
                 } else {
                     let contacts: [RBServerContact] = self.prepareContactsReport(from: helloMessages)
                     let body: RBServerReportBody = RBServerReportBody(token: code, contacts: contacts)
-                    self.processRequest(url: self.baseUrl.appendingPathComponent("report"), method: .post, body: body) { result in
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("report"), method: .post, body: body) { result in
                         switch result {
                         case let .success(data):
                             do {
@@ -124,7 +125,44 @@ public final class Server: NSObject, RBServer {
                     completion(.failure(NSError.deviceTime))
                 } else {
                     let body: RBServerRegisterBody = RBServerRegisterBody(captcha: token, clientPublicECDHKey: publicKey)
-                    self.processRequest(url: self.baseUrl.appendingPathComponent("register"), method: .post, body: body) { result in
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("register"), method: .post, body: body) { result in
+                        switch result {
+                        case let .success(data):
+                            do {
+                                let response: RBServerRegisterResponse = try JSONDecoder().decode(RBServerRegisterResponse.self, from: data)
+                                
+                                let rootJson: [String: Any] = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] ?? [:]
+                                let config: [[String: Any]] = rootJson["config"] as? [[String: Any]] ?? []
+                                
+                                let transformedResponse: RBRegisterResponse = RBRegisterResponse(tuples: response.tuples,
+                                                                                                 timeStart: response.timeStart,
+                                                                                                 config: config)
+                                completion(.success(transformedResponse))
+                            } catch {
+                                completion(.failure(error))
+                            }
+                        case let .failure(error):
+                            completion(.failure(error))
+                        }
+                    }
+                }
+            case let .failure(error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    public func registerV2(captcha: String, captchaId: String, publicKey: String, completion: @escaping (_ result: Result<RBRegisterResponse, Error>) -> ()) {
+        ParametersManager.shared.fetchConfig { configResult in
+            switch configResult {
+            case let .success(serverTime):
+                let nowTimeStamp: Double = Date().timeIntervalSince1970
+                if abs(nowTimeStamp - serverTime) > ServerConstant.maxClockShiftToleranceInSeconds {
+                    self.deviceTimeNotAlignedToServerTimeDetected()
+                    completion(.failure(NSError.deviceTime))
+                } else {
+                    let body: RBServerRegisterBodyV2 = RBServerRegisterBodyV2(captcha: captcha, captchaId: captchaId, clientPublicECDHKey: publicKey)
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("register"), method: .post, body: body) { result in
                         switch result {
                         case let .success(data):
                             do {
@@ -161,7 +199,7 @@ public final class Server: NSObject, RBServer {
                     completion(NSError.deviceTime)
                 } else {
                     let body: RBServerUnregisterBody = RBServerUnregisterBody(epochId: epochId, ebid: ebid, time: time, mac: mac)
-                    self.processRequest(url: self.baseUrl.appendingPathComponent("unregister"), method: .post, body: body) { result in
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("unregister"), method: .post, body: body) { result in
                         switch result {
                         case let .success(data):
                             do {
@@ -199,7 +237,7 @@ public final class Server: NSObject, RBServer {
                     completion(NSError.deviceTime)
                 } else {
                     let body: RBServerDeleteExposureBody = RBServerDeleteExposureBody(epochId: epochId, ebid: ebid, time: time, mac: mac)
-                    self.processRequest(url: self.baseUrl.appendingPathComponent("deleteExposureHistory"), method: .post, body: body) { result in
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("deleteExposureHistory"), method: .post, body: body) { result in
                         switch result {
                         case let .success(data):
                             do {
@@ -316,7 +354,6 @@ extension Server: URLSessionDelegate, URLSessionDataDelegate {
     
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         CertificatePinning.validateChallenge(challenge, certificateFile: certificateFile) { validated, credential in
-            print("Server request - Certificate (StopCovid) validated: \(validated)")
             validated ? completionHandler(.useCredential, credential) : completionHandler(.cancelAuthenticationChallenge, nil)
         }
     }

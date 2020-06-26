@@ -185,7 +185,7 @@
     "accessibility.hint.proximity.buttonDescription": "Schaltfläche zur Aktivierung von StopCovid",
     "accessibility.hint.proximity.buttonState.activated": "Aktiviert!",
     "accessibility.hint.proximity.buttonState.deactivated": "Deaktiviert!",
-    "captchaController.title": "Prüfung",
+    
     "captchaController.mainMessage.title": "Um die Sicherheit der App zu gewährleisten, müssen Sie beweisen, dass Sie ein Mensch sind",
     "captchaController.mainMessage.subtitle": "Beantworten Sie bitte die folgenden Fragen",
     "captchaController.mainMessage.action": "Tippen Sie bitte auf das Foto von",
@@ -272,7 +272,34 @@
     "common.error.proximityNotification": "Die Erstellung der Bluetooth-Benachrichtigung ist gescheitert. Versuchen Sie es noch einmal oder starten Sie Ihr Telefon neu.",
     "proximityController.error.bluetoothOff": "Damit StopCovid funktionieren kann, müssen Sie Bluetooth aktivieren",
     "onboarding.gesturesController.gesture7": "Tragen Sie einen Mund-Nasen-Schutz, wenn der Sicherheitsabstand von 1 Meter nicht gewahrt werden kann",
-    "common.error.clockNotAligned.title": "Veuillez utiliser l'horloge automatique",
-    "common.error.clockNotAligned.message": "Votre téléphone n’est pas à l’heure précise. Pour votre sécurité, StopCovid ne pourra pas fonctionner correctement avec une heure imprécise."
+    
+    "notification.channel.upgrade.title": "Aktualisieren",
+    "notification.upgrade.title": "Aktualisieren",
+    "notification.upgrade.message": "StopCovid braucht Sie: Starten Sie die App, da eine Aktualisierung von StopCovid erforderlich ist, um seine einwandfreie Funktionsweise zu gewährleisten.",
+    "common.error.clockNotAligned.title": "Verwenden Sie die automatische Uhr",
+    "common.error.clockNotAligned.message": "Ihr Telefon zeigt nicht die genaue Uhrzeit an. Zu Ihrer Sicherheit sei angemerkt, dass StopCovid ohne eine genaue Uhrzeit nicht ordnungsgemäß funktionieren kann.",
+    
+    "captchaController.title": "Prüfen",
+    "captchaController.mainMessage.image.title": "Bitte geben Sie nachstehend den Text ein, den Sie in dem kleinen Fenster sehen (mit Groß– und Kleinbuchstaben)",
+    "captchaController.mainMessage.image.subtitle": "Ihre Aktion gewährleistet den sicheren Zugang zu StopCovid.",
+    "captchaController.mainMessage.audio.title": "Bitte geben Sie nachstehend ein, was Sie gehört haben",
+    "captchaController.mainMessage.audio.subtitle": "Ihre Aktion gewährleistet den sicheren Zugang zu StopCovid.",
+    "captchaController.textField.image.placeholder": "Text aus dem Fenster eingeben",
+    "captchaController.textField.audio.placeholder": "Das Gehörte eingeben",
+    "captchaController.button.title": "Bestätigen",
+    "captchaController.alert.noAnswer.title": "Warnung",
+    "captchaController.alert.noAnswer.message": "Geben Sie eine Antwort ein, um bestätigen zu können.",
+    "captchaController.generate.image": "Einen anderen Text im Fenster anzeigen",
+    "captchaController.generate.sound": "Einen anderen Ton ausgeben",
+    "captchaController.switchToImage": "Die visuelle Version verwenden",
+    "captchaController.switchToAudio": "Die Audio-Version verwenden",
+    "accessibility.hint.captcha.image": "Captcha-Bild",
+    "accessibility.hint.captcha.audio.button.play": "Audio-Captcha hören",
+    "accessibility.hint.captcha.audio.button.pause": "Wiedergabe des Audio-Captchas anhalten",
+    
+    "captchaController.alert.invalidCode.title": "Attention",
+    "captchaController.alert.invalidCode.message": "The code you entered is not valid.",
+    
+    "proximityController.error.noBackgroundAppRefresh" : "The background app refresh is necessary. Tap to change this parameter."
 }
 

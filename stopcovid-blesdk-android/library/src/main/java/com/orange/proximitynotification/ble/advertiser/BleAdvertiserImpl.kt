@@ -15,7 +15,6 @@ import android.bluetooth.le.AdvertiseData
 import android.bluetooth.le.AdvertiseSettings
 import android.bluetooth.le.BluetoothLeAdvertiser
 import android.os.ParcelUuid
-import android.util.Log
 import com.orange.proximitynotification.ble.BleSettings
 import timber.log.Timber
 
@@ -26,11 +25,11 @@ class BleAdvertiserImpl(
 
     private var advertiseCallback: InnerAdvertiseCallback? = null
 
-    override fun start(data: ByteArray, callback: BleAdvertiser.Callback) {
-       Timber.d("Starting Advertising")
+    override fun start(data: ByteArray, callback: BleAdvertiser.Callback): Boolean {
+        Timber.d("Starting Advertising")
 
         doStop()
-        doStart(data, callback)
+        return doStart(data, callback)
     }
 
     override fun stop() {
@@ -38,19 +37,23 @@ class BleAdvertiserImpl(
         doStop()
     }
 
-    private fun doStart(data: ByteArray, callback: BleAdvertiser.Callback) {
-        advertiseCallback = InnerAdvertiseCallback(callback).also {
+    private fun doStart(data: ByteArray, callback: BleAdvertiser.Callback): Boolean {
+        advertiseCallback = InnerAdvertiseCallback(callback)
+
+        return runCatching {
             bluetoothAdvertiser.startAdvertising(
                 buildAdvertiseSettings(),
                 buildAdvertiseData(data),
-                it
+                advertiseCallback
             )
-        }
+        }.isSuccess
     }
 
     private fun doStop() {
         advertiseCallback?.let {
-            bluetoothAdvertiser.stopAdvertising(advertiseCallback)
+            runCatching {
+                bluetoothAdvertiser.stopAdvertising(advertiseCallback)
+            }
         }
         advertiseCallback = null
     }

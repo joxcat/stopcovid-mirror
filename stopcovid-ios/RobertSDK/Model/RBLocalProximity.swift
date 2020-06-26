@@ -10,7 +10,7 @@
 
 import UIKit
 
-public struct RBLocalProximity {
+public struct RBLocalProximity: Hashable {
 
     public let ecc: String
     public let ebid: String
@@ -18,7 +18,7 @@ public struct RBLocalProximity {
     public let timeFromHelloMessage: UInt16
     public let timeCollectedOnDevice: Int
     public let rssiRaw: Int
-    public let rssiCalibrated: Int
+    public var rssiCalibrated: Int
     public let tx: Int
 
     public init(ecc: String, ebid: String, mac: String, timeFromHelloMessage: UInt16, timeCollectedOnDevice: Int, rssiRaw: Int, rssiCalibrated: Int, tx: Int) {

@@ -2,6 +2,9 @@ stages:
   - build
   - verification
 
+before_script:
+  - export DEVELOPER_DIR=/Applications/Xcode11.5.app/Contents/Developer
+
 # Builds the library with the release configuration
 build-release:
   stage: build
@@ -13,14 +16,14 @@ build-release:
     paths:
       - build/*/*.a
   tags:
-    - xcode11.4
+    - xcode11.5
 
 # Tests the library
 test:
   stage: verification
   script:
-    - xcodebuild build-for-testing -scheme ProximityNotificationTests -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.4' 
-    - xcodebuild test -scheme ProximityNotificationTests -destination 'platform=iOS Simulator,name=iPhone 11,OS=13.4' 
+    - xcodebuild build-for-testing -scheme ProximityNotificationTests -destination 'platform=iOS Simulator,name=iPhone 11' 
+    - xcodebuild test -scheme ProximityNotificationTests -destination 'platform=iOS Simulator,name=iPhone 11' 
   tags:
-    - xcode11.4
+    - xcode11.5
 

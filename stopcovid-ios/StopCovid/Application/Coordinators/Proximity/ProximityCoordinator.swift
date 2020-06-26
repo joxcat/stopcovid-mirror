@@ -27,6 +27,8 @@ final class ProximityCoordinator: Coordinator {
     private func start() {
         let navigationChildController: UIViewController = CVNavigationChildController.controller(ProximityController(didTouchAbout: { [weak self] in
             self?.showAbout()
+        }, showCaptchaChallenge: { [weak self] captcha, didEnterCaptcha, didCancelCaptcha in
+            self?.showCaptchaChallenge(captcha: captcha, didEnterCaptcha: didEnterCaptcha, didCancelCaptcha: didCancelCaptcha)
         }, didTouchManageData: { [weak self] in
             self?.showManageData()
         }, didTouchPrivacy: { [weak self] in
@@ -61,6 +63,18 @@ final class ProximityCoordinator: Coordinator {
         let controller: UIViewController = CVNavigationChildController.controller(manageDataController)
         controller.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(controller, animated: true)
+    }
+    
+    private func showCaptchaChallenge(captcha: Captcha, didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), didCancelCaptcha: @escaping () -> ()) {
+        let captchaCoordinator: CaptchaCoordinator = CaptchaCoordinator(presentingController: navigationController, parent: self, captcha: captcha, didEnterCaptcha: { [weak self] id, answer in
+            self?.navigationController?.dismiss(animated: true) {
+                didEnterCaptcha(id, answer)
+            }
+            }, didCancelCaptcha: { [weak self] in
+                self?.navigationController?.dismiss(animated: true)
+                didCancelCaptcha()
+        })
+        addChild(coordinator: captchaCoordinator)
     }
     
 }

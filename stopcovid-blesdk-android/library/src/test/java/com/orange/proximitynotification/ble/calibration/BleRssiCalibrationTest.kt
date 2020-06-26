@@ -15,6 +15,7 @@ import com.googlecode.zohhak.api.TestWith
 import com.googlecode.zohhak.api.runners.ZohhakRunner
 import org.junit.runner.RunWith
 
+
 @RunWith(ZohhakRunner::class)
 class BleRssiCalibrationTest {
 
@@ -25,7 +26,7 @@ class BleRssiCalibrationTest {
             "10,1,1,8"
         ]
     )
-    fun calibrate_show_sum_rssi_grx_gtx(rssi: Int, gRx: Int, gTx: Int, expectedRssi: Int) {
+    fun calibrate_should_sum_rssi_grx_gtx(rssi: Int, gRx: Int, gTx: Int, expectedRssi: Int) {
 
         // Given
 
@@ -39,4 +40,5 @@ class BleRssiCalibrationTest {
         // Then
         Truth.assertThat(result).isEqualTo(expectedRssi)
     }
+
 }

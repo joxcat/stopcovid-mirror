@@ -184,7 +184,7 @@
     "accessibility.hint.proximity.buttonDescription": "Botón de activación de StopCovid",
     "accessibility.hint.proximity.buttonState.activated": "Activado",
     "accessibility.hint.proximity.buttonState.deactivated": "Desactivado",
-    "captchaController.title": "Verificación",
+    
     "captchaController.mainMessage.title": "Por la seguridad de la aplicación, necesitamos que nos demuestres que eres una persona",
     "captchaController.mainMessage.subtitle": "Respondiendo a algunas preguntas",
     "captchaController.mainMessage.action": "Selecciona la foto de",
@@ -271,6 +271,33 @@
     "common.error.proximityNotification": "Fallo en la creación de la notificación Bluetooth. Vuelve a intentarlo o reinicia tu teléfono.",
     "proximityController.error.bluetoothOff": "Para que StopCovid pueda funcionar debes activar el Bluetooth",
     "onboarding.gesturesController.gesture7": "Lleva mascarilla cuando no puedas respetar la distancia de seguridad de un metro",
-    "common.error.clockNotAligned.title": "Veuillez utiliser l'horloge automatique",
-    "common.error.clockNotAligned.message": "Votre téléphone n’est pas à l’heure précise. Pour votre sécurité, StopCovid ne pourra pas fonctionner correctement avec une heure imprécise."
+    
+    "notification.channel.upgrade.title": "Actualización",
+    "notification.upgrade.title": "Actualización",
+    "notification.upgrade.message": "StopCovid te necesita. Por favor, abre la app: es necesario instalar la actualización de StopCovid para que siga funcionando correctamente.",
+    "common.error.clockNotAligned.title": "Por favor, utiliza el reloj automático",
+    "common.error.clockNotAligned.message": "Tu teléfono no está en hora. Por tu seguridad, StopCovid no puede funcionar correctamente si la hora es inexacta.",
+    
+    "captchaController.title": "Verificación",
+    "captchaController.mainMessage.image.title": "Por favor, escribe el texto que aparece en la imagen (diferenciando entre mayúsculas y minúsculas)",
+    "captchaController.mainMessage.image.subtitle": "Gracias a tu acción, el acceso a StopCovid es más seguro.",
+    "captchaController.mainMessage.audio.title": "Por favor, escribe lo que oyes",
+    "captchaController.mainMessage.audio.subtitle": "Gracias a tu acción, el acceso a StopCovid es más seguro.",
+    "captchaController.textField.image.placeholder": "Escribe el texto de la imagen",
+    "captchaController.textField.audio.placeholder": "Escribe lo que oyes",
+    "captchaController.button.title": "Confirmar",
+    "captchaController.alert.noAnswer.title": "Atención",
+    "captchaController.alert.noAnswer.message": "Por favor, escribe una respuesta para poder confirmar.",
+    "captchaController.generate.image": "Mostrar otra imagen",
+    "captchaController.generate.sound": "Oír otro sonido",
+    "captchaController.switchToImage": "Utilizar la versión visual",
+    "captchaController.switchToAudio": "Utilizar la versión audio",
+    "accessibility.hint.captcha.image": "Imagen de captcha",
+    "accessibility.hint.captcha.audio.button.play": "Escuchar el captcha audio",
+    "accessibility.hint.captcha.audio.button.pause": "Parar la lectura del captcha audio",
+
+	"captchaController.alert.invalidCode.title": "Attention",
+    "captchaController.alert.invalidCode.message": "The code you entered is not valid.",
+    
+    "proximityController.error.noBackgroundAppRefresh" : "The background app refresh is necessary. Tap to change this parameter."
 }

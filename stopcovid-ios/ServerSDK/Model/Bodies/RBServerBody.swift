@@ -8,9 +8,9 @@
 //  Created by Lunabee Studio / Date - 23/04/2020 - for the STOP-COVID project.
 //
 
-import UIKit
+import Foundation
 
-protocol RBServerBody: Codable {
+protocol RBServerBody: Encodable {
 
     func toData() throws -> Data
     

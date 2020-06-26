@@ -1,0 +1,56 @@
+{
+  "config": [
+    {
+      "name": "app.randomStatusHour",
+      "value": 12
+    },
+    {
+      "name": "app.dataRetentionPeriod",
+      "value": 14
+    },
+    {
+      "name": "app.quarantinePeriod",
+      "value": 14
+    },
+    {
+      "name": "app.checkStatusFrequency",
+      "value": 6
+    },
+    {
+      "name": "app.minStatusRetryDuration",
+      "value": 0.6
+    },
+    {
+      "name": "app.preSymptomsSpan",
+      "value": 2
+    },
+    {
+      "name": "app.appAvailability",
+      "value": true
+    },
+    {
+      "name": "app.minHourContactNotif",
+      "value": 7
+    },
+    {
+      "name": "app.maxHourContactNotif",
+      "value": 19
+    },
+    {
+      "name": "ble.serviceUUID",
+      "value": "0000fd64-0000-1000-8000-00805f9b34fb"
+    },
+    {
+      "name": "ble.characteristicUUID",
+      "value": "a8f12d00-ee67-478b-b95f-65d599407756"
+    },
+    {
+      "name": "ble.backgroundServiceManufacturerData",
+      "value": "1.0.0.0.0.0.0.0.0.0.0.8.0.0.0.0.0"
+    },
+    {
+      "name": "ble.calibration",
+      "value": []
+    }
+  ]
+}

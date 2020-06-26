@@ -68,11 +68,9 @@ final class BluetoothProximityNotification: ProximityNotification {
         centralManager.stop()
         peripheralManager.stop()
         stopCacheExpirationTimer()
-        dispatchQueue.async {
-            self.scannedPeripheralForPeripheralIdentifier.removeAllValues()
-            self.bluetoothProximityPayloadForPeripheralIdentifier.removeAllValues()
-            self.connectionDateForPayloadIdentifier.removeAllValues()
-        }
+        scannedPeripheralForPeripheralIdentifier.removeAllValues()
+        bluetoothProximityPayloadForPeripheralIdentifier.removeAllValues()
+        connectionDateForPayloadIdentifier.removeAllValues()
     }
     
     private func proximityInfo(for bluetoothProximityPayload: BluetoothProximityPayload,
@@ -95,11 +93,9 @@ final class BluetoothProximityNotification: ProximityNotification {
         let timer = Timer(timeInterval: settings.cacheExpirationDelay / 5.0, repeats: true) { [weak self] _ in
             guard let `self` = self else { return }
             
-            self.dispatchQueue.async {
-                self.scannedPeripheralForPeripheralIdentifier.removeExpiredValues()
-                self.bluetoothProximityPayloadForPeripheralIdentifier.removeExpiredValues()
-                self.connectionDateForPayloadIdentifier.removeExpiredValues()
-            }
+            self.scannedPeripheralForPeripheralIdentifier.removeExpiredValues()
+            self.bluetoothProximityPayloadForPeripheralIdentifier.removeExpiredValues()
+            self.connectionDateForPayloadIdentifier.removeExpiredValues()
         }
         
         cacheExpirationTimer = timer

@@ -50,7 +50,11 @@ public protocol RBStorage {
     // MARK: - Status: last exposure time frame -
     func save(lastExposureTimeFrame: Int?)
     func lastExposureTimeFrame() -> Int?
-    
+
+    // MARK: - Status: last status request date -
+    func saveLastStatusRequestDate(_ date: Date?)
+    func lastStatusRequestDate() -> Date?
+
     // MARK: - Status: last status received date -
     func saveLastStatusReceivedDate(_ date: Date?)
     func lastStatusReceivedDate() -> Date?

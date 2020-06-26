@@ -34,7 +34,7 @@ class RemoteFileSyncManager: NSObject {
     
     func notifyObservers() {}
     
-    func processReceivedData(_ data: Data) {}
+    @discardableResult func processReceivedData(_ data: Data) -> Bool { fatalError("Must be overriden") }
     
     func createWorkingDirectoryIfNeeded() -> URL {
         let directoryUrl: URL = FileManager.libraryDirectory().appendingPathComponent(workingDirectoryName())
@@ -60,9 +60,12 @@ class RemoteFileSyncManager: NSObject {
             guard let data = data else { return }
             do {
                 let localUrl: URL = self.localFileUrl(for: languageCode)
-                self.processReceivedData(data)
-                try data.write(to: localUrl)
-                self.lastUpdateDate = Date()
+                if self.processReceivedData(data) {
+                    try data.write(to: localUrl)
+                    self.lastUpdateDate = Date()
+                } else {
+                    self.loadLocalFile()
+                }
                 self.lastLanguageCode = Locale.currentLanguageCode
                 DispatchQueue.main.async {
                     self.notifyObservers()
@@ -107,7 +110,6 @@ extension RemoteFileSyncManager: URLSessionDelegate {
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         CertificatePinning.validateChallenge(challenge, certificateFile: Constant.Server.resourcesCertificate) { validated, credential in
-            print("Remote file sync request - Certificate (StopCovid) validated: \(validated)")
             validated ? completionHandler(.useCredential, credential) : completionHandler(.cancelAuthenticationChallenge, nil)
         }
     }

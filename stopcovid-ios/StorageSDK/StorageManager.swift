@@ -23,6 +23,7 @@ public final class StorageManager: RBStorage {
         case proximityActivated
         case isAtRisk
         case lastExposureTimeFrame
+        case lastStatusRequestDate
         case lastStatusReceivedDate
         case isSick
         case positiveToSymptoms
@@ -183,6 +184,21 @@ public final class StorageManager: RBStorage {
         guard let lastExposureString = keychain.get(KeychainKey.lastExposureTimeFrame.rawValue), let lastExposure = Int(lastExposureString) else { return nil }
         return lastExposure
     }
+
+    // MARK: - Status: last status request date -
+       public func saveLastStatusRequestDate(_ date: Date?) {
+           if let date = date {
+               keychain.set("\(date.timeIntervalSince1970)", forKey: KeychainKey.lastStatusRequestDate.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+           } else {
+               keychain.delete(KeychainKey.lastStatusRequestDate.rawValue)
+           }
+           notifyStatusDataChanged()
+       }
+
+       public func lastStatusRequestDate() -> Date? {
+           guard let timestampString = keychain.get(KeychainKey.lastStatusRequestDate.rawValue), let timestamp = Double(timestampString) else { return nil }
+           return Date(timeIntervalSince1970: timestamp)
+       }
     
     // MARK: - Status: last status received date -
     public func saveLastStatusReceivedDate(_ date: Date?) {
