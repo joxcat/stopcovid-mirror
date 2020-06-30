@@ -414,7 +414,6 @@ public class CryptoGrpcServiceBaseImpl extends CryptoGrpcServiceImplImplBase {
                         true,
                         false,
                         enableEpochOverlapping, adjacentEpochMatchEnum);
-
             } else {
                 return manageEBIDDecryptRetry(ebid,
                         authRequestEpoch,
@@ -452,7 +451,6 @@ public class CryptoGrpcServiceBaseImpl extends CryptoGrpcServiceImplImplBase {
         switch (adjacentEpochMatchEnum) {
             case PREVIOUS:
                 log.warn("Retrying ebid decrypt with previous epoch");
-
                 return decryptEBIDAndCheckEpoch(ebid, authRequestEpoch - 1, false, false, false, AdjacentEpochMatchEnum.NONE);
             case NEXT:
                 log.warn("Retrying ebid decrypt with next epoch");

@@ -1487,7 +1487,6 @@ class CryptoServiceGrpcServerTest {
 //        when(this.cryptographicStorageService.getServerKey(epochId, time, true)).thenReturn(serverKeys[1]);
         when(this.cryptographicStorageService.getFederationKey()).thenReturn(this.federationKey);
 
-
         byte[] mac;
         byte[] ecc;
         try {
@@ -1661,7 +1660,6 @@ class CryptoServiceGrpcServerTest {
                     epochId);
             return;
         }
-
 
         // Given
         GetInfoFromHelloMessageRequest request = GetInfoFromHelloMessageRequest
