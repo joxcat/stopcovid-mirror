@@ -86,7 +86,7 @@ public class ScoringStrategyV2ServiceImpl implements ScoringStrategyService {
 	@Override
 	public ScoringResult execute(Contact contact) throws RobertScoringException {
 
-		final int epochDurationInMinutes = serverConfigurationService.getEpochDurationSecs() / 60;
+		final int epochDurationInMinutes = this.serverConfigurationService.getEpochDurationSecs() / 60;
 
 		// Variables
 		final List<Number>[] listRSSI = new ArrayList[epochDurationInMinutes];
@@ -109,10 +109,30 @@ public class ScoringStrategyV2ServiceImpl implements ScoringStrategyService {
 		double t0 = messageDetails.get(0).getTimeCollectedOnDevice();
 
 		int vectorSize = messageDetails.size();
+
+		double tf = messageDetails.get(vectorSize - 1).getTimeCollectedOnDevice();
+
+		/* Over run verification */
+		if ( (tf - t0) > (epochDurationInMinutes * 60 + configuration.getEpochTolerance()) )
+		{
+			String errorMessage = String.format(
+					"Skip contact because some hello messages are coming too late: %s sec after first message",
+					tf - t0);
+			log.error(errorMessage);
+
+			// Initializing values to 0.0 will ignore this problematic contact in the overall summation
+			return ScoringResult.builder()
+					.rssiScore(0.0)
+					.duration(0)
+					.nbContacts(0)
+					.build();
+		}
+
 		for (int k = 0; k < vectorSize; k++) {
 			HelloMessageDetail messageDetail = messageDetails.get(k);
 			double timestampDelta = messageDetail.getTimeCollectedOnDevice() - t0;
 			int index = (int) Math.floor(timestampDelta / 60.0);
+			index = index > epochDurationInMinutes ? epochDurationInMinutes - 1 : index;
 			if ((index >= 0) && (index < epochDurationInMinutes)) {
 				// Drop error Hello messages with too big RSSI (corresponding to errors in iOS
 				// and Android)
@@ -122,12 +142,7 @@ public class ScoringStrategyV2ServiceImpl implements ScoringStrategyService {
 					int rssi = Math.min(messageDetail.getRssiCalibrated(), configuration.getRssiMax());
 					listRSSI[index].add(rssi);
 				}
-			} else {
-				String errorMessage = String.format("Epoch in minutes too big {}", index);
-				log.error(errorMessage);
-				throw new RobertScoringException(errorMessage);
 			}
-
 		}
 
 		// Phase 2: Average RSSI

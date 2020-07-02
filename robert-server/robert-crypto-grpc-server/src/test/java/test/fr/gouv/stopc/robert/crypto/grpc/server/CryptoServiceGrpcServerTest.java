@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -86,6 +87,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import test.fr.gouv.stopc.robert.crypto.grpc.server.utils.CryptoTestUtils;
+
 
 @Slf4j
 @ExtendWith(SpringExtension.class)

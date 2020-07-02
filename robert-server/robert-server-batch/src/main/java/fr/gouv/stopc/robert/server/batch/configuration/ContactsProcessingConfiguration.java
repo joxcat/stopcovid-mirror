@@ -5,6 +5,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import fr.gouv.stopc.robert.server.batch.processor.RegistrationProcessor;
+import fr.gouv.stopc.robertserver.database.model.Registration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -29,6 +32,7 @@ import fr.gouv.stopc.robertserver.database.model.Contact;
 import fr.gouv.stopc.robertserver.database.service.ContactService;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 
+@Slf4j
 @Configuration
 @EnableBatchProcessing
 public class ContactsProcessingConfiguration {
@@ -47,13 +51,21 @@ public class ContactsProcessingConfiguration {
 
 	private final PropertyLoader propertyLoader;
 
+	private final JobBuilderFactory jobBuilderFactory;
+
+	private final StepBuilderFactory stepBuilderFactory;
+
+
+
 	@Inject
 	public ContactsProcessingConfiguration(final IServerConfigurationService serverConfigurationService,
 										   final IRegistrationService registrationService,
 										   final ContactService contactService,
 										   final ICryptoServerGrpcClient cryptoServerClient,
 										   final ScoringStrategyService scoringStrategyService,
-										   final PropertyLoader propertyLoader
+										   final PropertyLoader propertyLoader,
+										   final JobBuilderFactory jobBuilderFactory,
+										   final StepBuilderFactory stepBuilderFactory
 			) {
 		
 		this.serverConfigurationService = serverConfigurationService;
@@ -62,23 +74,52 @@ public class ContactsProcessingConfiguration {
 		this.cryptoServerClient = cryptoServerClient;
 		this.scoringStrategyService = scoringStrategyService;
 		this.propertyLoader =  propertyLoader;
-
+		this.stepBuilderFactory = stepBuilderFactory;
+		this.jobBuilderFactory = jobBuilderFactory;
 	}
 
 	@Bean
-	public Job readReport(JobBuilderFactory jobBuilderFactory, Step step) {
-		return jobBuilderFactory.get("processContacts").flow(step).end().build();
+	public Job scoreAndProcessRisks(Step stepContact, Step stepRegistration) {
+
+		BatchMode batchMode;
+
+		try {
+			batchMode = BatchMode.valueOf(this.propertyLoader.getBatchMode());
+		} catch (IllegalArgumentException e) {
+			log.error("Unrecognized batch mode {}", this.propertyLoader.getBatchMode());
+			batchMode = BatchMode.NONE;
+		}
+
+		if (batchMode == BatchMode.FULL_REGISTRATION_SCAN_COMPUTE_RISK) {
+			log.info("Launching registration batch (No contact scoring, risk computation)");
+			return this.jobBuilderFactory.get("processRegistration").flow(stepRegistration).end().build();
+		} else if (batchMode == BatchMode.SCORE_CONTACTS_AND_COMPUTE_RISK) {
+			log.info("Launching contact batch (Contact scoring, Risk computation)");
+			return this.jobBuilderFactory.get("processContacts").flow(stepContact).end().build();
+		}
+		return null;
 	}
 
 	@Bean
-	public Step step(StepBuilderFactory stepBuilderFactory, MongoItemReader<Contact> mongoItemReader,
-			MongoItemWriter<Contact> mongoItemWriter, IServerConfigurationService serverConfigurationService) {
-		return stepBuilderFactory.get("read").<Contact, Contact>chunk(CHUNK_SIZE).reader(mongoItemReader)
-				.processor(contactsProcessor()).writer(mongoItemWriter).build();
+	public Step stepContact(
+			MongoItemReader<Contact> mongoContactItemReader,
+			MongoItemWriter<Contact> mongoContactItemWriter) {
+
+		return this.stepBuilderFactory.get("readContacts").<Contact, Contact>chunk(CHUNK_SIZE).reader(mongoContactItemReader)
+					.processor(contactsProcessor()).writer(mongoContactItemWriter).build();
 	}
 
 	@Bean
-	public MongoItemReader<Contact> mongoItemReader(MongoTemplate mongoTemplate) {
+	public Step stepRegistration(
+			MongoItemReader<Registration> mongoRegistrationItemReader,
+			MongoItemWriter<Registration> mongoRegistrationItemWriter) {
+
+		return this.stepBuilderFactory.get("readRegistrations").<Registration, Registration>chunk(CHUNK_SIZE).reader(mongoRegistrationItemReader)
+				.processor(registrationsProcessor()).writer(mongoRegistrationItemWriter).build();
+	}
+
+	@Bean
+	public MongoItemReader<Contact> mongoContactItemReader(MongoTemplate mongoTemplate) {
 		
 	    MongoItemReader<Contact> reader = new MongoItemReader<>();
 
@@ -97,11 +138,37 @@ public class ContactsProcessingConfiguration {
 	}
 
 	@Bean
-	public MongoItemWriter<Contact> mongoItemWriter(MongoTemplate mongoTemplate) {
+	public MongoItemReader<Registration> mongoRegistrationItemReader(MongoTemplate mongoTemplate) {
+
+		MongoItemReader<Registration> reader = new MongoItemReader<>();
+
+		reader.setTemplate(mongoTemplate);
+
+		reader.setSort(new HashMap<String, Sort.Direction>() {{
+
+			put("_id", Direction.DESC);
+
+		}});
+
+		reader.setTargetType(Registration.class);
+
+		reader.setQuery("{exposedEpochs: {$ne: []}}");
+		return reader;
+	}
+
+	@Bean
+	public MongoItemWriter<Contact> mongoContactItemWriter(MongoTemplate mongoTemplate) {
 		Map<String, Direction> sortDirection = new HashMap<>();
 		sortDirection.put("timeInsertion", Direction.DESC);
 		MongoItemWriter<Contact> writer = new MongoItemWriterBuilder<Contact>().template(mongoTemplate)
 				.collection("contacts_to_process").build();
+		return writer;
+	}
+
+	@Bean
+	public MongoItemWriter<Registration> mongoRegistrationItemWriter(MongoTemplate mongoTemplate) {
+		MongoItemWriter<Registration> writer = new MongoItemWriterBuilder<Registration>().template(mongoTemplate)
+				.collection("Registration").build();
 		return writer;
 	}
 
@@ -115,5 +182,21 @@ public class ContactsProcessingConfiguration {
 				this.scoringStrategyService,
 				this.propertyLoader) {
 		};
+	}
+
+	@Bean
+	public ItemProcessor<Registration, Registration> registrationsProcessor() {
+		return new RegistrationProcessor(
+				this.serverConfigurationService,
+				this.registrationService,
+				this.scoringStrategyService,
+				this.propertyLoader) {
+		};
+	}
+
+	private enum BatchMode {
+		NONE,
+		FULL_REGISTRATION_SCAN_COMPUTE_RISK,
+		SCORE_CONTACTS_AND_COMPUTE_RISK;
 	}
 }

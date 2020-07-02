@@ -5,10 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.*;
-import fr.gouv.stopc.robert.server.batch.service.impl.ScoringStrategyV2ServiceImpl;
+import fr.gouv.stopc.robert.server.batch.utils.ScoringUtils;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.util.CollectionUtils;
 
@@ -130,30 +129,14 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
         }
 
         List<EpochExposition> epochsToKeep = step9ScoreAndAddContactInListOfExposedEpochs(contact, epoch, registration);
-        int latestRiskEpoch = registration.getLatestRiskEpoch();
 
-        // Only consider epochs that are after the last notification for scoring
-        List<EpochExposition> scoresSinceLastNotif = CollectionUtils.isEmpty(epochsToKeep) ?
-                new ArrayList<>()
-                : epochsToKeep.stream()
-                .filter(ep -> ep.getEpochId() > latestRiskEpoch)
-                .collect(Collectors.toList());
-
-        // TODO: delay to end of batch for all registrations and epochs that have been affected
-        // If at risk detection is delayed to end of batch, no aggregate scoring here
-        // If not, scoring must be done here. If at risk trigger on single exposed epoch,
-        // then remove loop and get epochExposition[epoch] and launch aggregate but protect setAtRisk if set to true
-        int numberOfAtRiskExposedEpochs = 0;
-        for (EpochExposition epochExposition : scoresSinceLastNotif) {
-            double finalRiskForEpoch = this.scoringStrategy.aggregate(epochExposition.getExpositionScores());
-            if (finalRiskForEpoch > this.propertyLoader.getRiskThreshold()) {
-                log.info("Risk detected. Scored aggregate risk for epoch {}: {}", epochExposition.getEpochId(), finalRiskForEpoch);
-                numberOfAtRiskExposedEpochs++;
-                break;
-            }
-        }
-
-        registration.setAtRisk(numberOfAtRiskExposedEpochs >= this.scoringStrategy.getNbEpochsScoredAtRiskThreshold());
+        ScoringUtils.updateRegistrationIfRisk(
+                registration,
+                epochsToKeep,
+                this.serverConfigurationService.getServiceTimeStart(),
+                this.propertyLoader.getRiskThreshold(),
+                this.scoringStrategy
+        );
 
         this.registrationService.saveRegistration(registration);
         this.contactService.delete(contact);
@@ -227,27 +210,14 @@ public class ContactProcessor implements ItemProcessor<Contact, Contact> {
                     .build());
         }
 
-        List<EpochExposition> epochsToKeep = getExposedEpochsWithoutEpochsOlderThanContagiousPeriod(exposedEpochs);
+        int currentEpochId = TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart());
+        List<EpochExposition> epochsToKeep = ScoringUtils.getExposedEpochsWithoutEpochsOlderThanContagiousPeriod(
+                exposedEpochs,
+                currentEpochId,
+                this.propertyLoader.getContagiousPeriod(),
+                this.serverConfigurationService.getEpochDurationSecs());
         registrationRecord.setExposedEpochs(epochsToKeep);
         return epochsToKeep;
-    }
-
-    /**
-     * Keep epochs within the contagious period
-     * @param exposedEpochs
-     * @return
-     */
-    private List<EpochExposition> getExposedEpochsWithoutEpochsOlderThanContagiousPeriod(List<EpochExposition> exposedEpochs) {
-        int currentEpochId = TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart());
-
-        // Purge exposed epochs list from epochs older than contagious period (C_T)
-        return CollectionUtils.isEmpty(exposedEpochs) ?
-                new ArrayList<>()
-                : exposedEpochs.stream().filter(epoch -> {
-            int nbOfEpochsToKeep = (this.propertyLoader.getContagiousPeriod() * 24 * 3600)
-                    / this.serverConfigurationService.getEpochDurationSecs();
-            return (currentEpochId - epoch.getEpochId()) <= nbOfEpochsToKeep;
-        }).collect(Collectors.toList());
     }
 
     private long castIntegerToLong(int x, int nbOfSignificantBytes) {

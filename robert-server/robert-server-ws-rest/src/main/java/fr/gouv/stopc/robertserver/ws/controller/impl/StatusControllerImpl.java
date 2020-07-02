@@ -130,39 +130,22 @@ public class StatusControllerImpl implements IStatusController {
 		// Request is valid
 		// (now iterating through steps from section "If the ESR_REQUEST_A,i is valid, the server:", p11 of spec)
 		// Step #1: Set SRE with current epoch number
-		record.setLastStatusRequestEpoch(epoch);
+		record.setLastStatusRequestEpoch(currentEpoch);
 
 		// Step #2: Risk and score were processed during batch, simple lookup
 		boolean atRisk = record.isAtRisk();
-		boolean newRiskDetected = false;
 
-		if (!record.isNotified()) {
-			// Step #3: Set UserNotified to true if at risk
-			// If was never notified and batch flagged a risk, notify
-			// and remember last exposed epoch as new starting point for subsequent risk notifications
-			if (atRisk) {
-				newRiskDetected = true;
-				record.setAtRisk(false);
-				record.setNotified(true);
-				int lastExposedEpoch = findLastExposedEpoch(record.getExposedEpochs());
-				record.setLatestRiskEpoch(lastExposedEpoch);
-			}
-		} else {
-			// Has already been notified he was at risk
-
-			// Batch marked a new risk since latestRiskEpoch
-			// Update latestRiskEpoch to latest exposed epoch
-			if (atRisk) {
-				newRiskDetected = true;
-				record.setAtRisk(false);
-				int lastExposedEpoch = findLastExposedEpoch(record.getExposedEpochs());
-				record.setLatestRiskEpoch(lastExposedEpoch);
-			}
+		// Step #3: Set UserNotified to true if at risk
+		// If was never notified and batch flagged a risk, notify
+		// and remember last exposed epoch as new starting point for subsequent risk notifications
+		if (atRisk) {
+			record.setAtRisk(false);
+			record.setNotified(true);
 		}
 
 		// Include new EBIDs and ECCs for next M epochs
 		StatusResponseDto statusResponse = StatusResponseDto.builder()
-				.atRisk(newRiskDetected)
+				.atRisk(atRisk)
 				.config(getClientConfig())
 				.tuples(Base64.encode(tuples))
 				.build();
