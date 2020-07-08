@@ -8,6 +8,10 @@ import lombok.Getter;
 public enum MessageConstants {
 
 	SUCCESSFUL_OPERATION("Successful operation"),
+	
+	UNSUCCESSFUL_OPERATION("Unsuccessful operation"),
+
+	UNAUTHORIZED_OPERATION("Unauthorized operation"),
 
 	INVALID_AUTHENTICATION("Invalid authentication"),
 

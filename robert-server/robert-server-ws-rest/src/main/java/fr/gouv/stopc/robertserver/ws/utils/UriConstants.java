@@ -17,4 +17,6 @@ public final class UriConstants {
 
 	public static final String DELETE_HISTORY = "/deleteExposureHistory";
 
+	public static final String CAPTCHA = "/captcha";
+
 }

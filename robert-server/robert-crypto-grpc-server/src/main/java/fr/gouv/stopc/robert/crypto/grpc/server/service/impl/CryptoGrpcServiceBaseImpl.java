@@ -4,7 +4,12 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -27,6 +32,10 @@ import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusRequest;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusResponse;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetInfoFromHelloMessageRequest;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetInfoFromHelloMessageResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.HSMCacheStatusRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.HSMCacheStatusResponse;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.ReloadHSMRequest;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.ReloadHSMResponse;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.ICryptoServerConfigurationService;
 import fr.gouv.stopc.robert.crypto.grpc.server.service.IECDHKeyService;
 import fr.gouv.stopc.robert.crypto.grpc.server.storage.cryptographic.service.ICryptographicStorageService;
@@ -77,6 +86,30 @@ public class CryptoGrpcServiceBaseImpl extends CryptoGrpcServiceImplImplBase {
         this.clientStorageService = clientStorageService;
         this.cryptographicStorageService = cryptographicStorageService;
         this.propertyLoader = propertyLoader;
+    }
+
+    @Override
+    public void reloadHSM(ReloadHSMRequest request, StreamObserver<ReloadHSMResponse> responseObserver) {
+
+        boolean success = this.cryptographicStorageService.reloadHSM(
+                request.getPin(),
+                request.getConfigFileName());
+
+        responseObserver.onNext(ReloadHSMResponse.newBuilder()
+                .setSuccess(success)
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getHSMCacheStatus(HSMCacheStatusRequest request, StreamObserver<HSMCacheStatusResponse> responseObserver) {
+
+        List<String> cachedKeys = this.cryptographicStorageService.getHSMCacheStatus();
+
+        responseObserver.onNext(HSMCacheStatusResponse.newBuilder()
+                .addAllAliases(cachedKeys)
+                .build());
+        responseObserver.onCompleted();
     }
 
     @Override

@@ -1,34 +1,33 @@
 package fr.gouv.stopc.robertserver.ws.controller.impl;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusResponse;
-import fr.gouv.stopc.robertserver.database.model.ApplicationConfigurationModel;
-import fr.gouv.stopc.robertserver.ws.dto.ClientConfigDto;
 import org.bson.internal.Base64;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.google.protobuf.ByteString;
-
-import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusResponse;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
+import fr.gouv.stopc.robertserver.database.model.ApplicationConfigurationModel;
 import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IApplicationConfigService;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 import fr.gouv.stopc.robertserver.ws.controller.IStatusController;
+import fr.gouv.stopc.robertserver.ws.dto.ClientConfigDto;
 import fr.gouv.stopc.robertserver.ws.dto.StatusResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
 import fr.gouv.stopc.robertserver.ws.service.AuthRequestValidationService;
 import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.vo.StatusVo;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -127,10 +126,22 @@ public class StatusControllerImpl implements IStatusController {
 			return Optional.of(ResponseEntity.badRequest().build());
 		}
 
+		if (epochDistance < 0) {
+		    log.warn("The ESR request epoch difference is negative {}, "
+		            + "because the last ESR request epoch is {} and currentEpoch is {} ",
+		            epochDistance,
+		            record.getLastStatusRequestEpoch(),
+		            currentEpoch);
+		}
 		// Request is valid
 		// (now iterating through steps from section "If the ESR_REQUEST_A,i is valid, the server:", p11 of spec)
 		// Step #1: Set SRE with current epoch number
+		int previousLastStatusRequestEpoch = record.getLastStatusRequestEpoch();
 		record.setLastStatusRequestEpoch(currentEpoch);
+		log.info("The registration previous last status epoch request was {} and the next epoch, {}, will be the current epoch {}",
+		        previousLastStatusRequestEpoch,
+		        record.getLastStatusRequestEpoch(),
+		        currentEpoch);
 
 		// Step #2: Risk and score were processed during batch, simple lookup
 		boolean atRisk = record.isAtRisk();

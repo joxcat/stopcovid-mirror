@@ -1,6 +1,49 @@
 package test.fr.gouv.stopc.robertserver.ws;
 
+import static fr.gouv.stopc.robertserver.ws.config.Config.API_V1;
+import static fr.gouv.stopc.robertserver.ws.config.Config.API_V2;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.net.URI;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Optional;
+
+import javax.crypto.KeyGenerator;
+import javax.inject.Inject;
+
+import org.bson.internal.Base64;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.google.protobuf.ByteString;
+
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdResponse;
 import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
@@ -18,36 +61,6 @@ import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.utils.UriConstants;
 import fr.gouv.stopc.robertserver.ws.vo.UnregisterRequestVo;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.internal.Base64;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.crypto.KeyGenerator;
-import javax.inject.Inject;
-import java.net.URI;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
@@ -56,8 +69,12 @@ import static org.mockito.Mockito.*;
 @TestPropertySource("classpath:application.properties")
 @Slf4j
 public class UnregisterControllerWsRestTest {
-	@Value("${controller.path.prefix}")
-	private String pathPrefix;
+
+    @Value("${controller.path.prefix}" + API_V1)
+    private String pathPrefix_V1;
+
+    @Value("${controller.path.prefix}" + API_V2)
+    private String pathPrefix;
 
 	@Inject
 	private TestRestTemplate restTemplate;
@@ -77,13 +94,13 @@ public class UnregisterControllerWsRestTest {
 	private CryptoService cryptoService;
 
 	@MockBean
-	ICryptoServerGrpcClient cryptoServerClient;
+	private ICryptoServerGrpcClient cryptoServerClient;
+
+	@Autowired
+    private PropertyLoader propertyLoader;
 
 	@Autowired
 	private IServerConfigurationService serverConfigurationService;
-
-	@Autowired
-	private PropertyLoader propertyLoader;
 
 	private int currentEpoch;
 
@@ -139,11 +156,22 @@ public class UnregisterControllerWsRestTest {
 		verify(this.registrationService, never()).delete(ArgumentMatchers.any());
 	}
 
+    /** Test the access for API V1, should not be used since API V2 */
+    @Test
+    public void testAccessV1() {
+    	acceptOldEBIDValueEpochSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefix).path(UriConstants.UNREGISTER).build().encode().toUri());
+    }
+
+    /** {@link #acceptOldEBIDValueEpochSucceeds(URI)} and shortcut to test for API V2 exposure */
+    @Test
+	public void testAcceptOldEBIDValueEpochSucceeds() {
+    	acceptOldEBIDValueEpochSucceeds(this.targetUrl);
+    }
+
 	/**
 	 * Business requirement: app can use an old EBID to perform its request
 	 */
-	@Test
-	public void testAcceptOldEBIDValueEpochSucceeds() {
+	protected void acceptOldEBIDValueEpochSucceeds(URI targetUrl) {
 
 		// Given
 		byte[] idA = this.generateKey(5);
@@ -177,7 +205,7 @@ public class UnregisterControllerWsRestTest {
 		this.requestEntity = new HttpEntity<>(this.requestBody, this.headers);
 
 		// When
-		ResponseEntity<UnregisterResponseDto> response = this.restTemplate.exchange(this.targetUrl.toString(),
+		ResponseEntity<UnregisterResponseDto> response = this.restTemplate.exchange(targetUrl.toString(),
 				HttpMethod.POST, this.requestEntity, UnregisterResponseDto.class);
 
 		// Given

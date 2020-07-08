@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,7 +37,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -88,9 +90,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import test.fr.gouv.stopc.robert.crypto.grpc.server.utils.CryptoTestUtils;
 
-
 @Slf4j
 @ExtendWith(SpringExtension.class)
+@TestPropertySource(locations = "classpath:application.properties")
 class CryptoServiceGrpcServerTest {
 
     private final static String UNEXPECTED_FAILURE_MESSAGE = "Should not fail";
@@ -98,6 +100,9 @@ class CryptoServiceGrpcServerTest {
     private final static int NUMBER_OF_DAYS_FOR_BUNDLES = 4;
 
     private final static int MAX_EPOCH_DOUBLE_KS_CHECK = 672;
+
+    @Value("${robert.server.time-start:20200601}")
+    private String timeStart;
 
     final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
 
@@ -130,14 +135,16 @@ class CryptoServiceGrpcServerTest {
     void beforeEach() throws IOException {
 
         serverConfigurationService = new ICryptoServerConfigurationService() {
-           long timeStartNtp = TimeUtils.convertUnixStoNtpSeconds(LocalDate.of(2020, 6, 1).atStartOfDay().toEpochSecond(ZoneOffset.UTC));
+            final LocalDate ld = LocalDate.of(2020,6,1);
+            final ZonedDateTime zdt = ld.atStartOfDay().atZone(ZoneId.of("UTC"));
+            long timeStartNtp = TimeUtils.convertUnixMillistoNtpSeconds(zdt.toInstant().toEpochMilli());
 
-           @Override
-            public long getServiceTimeStart() {
-                return timeStartNtp;
-            }
+            @Override
+             public long getServiceTimeStart() {
+                 return timeStartNtp;
+             }
 
-        };
+         };
 
         cryptoService = new CryptoServiceImpl();
 
@@ -258,8 +265,8 @@ class CryptoServiceGrpcServerTest {
     }
 
     private boolean checkTuplesContentMatchesKeysForDays(Collection<CryptoGrpcServiceBaseImpl.EphemeralTupleJson> decodedTuples,
-                                                      int epochId,
-                                                      byte[][] serverKeys) {
+            int epochId,
+            byte[][] serverKeys) {
         ArrayList<CryptoGrpcServiceBaseImpl.EphemeralTupleJson> list = new ArrayList(decodedTuples);
 
         int offset = TimeUtils.remainingEpochsForToday(epochId);
@@ -421,10 +428,10 @@ class CryptoServiceGrpcServerTest {
     }
 
     private AuthRequestBundle generateAuthRequestBundleWithTimeDeltaAndOtherKS(byte[] id,
-                                                                               byte[] keyForMac,
-                                                                               DigestSaltEnum digestSalt,
-                                                                               long timeDelta,
-                                                                               OtherKSEnum otherKs) {
+            byte[] keyForMac,
+            DigestSaltEnum digestSalt,
+            long timeDelta,
+            OtherKSEnum otherKs) {
         long time = getCurrentTimeNTPSeconds();
         int epochId = TimeUtils.getNumberOfEpochsBetween(
                 this.serverConfigurationService.getServiceTimeStart(),
@@ -440,29 +447,29 @@ class CryptoServiceGrpcServerTest {
 
         byte[] ksToUseToEncryptEBID;
         switch(otherKs) {
-            case PREVIOUS:
-                ksToUseToEncryptEBID = ksPrevious;
-                break;
-            case NEXT:
-                ksToUseToEncryptEBID = ksNext;
-                break;
-            case NONE:
-            default:
-                ksToUseToEncryptEBID = ks;
-                break;
+        case PREVIOUS:
+            ksToUseToEncryptEBID = ksPrevious;
+            break;
+        case NEXT:
+            ksToUseToEncryptEBID = ksNext;
+            break;
+        case NONE:
+        default:
+            ksToUseToEncryptEBID = ks;
+            break;
         }
-        
+
         byte[] ebid = generateEbid(id, epochId, ksToUseToEncryptEBID);
         doReturn(Arrays.copyOf(ks, ks.length))
-                .when(this.cryptographicStorageService).getServerKey(
-                        epochId,
-                        this.serverConfigurationService.getServiceTimeStart(),
-                        false);
+        .when(this.cryptographicStorageService).getServerKey(
+                epochId,
+                this.serverConfigurationService.getServiceTimeStart(),
+                false);
         doReturn(Arrays.copyOf(ksPrevious, ksPrevious.length))
-                .when(this.cryptographicStorageService).getServerKey(
-                        epochId,
-                        this.serverConfigurationService.getServiceTimeStart(),
-                        true);
+        .when(this.cryptographicStorageService).getServerKey(
+                epochId,
+                this.serverConfigurationService.getServiceTimeStart(),
+                true);
 
         return new AuthRequestBundle().builder()
                 .ebid(ebid)
@@ -1137,7 +1144,7 @@ class CryptoServiceGrpcServerTest {
         when(this.cryptographicStorageService.getServerKeys(this.currentEpochId,
                 this.serverConfigurationService.getServiceTimeStart(),
                 4))
-                .thenReturn(serverKeys);
+        .thenReturn(serverKeys);
 
         // Given
         GetIdFromStatusRequest request = GetIdFromStatusRequest
@@ -1355,7 +1362,7 @@ class CryptoServiceGrpcServerTest {
         when(this.cryptographicStorageService.getServerKeys(this.currentEpochId,
                 this.serverConfigurationService.getServiceTimeStart(),
                 4))
-                .thenReturn(serverKeys);
+        .thenReturn(serverKeys);
 
         // Given
         GetIdFromStatusRequest request = GetIdFromStatusRequest
@@ -1397,7 +1404,7 @@ class CryptoServiceGrpcServerTest {
         when(this.cryptographicStorageService.getServerKeys(this.currentEpochId,
                 this.serverConfigurationService.getServiceTimeStart(),
                 4))
-                .thenReturn(serverKeys);
+        .thenReturn(serverKeys);
 
         // Given
         GetIdFromStatusRequest request = GetIdFromStatusRequest
@@ -1434,11 +1441,11 @@ class CryptoServiceGrpcServerTest {
     }
 
     private HelloMessageBundle generateHelloMessage(byte[] id,
-                                                    byte[][] serverKeys,
-                                                    byte[] keyForMac,
-                                                    DigestSaltEnum digestSalt,
-                                                    int delta,
-                                                    OtherKSEnum otherKSEnum) {
+            byte[][] serverKeys,
+            byte[] keyForMac,
+            DigestSaltEnum digestSalt,
+            int delta,
+            OtherKSEnum otherKSEnum) {
 
         final LocalDateTime ldt = LocalDateTime.of(2020, 6, 1, 00, 00);
         final ZonedDateTime zdt = ldt.atZone(ZoneId.of("UTC"));
@@ -1452,41 +1459,41 @@ class CryptoServiceGrpcServerTest {
         byte[] ksNext = ByteUtils.generateRandom(24);
 
         doReturn(ks).when(this.cryptographicStorageService)
-                .getServerKey(epochId,
-                        this.serverConfigurationService.getServiceTimeStart(),
-                        false);
+        .getServerKey(epochId,
+                this.serverConfigurationService.getServiceTimeStart(),
+                false);
         doReturn(ksNext).when(this.cryptographicStorageService)
-                .getServerKey(epochId + 1,
-                        this.serverConfigurationService.getServiceTimeStart(),
-                        false);
+        .getServerKey(epochId + 1,
+                this.serverConfigurationService.getServiceTimeStart(),
+                false);
         doReturn(ksPrevious).when(this.cryptographicStorageService)
-                .getServerKey(epochId -1,
-                        this.serverConfigurationService.getServiceTimeStart(),
-                        false);
+        .getServerKey(epochId -1,
+                this.serverConfigurationService.getServiceTimeStart(),
+                false);
         doReturn(ksPrevious).when(this.cryptographicStorageService)
-                .getServerKey(epochId,
-                        this.serverConfigurationService.getServiceTimeStart(),
-                        true);
+        .getServerKey(epochId,
+                this.serverConfigurationService.getServiceTimeStart(),
+                true);
 
         byte[] serverKey;
         switch(otherKSEnum) {
-            case PREVIOUS:
-                serverKey = ksPrevious;
-                break;
-            case NEXT:
-                serverKey = ksNext;
-                break;
-            case NONE:
-            default:
-                serverKey = ks;
-                break;
+        case PREVIOUS:
+            serverKey = ksPrevious;
+            break;
+        case NEXT:
+            serverKey = ksNext;
+            break;
+        case NONE:
+        default:
+            serverKey = ks;
+            break;
         }
 
         byte[] ebid = generateEbid(id, epochId, serverKey);
 
         //when(this.cryptographicStorageService.getServerKeys(epochId, time, 4)).thenReturn(serverKeys);
-//        when(this.cryptographicStorageService.getServerKey(epochId, time, false)).thenReturn(serverKeys[2]);
-//        when(this.cryptographicStorageService.getServerKey(epochId, time, true)).thenReturn(serverKeys[1]);
+        //        when(this.cryptographicStorageService.getServerKey(epochId, time, false)).thenReturn(serverKeys[2]);
+        //        when(this.cryptographicStorageService.getServerKey(epochId, time, true)).thenReturn(serverKeys[1]);
         when(this.cryptographicStorageService.getFederationKey()).thenReturn(this.federationKey);
 
         byte[] mac;
@@ -1640,6 +1647,7 @@ class CryptoServiceGrpcServerTest {
         new SecureRandom().nextBytes(serverKeys[3]);
 
         int delta = 5000;
+
         Optional<ClientIdentifierBundle> clientIdentifierBundle = createId();
         HelloMessageBundle bundle = generateHelloMessage(
                 clientIdentifierBundle.get().getId(),
@@ -1648,7 +1656,7 @@ class CryptoServiceGrpcServerTest {
                 DigestSaltEnum.HELLO,
                 delta,
                 OtherKSEnum.PREVIOUS);
-    
+
         final LocalDateTime ldt = LocalDateTime.of(2020, 6, 1, 00, 00);
         final ZonedDateTime zdt = ldt.atZone(ZoneId.of("UTC"));
         long otherTimeStart = TimeUtils.convertUnixMillistoNtpSeconds(zdt.toInstant().toEpochMilli());
@@ -1875,6 +1883,4 @@ class CryptoServiceGrpcServerTest {
             }
         }
     }
-
-
 }

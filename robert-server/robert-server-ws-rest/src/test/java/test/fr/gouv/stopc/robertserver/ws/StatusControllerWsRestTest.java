@@ -1,5 +1,7 @@
 package test.fr.gouv.stopc.robertserver.ws;
 
+import static fr.gouv.stopc.robertserver.ws.config.Config.API_V1;
+import static fr.gouv.stopc.robertserver.ws.config.Config.API_V2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -73,8 +75,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StatusControllerWsRestTest {
 
-    @Value("${controller.path.prefix}")
+    @Value("${controller.path.prefix}" + API_V1)
+    private String pathPrefix_V1;
+
+    @Value("${controller.path.prefix}" + API_V2)
     private String pathPrefix;
+
+    @Value("${robert.server.status-request-minimum-epoch-gap}")
+    private Integer statusRequestMinimumEpochGap;
 
     @Inject
     private TestRestTemplate restTemplate;
@@ -119,8 +127,8 @@ public class StatusControllerWsRestTest {
         this.currentEpoch = this.getCurrentEpoch();
 
         when(this.propertyLoader.getEsrLimit()).thenReturn(-1);
-        when(this.propertyLoader.getRequestTimeDeltaTolerance()).thenReturn(60);
-        doReturn(2).when(this.propertyLoader).getStatusRequestMinimumEpochGap();
+        when(this.propertyLoader.getStatusRequestMinimumEpochGap()).thenReturn(this.statusRequestMinimumEpochGap);
+
         this.serverKey = this.generateKey(24);
     }
 
@@ -513,8 +521,19 @@ public class StatusControllerWsRestTest {
         return res;
     }
 
+    /** Test the access for API V1, should not be used since API V2 */
     @Test
-    public void testStatusRequestAtRiskSucceeds() {
+    public void testAccessV1() {
+    	statusRequestAtRiskSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefix_V1).path(UriConstants.STATUS).build().encode().toUri());
+    }
+
+    /** {@link #statusRequestAtRiskSucceeds(URI)} and shortcut to test for API V2 exposure */
+    @Test
+    public void testStatusRequestAtRiskSucceedsV2() {
+    	statusRequestAtRiskSucceeds(this.targetUrl);
+    }
+
+    protected void statusRequestAtRiskSucceeds(URI targetUrl) {
 
         // Given
         byte[] idA = this.generateKey(5);
@@ -550,7 +569,7 @@ public class StatusControllerWsRestTest {
         this.requestEntity = new HttpEntity<>(this.statusBody, this.headers);
 
         // When
-        ResponseEntity<StatusResponseDto> response = this.restTemplate.exchange(this.targetUrl.toString(),
+        ResponseEntity<StatusResponseDto> response = this.restTemplate.exchange(targetUrl.toString(),
                 HttpMethod.POST, this.requestEntity, StatusResponseDto.class);
 
         // Then
@@ -800,6 +819,7 @@ public class StatusControllerWsRestTest {
         verify(this.registrationService, times(1)).findById(idA);
         verify(this.registrationService, times(0)).saveRegistration(reg);
     }
+ 
     @Test
     public void testStatusRequestESRThrottleShouldSucceedsWhenLimitIsZero() {
 

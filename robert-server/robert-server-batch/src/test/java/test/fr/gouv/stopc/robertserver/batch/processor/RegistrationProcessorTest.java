@@ -10,7 +10,6 @@ import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import test.fr.gouv.stopc.robertserver.batch.utils.ProcessorTestUtils;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +30,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Slf4j
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { RobertServerBatchApplication.class })
@@ -75,6 +74,7 @@ public class RegistrationProcessorTest {
         this.currentEpoch = TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart());
 
         // TODO: Mock configuration service to simulate overall service having been started since 14 days in order to test purge
+        this.ARBITRARY_SCORE_EPOCH_START = this.currentEpoch - (14 * 96) + new SecureRandom().nextInt(100) + 1;
     }
 
     @Test
@@ -128,11 +128,11 @@ public class RegistrationProcessorTest {
         Double[] expositionsForSecondEpoch = new Double[] { 14.5 };
         ArrayList<EpochExposition> expositions = new ArrayList<>();
         expositions.add(EpochExposition.builder()
-                .epochId(this.currentEpoch - ARBITRARY_SCORE_EPOCH_START)
+                .epochId(ARBITRARY_SCORE_EPOCH_START)
                 .expositionScores(Arrays.asList(expositionsForFirstEpoch))
                 .build());
         expositions.add(EpochExposition.builder()
-                .epochId(this.currentEpoch - ARBITRARY_SCORE_EPOCH_START + 7)
+                .epochId(ARBITRARY_SCORE_EPOCH_START + 7)
                 .expositionScores(Arrays.asList(expositionsForSecondEpoch))
                 .build());
 
@@ -158,11 +158,11 @@ public class RegistrationProcessorTest {
         Double[] expositionsForSecondEpoch = new Double[] { };
         ArrayList<EpochExposition> expositions = new ArrayList<>();
         expositions.add(EpochExposition.builder()
-                .epochId(this.currentEpoch - ARBITRARY_SCORE_EPOCH_START)
+                .epochId(ARBITRARY_SCORE_EPOCH_START)
                 .expositionScores(Arrays.asList(expositionsForFirstEpoch))
                 .build());
         expositions.add(EpochExposition.builder()
-                .epochId(this.currentEpoch - ARBITRARY_SCORE_EPOCH_START + 7)
+                .epochId(ARBITRARY_SCORE_EPOCH_START + 7)
                 .expositionScores(Arrays.asList(expositionsForSecondEpoch))
                 .build());
 
@@ -185,11 +185,11 @@ public class RegistrationProcessorTest {
         Double[] expositionsForSecondEpoch = new Double[] { };
         ArrayList<EpochExposition> expositions = new ArrayList<>();
         expositions.add(EpochExposition.builder()
-                .epochId(this.currentEpoch - ARBITRARY_SCORE_EPOCH_START)
+                .epochId( ARBITRARY_SCORE_EPOCH_START)
                 .expositionScores(Arrays.asList(expositionsForFirstEpoch))
                 .build());
         expositions.add(EpochExposition.builder()
-                .epochId(this.currentEpoch - ARBITRARY_SCORE_EPOCH_START + 7)
+                .epochId(ARBITRARY_SCORE_EPOCH_START + 7)
                 .expositionScores(Arrays.asList(expositionsForSecondEpoch))
                 .build());
 
@@ -202,11 +202,11 @@ public class RegistrationProcessorTest {
         Double[] expositionsForSecondEpoch = new Double[] { };
         ArrayList<EpochExposition> expositions = new ArrayList<>();
         expositions.add(EpochExposition.builder()
-                .epochId(this.currentEpoch - ARBITRARY_SCORE_EPOCH_START)
+                .epochId(ARBITRARY_SCORE_EPOCH_START)
                 .expositionScores(Arrays.asList(expositionsForFirstEpoch))
                 .build());
         expositions.add(EpochExposition.builder()
-                .epochId(this.currentEpoch - ARBITRARY_SCORE_EPOCH_START + 7)
+                .epochId(ARBITRARY_SCORE_EPOCH_START + 7)
                 .expositionScores(Arrays.asList(expositionsForSecondEpoch))
                 .build());
 

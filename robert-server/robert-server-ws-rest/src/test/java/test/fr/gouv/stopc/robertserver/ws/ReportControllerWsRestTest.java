@@ -1,5 +1,7 @@
 package test.fr.gouv.stopc.robertserver.ws;
 
+import static fr.gouv.stopc.robertserver.ws.config.Config.API_V1;
+import static fr.gouv.stopc.robertserver.ws.config.Config.API_V2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,8 +50,8 @@ import fr.gouv.stopc.robertserver.ws.service.ContactDtoService;
 import fr.gouv.stopc.robertserver.ws.service.IRestApiService;
 import fr.gouv.stopc.robertserver.ws.utils.MessageConstants;
 import fr.gouv.stopc.robertserver.ws.utils.UriConstants;
-import fr.gouv.stopc.robertserver.ws.vo.HelloMessageDetailVo;
 import fr.gouv.stopc.robertserver.ws.vo.ContactVo;
+import fr.gouv.stopc.robertserver.ws.vo.HelloMessageDetailVo;
 import fr.gouv.stopc.robertserver.ws.vo.ReportBatchRequestVo;
 
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
@@ -71,7 +73,10 @@ public class ReportControllerWsRestTest {
     @MockBean
     private IRestApiService restApiService;
 
-    @Value("${controller.path.prefix}")
+    @Value("${controller.path.prefix}" + API_V1)
+    private String pathPrefix_V1;
+
+    @Value("${controller.path.prefix}" + API_V2)
     private String pathPrefix;
 
     private URI targetUrl;
@@ -232,8 +237,19 @@ public class ReportControllerWsRestTest {
         }
     }
 
+    /** Test the access for API V1, should not be used since API V2 */
     @Test
-    public void testReportContactHistorySucceeds() {
+    public void testAccessV1() {
+    	reportContactHistorySucceeds(UriComponentsBuilder.fromUriString(this.pathPrefix).path(UriConstants.REPORT).build().encode().toUri());
+    }
+
+    /** {@link #reportContactHistorySucceeds(URI)} and shortcut to test for API V2 exposure */
+    @Test
+    public void testReportContactHistorySucceedsV2() {
+    	reportContactHistorySucceeds(this.targetUrl);
+    }
+
+    protected void reportContactHistorySucceeds(URI targetUrl) {
 
         try {
             // Given

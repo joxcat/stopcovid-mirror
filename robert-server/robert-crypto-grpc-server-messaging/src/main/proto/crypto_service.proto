@@ -27,6 +27,24 @@ service CryptoGrpcServiceImpl {
 	rpc getIdFromStatus(GetIdFromStatusRequest) returns (GetIdFromStatusResponse){}
 	rpc getInfoFromHelloMessage(GetInfoFromHelloMessageRequest) returns (GetInfoFromHelloMessageResponse){}
 	rpc deleteId(DeleteIdRequest) returns (DeleteIdResponse){}
+	rpc reloadHSM(ReloadHSMRequest) returns (ReloadHSMResponse){}
+	rpc getHSMCacheStatus(HSMCacheStatusRequest) returns (HSMCacheStatusResponse){}
+}
+
+message ReloadHSMRequest {
+	string pin = 1;
+	string configFileName = 2;
+}
+
+message ReloadHSMResponse {
+	bool success = 1;
+}
+
+message HSMCacheStatusRequest {
+}
+
+message HSMCacheStatusResponse {
+	repeated string aliases = 1;
 }
 
 message CreateRegistrationRequest {

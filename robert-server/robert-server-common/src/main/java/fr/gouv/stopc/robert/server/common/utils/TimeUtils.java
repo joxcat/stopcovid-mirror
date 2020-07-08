@@ -25,18 +25,9 @@ public final class TimeUtils {
      * @return time converted in NTP in seconds
      */
     public static long convertUnixMillistoNtpSeconds(final long unixTimeInMillis) {
-        return convertUnixStoNtpSeconds((unixTimeInMillis / 1000));
+        return (unixTimeInMillis / 1000) + SECONDS_FROM_01_01_1900;
     }
 
-    /**
-     * Convert UNIX timestamp in seconds to NTP seconds
-     * @param unixTimeInS UNIX time in millis
-     * @return time converted in NTP in seconds
-     */
-    public static long convertUnixStoNtpSeconds(final long unixTimeInS) {
-        return unixTimeInS + SECONDS_FROM_01_01_1900;
-    }
-    
     /**
      * ref {@see <a href="https://stackoverflow.com/questions/29112071/how-to-convert-ntp-time-to-unix-epoch-time-in-c-language-linux/29138806#29138806">Stackoverflow NTP to unix time interval</a>}
      * @param from the timestamp from which to calculate the number of epochs (e.g. ROBERT service time start); as NTP timestamp in seconds

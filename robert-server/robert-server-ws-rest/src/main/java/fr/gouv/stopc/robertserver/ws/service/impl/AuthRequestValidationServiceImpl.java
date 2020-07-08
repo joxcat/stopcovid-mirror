@@ -20,7 +20,6 @@ import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robertserver.ws.service.AuthRequestValidationService;
-import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.vo.AuthRequestVo;
 import fr.gouv.stopc.robertserver.ws.vo.StatusVo;
 import lombok.extern.slf4j.Slf4j;
@@ -35,16 +34,17 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
     private final IServerConfigurationService serverConfigurationService;
 
     private final ICryptoServerGrpcClient cryptoServerClient;
-    
-    private final PropertyLoader propertyLoader;
 
     @Inject
     public AuthRequestValidationServiceImpl(final IServerConfigurationService serverConfigurationService,
-                                            final ICryptoServerGrpcClient cryptoServerClient,
-                                            final PropertyLoader propertyLoader) {
+                                            final ICryptoServerGrpcClient cryptoServerClient) {
         this.serverConfigurationService = serverConfigurationService;
         this.cryptoServerClient = cryptoServerClient;
-        this.propertyLoader = propertyLoader;
+    }
+
+    private ResponseEntity createErrorIdNotFound() {
+        log.info("Discarding authenticated request because id unknown (fake or was deleted)");
+        return ResponseEntity.notFound().build();
     }
 
     private ResponseEntity createErrorValidationFailed() {

@@ -18,4 +18,5 @@ public interface ICryptoServerGrpcClient {
 	Optional<GetInfoFromHelloMessageResponse> getInfoFromHelloMessage(GetInfoFromHelloMessageRequest request);
 
 	Optional<DeleteIdResponse> deleteId(DeleteIdRequest request);
+
 }

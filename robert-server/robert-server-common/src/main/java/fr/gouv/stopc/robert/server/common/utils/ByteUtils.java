@@ -50,6 +50,7 @@ public final class ByteUtils {
         } else if (b == null) {
             byte[] copy = new byte[a.length];
             System.arraycopy(a, 0, copy, 0, a.length);
+            return copy;
         }
 
         byte[] res = new byte[a.length + b.length];

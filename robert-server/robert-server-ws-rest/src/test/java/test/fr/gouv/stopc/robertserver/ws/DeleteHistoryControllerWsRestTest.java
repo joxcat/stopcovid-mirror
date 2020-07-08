@@ -1,5 +1,7 @@
 package test.fr.gouv.stopc.robertserver.ws;
 
+import static fr.gouv.stopc.robertserver.ws.config.Config.API_V1;
+import static fr.gouv.stopc.robertserver.ws.config.Config.API_V2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,9 +22,6 @@ import java.util.Optional;
 import javax.crypto.KeyGenerator;
 import javax.inject.Inject;
 
-import com.google.protobuf.ByteString;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthResponse;
-import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoSkinny64;
 import org.bson.internal.Base64;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,12 +46,16 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.google.protobuf.ByteString;
+
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthResponse;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robert.server.crypto.service.CryptoService;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
+import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoSkinny64;
 import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
@@ -70,8 +73,12 @@ import lombok.extern.slf4j.Slf4j;
 @TestPropertySource("classpath:application.properties")
 @Slf4j
 public class DeleteHistoryControllerWsRestTest {
-	@Value("${controller.path.prefix}")
-	private String pathPrefix;
+	
+    @Value("${controller.path.prefix}" + API_V1)
+    private String pathPrefix_V1;
+
+    @Value("${controller.path.prefix}" + API_V2)
+    private String pathPrefix;
 
 	@Inject
 	private TestRestTemplate restTemplate;
@@ -91,13 +98,13 @@ public class DeleteHistoryControllerWsRestTest {
 	private CryptoService cryptoService;
 
 	@MockBean
-	ICryptoServerGrpcClient cryptoServerClient;
+	private ICryptoServerGrpcClient cryptoServerClient;
+
+	@Autowired
+	private PropertyLoader propertyLoader;
 
 	@Autowired
 	private IServerConfigurationService serverConfigurationService;
-
-	@Autowired
-    private PropertyLoader propertyLoader;
 
 	private int currentEpoch;
 
@@ -166,8 +173,19 @@ public class DeleteHistoryControllerWsRestTest {
 		callWsAndAssertResponse(reg, this.requestBody, HttpStatus.OK, 1, 0);
 	}
 
+    /** Test the access for API V1, should not be used since API V2 */
 	@Test
-	public void testDeleteHistoryWithExposedEpochsSucceeds() {
+	public void testAccessV1() {
+    	deleteHistoryWithExposedEpochsSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefix).path(UriConstants.DELETE_HISTORY).build().encode().toUri());
+    }
+
+    /** {@link #deleteHistoryWithExposedEpochsSucceeds(URI)} and shortcut to test for API V2 exposure */
+	@Test
+	public void testDeleteHistoryWithExposedEpochsSucceedsV2() {
+		deleteHistoryWithExposedEpochsSucceeds(this.targetUrl);
+	}
+	
+	protected  void deleteHistoryWithExposedEpochsSucceeds(URI targetUrl) {
 		// GIVEN
 		byte[] idA = this.generateKey(5);
 		byte[] kA = this.generateKA();
@@ -200,7 +218,7 @@ public class DeleteHistoryControllerWsRestTest {
 		this.requestEntity = new HttpEntity<>(this.requestBody, this.headers);
 
 		// WHEN
-		ResponseEntity<DeleteHistoryResponseDto> response = this.restTemplate.exchange(this.targetUrl.toString(),
+		ResponseEntity<DeleteHistoryResponseDto> response = this.restTemplate.exchange(targetUrl.toString(),
 				HttpMethod.POST, this.requestEntity, DeleteHistoryResponseDto.class);
 
 		// THEN
@@ -309,7 +327,7 @@ public class DeleteHistoryControllerWsRestTest {
 		byte[] kA = this.generateKA();
 
 		byte[][] reqContent = createEBIDTimeMACFor(idA, kA, this.currentEpoch,
-				0 - ((int) this.propertyLoader.getRequestTimeDeltaTolerance() + 1));
+				0 - (this.propertyLoader.getRequestTimeDeltaTolerance() + 1));
 
 		this.requestBody = DeleteHistoryRequestVo.builder().ebid(Base64.encode(reqContent[0]))
 				.time(Base64.encode(reqContent[1])).mac(Base64.encode(reqContent[2])).build();

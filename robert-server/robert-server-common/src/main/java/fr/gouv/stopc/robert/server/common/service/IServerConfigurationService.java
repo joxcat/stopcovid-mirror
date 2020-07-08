@@ -25,5 +25,4 @@ public interface IServerConfigurationService {
      */
     int getEpochBundleDurationInDays();
 
-
 }

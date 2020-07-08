@@ -18,5 +18,35 @@ public interface IRegistrationService {
 	void deleteAll();
 
 	List<Registration> findAll();
-	
+
+	/**
+	 * Return the number of users detected a new time at risk (isNotified = true and
+	 * atRisk=true)
+	 * 
+	 * @return the number
+	 */
+	Long countNbUsersAtRiskAgain();
+
+	/**
+	 * Return the number of users detected a new time at risk (isNotified = false
+	 * and atRisk = true)
+	 * 
+	 * @return the number
+	 */
+	Long countNbUsersAtRiskAndNotNotified();
+
+	/**
+	 * Return the number of users notified (isNotified = true, atRisk = false)
+	 * 
+	 * @return the number
+	 */
+	Long countNbUsersNotified();
+
+	/**
+	 * Return the number of users notified (isNotified = true, atRisk = false)
+	 * 
+	 * @return the number
+	 */
+	Long countNbExposedUsersButNotAtRisk();
+
 }
