@@ -1,6 +1,12 @@
 package fr.gouv.stopc.robert.crypto.grpc.server.service.impl;
 
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.ProviderException;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Objects;
@@ -9,16 +15,13 @@ import java.util.Optional;
 import javax.crypto.KeyAgreement;
 import javax.inject.Inject;
 
+import org.springframework.stereotype.Service;
+
+import fr.gouv.stopc.robert.crypto.grpc.server.service.IECDHKeyService;
 import fr.gouv.stopc.robert.crypto.grpc.server.storage.cryptographic.service.ICryptographicStorageService;
 import fr.gouv.stopc.robert.crypto.grpc.server.storage.model.ClientIdentifierBundle;
 import fr.gouv.stopc.robert.server.crypto.exception.RobertServerCryptoException;
 import fr.gouv.stopc.robert.server.crypto.structure.impl.CryptoHMACSHA256;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import org.springframework.stereotype.Service;
-
-import fr.gouv.stopc.robert.crypto.grpc.server.service.IECDHKeyService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -65,7 +68,7 @@ public class ECDHKeyServiceImpl implements IECDHKeyService {
             keyAgreement.doPhase(clientPublicKeyAsKey, true);
             return keyAgreement.generateSecret();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException
-                | InvalidKeyException | IllegalStateException e) {
+                | InvalidKeyException | IllegalStateException | ProviderException e) {
             log.error("Unable to generate ECDH Keys due to {}", e.getMessage());
         }
 

@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>fr.gouv.stopc</groupId>
 		<artifactId>robert-server</artifactId>
-		<version>1.4.0-SNAPSHOT</version>
+		<version>1.5.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>robert-server-batch</artifactId>
@@ -93,13 +93,13 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Micrometer core dependency  -->
+		<!-- Micrometer core dependency -->
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>
 		</dependency>
 
-		<!-- Micrometer Prometheus registry  -->
+		<!-- Micrometer Prometheus registry -->
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>

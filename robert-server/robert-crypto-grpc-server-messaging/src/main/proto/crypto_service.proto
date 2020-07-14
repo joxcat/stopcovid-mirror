@@ -1,4 +1,3 @@
-
 // Copyright 2015 The gRPC Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +46,11 @@ message HSMCacheStatusResponse {
 	repeated string aliases = 1;
 }
 
+message ErrorMessage {
+	int32 code = 1;
+	string description = 2;
+}
+
 message CreateRegistrationRequest {
 	bytes clientPublicKey = 1;
 	int32 fromEpochId = 2;
@@ -57,6 +61,7 @@ message CreateRegistrationRequest {
 message CreateRegistrationResponse {
 	bytes idA = 1;
 	bytes tuples = 2;
+	ErrorMessage error = 3;
 }
 
 message GetIdFromAuthRequest {
@@ -70,6 +75,7 @@ message GetIdFromAuthRequest {
 message GetIdFromAuthResponse {
 	bytes idA = 1;
 	int32 epochId = 2;
+	ErrorMessage error = 3;
 }
 
 message GetIdFromStatusRequest {
@@ -86,6 +92,7 @@ message GetIdFromStatusResponse {
 	bytes idA = 1;
 	int32 epochId = 2;
 	bytes tuples = 3;
+	ErrorMessage error = 4;
 }
 
 message GetInfoFromHelloMessageRequest {
@@ -94,12 +101,14 @@ message GetInfoFromHelloMessageRequest {
 	bytes mac = 3;
 	int32 timeSent = 4; // time hello message was sent from emitting device (unsigned 16 bits)
 	int64 timeReceived = 5; // time hello message was received on device (unsigned 32 bits, stored in long)
+	bytes serverCountryCode = 6;
 }
 
 message GetInfoFromHelloMessageResponse {
 	bytes countryCode = 1;
 	bytes idA = 2;
 	int32 epochId = 3;
+	ErrorMessage error = 4;
 }
 
 message DeleteIdRequest {
@@ -111,4 +120,5 @@ message DeleteIdRequest {
 
 message DeleteIdResponse {
 	bytes idA = 1;
+	ErrorMessage error = 2;
 }

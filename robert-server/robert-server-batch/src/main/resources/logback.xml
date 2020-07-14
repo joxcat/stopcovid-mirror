@@ -38,7 +38,7 @@
                 <maxFileSize>10MB</maxFileSize>
         </rollingPolicy>
     </appender>
-     
+
     <!-- LOG everything at INFO level -->
     <root level="info">
         <appender-ref ref="RollingFile" />

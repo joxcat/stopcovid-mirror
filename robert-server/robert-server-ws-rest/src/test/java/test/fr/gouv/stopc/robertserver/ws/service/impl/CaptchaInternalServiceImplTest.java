@@ -147,12 +147,12 @@ public class CaptchaInternalServiceImplTest {
         when(this.propertyLoader.getCaptchaInternalVerificationUrl()).thenReturn(this.captchaInternalVerificationUrl);
         when(this.propertyLoader.getCaptchaInternalSuccessCode()).thenReturn(this.captchaInternalSuccessCode);
         when(this.restTemplate.postForEntity(any(String.class), any(), any()))
-        	.thenThrow( new CaptchaInternalAccessException(HttpStatus.NOT_FOUND
-        			, CaptchaInternalErrorMessage.builder().httpStatus(HttpStatus.NOT_FOUND).message("The captcha does not exist").code("0002").build()
-        			, "{\r\n" + 
-        			"    \"code\": \"0002\",\r\n" + 
-        			"    \"message\": \"The captcha does not exist\"\r\n" + 
-        			"}"));
+                .thenThrow( new CaptchaInternalAccessException(HttpStatus.NOT_FOUND,
+                        CaptchaInternalErrorMessage.builder().httpStatus(HttpStatus.NOT_FOUND).message("The captcha does not exist").code("0002").build(),
+                        "{\r\n"
+                        + "    \"code\": \"0002\",\r\n"
+                        + "    \"message\": \"The captcha does not exist\"\r\n"
+                        + "}"));
 
         // When
         boolean isVerified = this.captchaStrictServiceImpl.verifyCaptcha(this.registerVo);

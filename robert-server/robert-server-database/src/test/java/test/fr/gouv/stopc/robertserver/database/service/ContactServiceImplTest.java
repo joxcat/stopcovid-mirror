@@ -1,7 +1,7 @@
 package test.fr.gouv.stopc.robertserver.database.service;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -47,7 +47,7 @@ public class ContactServiceImplTest {
 		this.contactService.saveContacts(contacts);
 
 		// Then
-		verify(this.contactRepository).saveAll(contacts);
+		verify(this.contactRepository).insert(contacts);
 	}
 
 	@Test
@@ -74,6 +74,31 @@ public class ContactServiceImplTest {
 	}
 
 	@Test
+	public void testDeleteAllWhenNotNull() {
+
+		// When
+		this.contactService.deleteAll(null);
+
+		// Then
+		verify(this.contactRepository, never()).deleteAll(any());
+	}
+
+	@Test
+	public void testDeleteAllWhenIsNull() {
+
+		// Given
+		List<Contact> contacts = new ArrayList<>();
+		contacts.add(new Contact());
+		contacts.add(new Contact());
+
+		// When
+		this.contactService.deleteAll(contacts);
+
+		// Then
+		verify(this.contactRepository).deleteAll(contacts);
+	}
+
+	@Test
 	public void testFindAll() {
 
 		// When
@@ -81,5 +106,15 @@ public class ContactServiceImplTest {
 
 		// Then
 		verify(this.contactRepository).findAll();
+	}
+
+	@Test
+	public void testCount() {
+
+		// When
+		this.contactService.count();
+
+		// Then
+		verify(this.contactRepository).count();
 	}
 }

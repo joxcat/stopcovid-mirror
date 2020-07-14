@@ -13,6 +13,9 @@ public interface ContactService {
 
 	void deleteAll();
 
+	void deleteAll(List<Contact> contacts);
+
 	List<Contact> findAll();
 
+	Long count();
 }

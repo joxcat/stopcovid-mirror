@@ -1,15 +1,15 @@
 package test.fr.gouv.stopc.robertserver.batch.processor;
 
-import fr.gouv.stopc.robert.server.batch.RobertServerBatchApplication;
-import fr.gouv.stopc.robert.server.batch.configuration.RobertServerBatchConfiguration;
-import fr.gouv.stopc.robert.server.batch.processor.RegistrationProcessor;
-import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
-import fr.gouv.stopc.robert.server.batch.utils.PropertyLoader;
-import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
-import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
-import fr.gouv.stopc.robertserver.database.model.EpochExposition;
-import fr.gouv.stopc.robertserver.database.model.Registration;
-import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,16 +19,20 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import fr.gouv.stopc.robert.server.batch.RobertServerBatchApplication;
+import fr.gouv.stopc.robert.server.batch.configuration.ContactsProcessingConfiguration;
+import fr.gouv.stopc.robert.server.batch.configuration.RobertServerBatchConfiguration;
+import fr.gouv.stopc.robert.server.batch.processor.RegistrationProcessor;
+import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
+import fr.gouv.stopc.robert.server.batch.utils.PropertyLoader;
+import fr.gouv.stopc.robert.server.batch.writer.RegistrationItemWriter;
+import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
+import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
+import fr.gouv.stopc.robertserver.database.model.EpochExposition;
+import fr.gouv.stopc.robertserver.database.model.Registration;
+import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 import test.fr.gouv.stopc.robertserver.batch.utils.ProcessorTestUtils;
-
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
@@ -41,6 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class RegistrationProcessorTest {
 
     private RegistrationProcessor registrationProcessor;
+
+    private RegistrationItemWriter registrationItemWriter;
 
     @Autowired
     private IServerConfigurationService serverConfigurationService;
@@ -71,6 +77,9 @@ public class RegistrationProcessorTest {
                 scoringStrategyService,
                 propertyLoader
         );
+
+        this.registrationItemWriter = new RegistrationItemWriter(registrationService, ContactsProcessingConfiguration.TOTAL_REGISTRATION_COUNT_KEY);
+
         this.currentEpoch = TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart());
 
         // TODO: Mock configuration service to simulate overall service having been started since 14 days in order to test purge
@@ -110,6 +119,8 @@ public class RegistrationProcessorTest {
 
         this.registrationProcessor.process(this.registration.get());
 
+        this.registrationItemWriter.write(Collections.singletonList(this.registration.get()));
+
         Optional<Registration> reg = this.registrationService.findById(this.registration.get().getPermanentIdentifier());
         assertTrue(reg.isPresent() && !reg.get().isAtRisk());
         assertEquals(reg.get().getLatestRiskEpoch(), 0);
@@ -139,6 +150,8 @@ public class RegistrationProcessorTest {
         this.registration.get().setExposedEpochs(expositions);
 
         this.registrationProcessor.process(this.registration.get());
+
+        this.registrationItemWriter.write(Collections.singletonList(this.registration.get()));
 
         Optional<Registration> reg = this.registrationService.findById(this.registration.get().getPermanentIdentifier());
         assertTrue(reg.isPresent() && reg.get().isAtRisk());
@@ -170,6 +183,8 @@ public class RegistrationProcessorTest {
 
         this.registrationProcessor.process(this.registration.get());
 
+        this.registrationItemWriter.write(Collections.singletonList(this.registration.get()));
+
         Optional<Registration> reg = this.registrationService.findById(this.registration.get().getPermanentIdentifier());
         assertTrue(reg.isPresent() && reg.get().isAtRisk());
         assertEquals(reg.get().getLatestRiskEpoch(), this.currentEpoch);
@@ -185,7 +200,7 @@ public class RegistrationProcessorTest {
         Double[] expositionsForSecondEpoch = new Double[] { };
         ArrayList<EpochExposition> expositions = new ArrayList<>();
         expositions.add(EpochExposition.builder()
-                .epochId( ARBITRARY_SCORE_EPOCH_START)
+                .epochId(ARBITRARY_SCORE_EPOCH_START)
                 .expositionScores(Arrays.asList(expositionsForFirstEpoch))
                 .build());
         expositions.add(EpochExposition.builder()
@@ -255,6 +270,8 @@ public class RegistrationProcessorTest {
         this.registration.get().setExposedEpochs(expositions);
 
         this.registrationProcessor.process(this.registration.get());
+
+        this.registrationItemWriter.write(Collections.singletonList(this.registration.get()));
 
         Optional<Registration> reg = this.registrationService.findById(this.registration.get().getPermanentIdentifier());
         assertTrue(reg.isPresent() && riskDetected == reg.get().isAtRisk());

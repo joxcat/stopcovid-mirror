@@ -1,5 +1,9 @@
 package test.fr.gouv.stopc.robert.server.common.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -9,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class TimeUtilsTest {
@@ -58,7 +61,6 @@ public class TimeUtilsTest {
         for (int i = 0; i < MAX_TEST; i++) {
             dates[i] = TimeUtils.getDateFromEpoch(i, getServiceTimeStart());
         }
-        //log.info("{}", dates);
 
         boolean error = false;
         int i = 0;
@@ -76,10 +78,7 @@ public class TimeUtilsTest {
             int i1 = remainingEpochsForDay[i];
             int i2 = TimeUtils.remainingEpochsForToday(i);
             if (i1 != i2) {
-                log.error("getDateFrom={}; remainingEpochs={}; i={}", i1, i2, i);
                 error = true;
-            } else {
-                log.info("getDateFrom={}; remainingEpochs={}; i={}", i1, i2, i);
             }
         }
         assertTrue(!error);

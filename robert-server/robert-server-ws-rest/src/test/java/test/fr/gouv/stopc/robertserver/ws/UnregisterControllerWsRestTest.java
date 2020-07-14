@@ -211,7 +211,7 @@ public class UnregisterControllerWsRestTest {
 		// Given
 		assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(this.cryptoServerClient, times(1)).deleteId(ArgumentMatchers.any());
-        verify(this.registrationService, times(1)).findById(ArgumentMatchers.any());
+        verify(this.registrationService, times(2)).findById(ArgumentMatchers.any());
 		verify(this.registrationService, times(1)).delete(ArgumentMatchers.any());
 	}
 
@@ -477,7 +477,7 @@ public class UnregisterControllerWsRestTest {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue(response.getBody().getSuccess());
 		verify(this.cryptoServerClient, times(1)).deleteId(ArgumentMatchers.any());
-		verify(this.registrationService, times(1)).findById(idA);
+		verify(this.registrationService, times(2)).findById(idA);
 		verify(this.registrationService, times(1)).delete(ArgumentMatchers.any());
 	}
 
@@ -516,7 +516,7 @@ public class UnregisterControllerWsRestTest {
 		// Then
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 		verify(this.cryptoServerClient, times(1)).deleteId(ArgumentMatchers.any());
-		verify(this.registrationService, times(1)).findById(ArgumentMatchers.any());
+		verify(this.registrationService, times(2)).findById(ArgumentMatchers.any());
 		verify(this.registrationService, never()).delete(ArgumentMatchers.any());
 	}
 }

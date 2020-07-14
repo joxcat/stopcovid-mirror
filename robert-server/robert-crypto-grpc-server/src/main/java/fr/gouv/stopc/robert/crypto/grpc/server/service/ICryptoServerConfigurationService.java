@@ -9,5 +9,4 @@ public interface ICryptoServerConfigurationService {
      *         not tied to an instance)
      */
     long getServiceTimeStart();
-
 }

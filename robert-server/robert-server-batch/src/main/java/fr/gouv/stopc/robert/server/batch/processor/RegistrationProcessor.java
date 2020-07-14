@@ -1,5 +1,9 @@
 package fr.gouv.stopc.robert.server.batch.processor;
 
+import java.util.List;
+
+import org.springframework.batch.item.ItemProcessor;
+
 import fr.gouv.stopc.robert.server.batch.service.ScoringStrategyService;
 import fr.gouv.stopc.robert.server.batch.utils.PropertyLoader;
 import fr.gouv.stopc.robert.server.batch.utils.ScoringUtils;
@@ -7,18 +11,12 @@ import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
-import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 import lombok.AllArgsConstructor;
-import org.springframework.batch.item.ItemProcessor;
-
-import java.util.List;
 
 @AllArgsConstructor
 public class RegistrationProcessor implements ItemProcessor<Registration, Registration> {
 
     private IServerConfigurationService serverConfigurationService;
-
-    private IRegistrationService registrationService;
 
     private ScoringStrategyService scoringStrategy;
 
@@ -34,7 +32,7 @@ public class RegistrationProcessor implements ItemProcessor<Registration, Regist
                 this.propertyLoader.getContagiousPeriod(),
                 this.serverConfigurationService.getEpochDurationSecs());
 
-        ScoringUtils.updateRegistrationIfRisk(
+        boolean isRegistrationAtRisk = ScoringUtils.updateRegistrationIfRisk(
                 registration,
                 epochsToKeep,
                 this.serverConfigurationService.getServiceTimeStart(),
@@ -42,7 +40,10 @@ public class RegistrationProcessor implements ItemProcessor<Registration, Regist
                 this.scoringStrategy
                 );
 
-        this.registrationService.saveRegistration(registration);
+        if(isRegistrationAtRisk){
+            return registration;
+        }
+
         return null;
     }
 }

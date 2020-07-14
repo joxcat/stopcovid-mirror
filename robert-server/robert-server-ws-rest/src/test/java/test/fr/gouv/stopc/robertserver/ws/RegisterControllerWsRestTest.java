@@ -134,7 +134,7 @@ public class RegisterControllerWsRestTest {
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		verify(this.registrationService, times(0)).saveRegistration(ArgumentMatchers.any());
 	}
-
+	
 	@Test
 	public void testNoCaptcha() {
 		this.body = RegisterVo.builder().build();

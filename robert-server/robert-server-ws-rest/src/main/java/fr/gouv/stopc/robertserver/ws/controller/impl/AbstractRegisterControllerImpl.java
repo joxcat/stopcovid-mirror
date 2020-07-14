@@ -51,7 +51,7 @@ public abstract class AbstractRegisterControllerImpl {
 	
 	    Optional<CreateRegistrationResponse> response = this.cryptoServerClient.createRegistration(request);
 	
-	    if(!response.isPresent()) {
+	    if(!response.isPresent() || response.get().hasError()) {
 	        log.error("Unable to generate an identity for the client");
 	        throw new RobertServerException(MessageConstants.ERROR_OCCURED);
 	    }

@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import fr.gouv.stopc.robert.crypto.grpc.server.exception.RobertServerCryptoExceptionHandler;
 import org.springframework.stereotype.Service;
 
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.CryptoGrpcServiceImplGrpc.CryptoGrpcServiceImplImplBase;
@@ -21,12 +22,10 @@ public class CryptoServiceGrpcServer {
 	private Server server;
 
 	private CryptoGrpcServiceImplImplBase cryptoService;
-	//private HealthGrpc.HealthImplBase healthService;
 
 	@Inject
 	public CryptoServiceGrpcServer(final CryptoGrpcServiceImplImplBase cryptoService) {
 		this.cryptoService = cryptoService;
-		//this.healthService = healthService;
 	}
 	
 	public CryptoServiceGrpcServer(int port) {
@@ -36,7 +35,7 @@ public class CryptoServiceGrpcServer {
 	public CryptoServiceGrpcServer(ServerBuilder<?> serverBuilder, int port) {
 		this.server = serverBuilder
 				.addService(cryptoService)
-				//.addService(healthService)
+				.intercept(new RobertServerCryptoExceptionHandler())
 				.build();
 		this.port = port;
 	}
@@ -44,6 +43,7 @@ public class CryptoServiceGrpcServer {
 	public CryptoServiceGrpcServer(ServerBuilder<?> serverBuilder, int port, BindableService cryptoService) {
 		this.server = serverBuilder
 				.addService(cryptoService)
+				.intercept(new RobertServerCryptoExceptionHandler())
 				.build();
 		this.port = port;
 
@@ -54,7 +54,7 @@ public class CryptoServiceGrpcServer {
 		this.server = ServerBuilder
 				.forPort(port)
 				.addService(cryptoService)
-				//.addService(healthService)
+				.intercept(new RobertServerCryptoExceptionHandler())
 				.build();
 	}
 	public void start() throws IOException {

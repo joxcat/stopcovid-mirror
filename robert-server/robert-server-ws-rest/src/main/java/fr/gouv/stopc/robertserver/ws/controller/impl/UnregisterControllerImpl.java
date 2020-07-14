@@ -38,7 +38,7 @@ public class UnregisterControllerImpl implements IUnregisterController {
         AuthRequestValidationService.ValidationResult<DeleteIdResponse> validationResult =
                 authRequestValidationService.validateRequestForUnregister(unregisterRequestVo);
 
-        if (Objects.nonNull(validationResult.getError())) {
+        if (Objects.nonNull(validationResult.getError()) || validationResult.getResponse().hasError()) {
             return ResponseEntity.badRequest().build();
         }
 

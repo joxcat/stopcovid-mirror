@@ -109,7 +109,7 @@ public class ScoringAlgorithmV2Test {
             scoringResult.setRssiScore(rssiScore);
         }
 
-        launchTestsOnDirectoryAndExpectOutput(directory, expectedOutput, 0.43701722115091);
+        launchTestsOnDirectoryAndExpectOutput(directory, expectedOutput, 0.44161884230882675);
     }
 
     private List<Contact> retrieveContacts(String dir) throws URISyntaxException, IOException, CsvException {
@@ -216,7 +216,7 @@ public class ScoringAlgorithmV2Test {
             scoringResult.setRssiScore(scoringResult.getRssiScore() * scoringResult.getDuration());
         }
 
-        launchTestsOnDirectoryAndExpectOutput(directory, expectedOutput, 0.20538514229166882);
+        launchTestsOnDirectoryAndExpectOutput(directory, expectedOutput, 0.20799057803577403);
     }
 
     private void launchTestsOnDirectoryAndExpectOutput(String directory,

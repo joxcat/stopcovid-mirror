@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import fr.gouv.stopc.robertserver.database.model.Registration;
+import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 import org.bson.internal.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -35,16 +37,15 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
 
     private final ICryptoServerGrpcClient cryptoServerClient;
 
+    private final IRegistrationService registrationService;
+
     @Inject
     public AuthRequestValidationServiceImpl(final IServerConfigurationService serverConfigurationService,
-                                            final ICryptoServerGrpcClient cryptoServerClient) {
+                                            final ICryptoServerGrpcClient cryptoServerClient,
+                                            final IRegistrationService registrationService) {
         this.serverConfigurationService = serverConfigurationService;
         this.cryptoServerClient = cryptoServerClient;
-    }
-
-    private ResponseEntity createErrorIdNotFound() {
-        log.info("Discarding authenticated request because id unknown (fake or was deleted)");
-        return ResponseEntity.notFound().build();
+        this.registrationService = registrationService;
     }
 
     private ResponseEntity createErrorValidationFailed() {
@@ -83,12 +84,7 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
             return createErrorBadRequestCustom("Discarding authenticated request because of invalid MAC field size");
         }
 
-        final long currentTime = TimeUtils.convertUnixMillistoNtpSeconds(new Date().getTime());
-
-        // Step #2: check if time is close to current time
-        if (!checkTime(time, currentTime)) {
-            return createErrorBadRequestCustom("Discarding authenticated request because provided time is too far from current server time");
-        }
+        // Moved timestamp difference check to after request sent to cryptoserver to be able to store drift in db
 
         return Optional.empty();
     }
@@ -113,6 +109,14 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
             Optional<GetIdFromAuthResponse> response = this.cryptoServerClient.getIdFromAuth(request);
 
             if (response.isPresent()) {
+                if (Objects.nonNull(response.get().getIdA())) {
+                    Optional<ValidationResult> timeValidationResult = this.checkTime(
+                            Base64.decode(authRequestVo.getTime()),
+                            response.get().getIdA().toByteArray());
+                    if (timeValidationResult.isPresent()) {
+                        return timeValidationResult.get();
+                    }
+                }
                 return ValidationResult.<GetIdFromAuthResponse>builder().response(response.get()).build();
             } else {
                 return ValidationResult.<GetIdFromAuthResponse>builder().error(createErrorValidationFailed()).build();
@@ -141,6 +145,14 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
             Optional<DeleteIdResponse> response = this.cryptoServerClient.deleteId(request);
 
             if (response.isPresent()) {
+                if (Objects.nonNull(response.get().getIdA())) {
+                    Optional<ValidationResult> timeValidationResult = this.checkTime(
+                            Base64.decode(authRequestVo.getTime()),
+                            response.get().getIdA().toByteArray());
+                    if (timeValidationResult.isPresent()) {
+                        return timeValidationResult.get();
+                    }
+                }
                 return ValidationResult.<DeleteIdResponse>builder().response(response.get()).build();
             } else {
                 return ValidationResult.<DeleteIdResponse>builder().error(createErrorValidationFailed()).build();
@@ -172,68 +184,55 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
             Optional<GetIdFromStatusResponse> response = this.cryptoServerClient.getIdFromStatus(request);
 
             if (response.isPresent()) {
+                if (Objects.nonNull(response.get().getIdA())) {
+                    Optional<ValidationResult> timeValidationResult = this.checkTime(
+                            Base64.decode(statusVo.getTime()),
+                            response.get().getIdA().toByteArray());
+                    if (timeValidationResult.isPresent()) {
+                        return timeValidationResult.get();
+                    }
+                }
                 return ValidationResult.<GetIdFromStatusResponse>builder().response(response.get()).build();
             } else {
                 return ValidationResult.<GetIdFromStatusResponse>builder().error(createErrorValidationFailed()).build();
             }
-
-//            // Step #3: retrieve id_A and epoch from EBID
-//            DecryptEBIDRequest request = DecryptEBIDRequest.newBuilder().setEbid(ByteString.copyFrom(ebid)).build();
-//            byte[] decrytedEbid = this.cryptoServerClient.decryptEBID(request);
-//
-//            byte[] epochId = new byte[4];
-//            byte[] idA = new byte[5];
-//            System.arraycopy(decrytedEbid, 0, epochId, 1, epochId.length - 1);
-//            System.arraycopy(decrytedEbid, epochId.length - 1, idA, 0, idA.length);
-//            ByteBuffer wrapped = ByteBuffer.wrap(epochId);
-//            int epoch = wrapped.getInt();
-//
-//            // Step #4: Get record from database
-//            Optional<Registration> record = this.registrationService.findById(idA);
-//
-//            if (record.isPresent()) {
-//                byte[] ka = record.get().getSharedKey();
-//
-//                // Step #5: Verify MAC
-//                byte[] toCheck = new byte[12];
-//                System.arraycopy(ebid, 0, toCheck, 0, 8);
-//                System.arraycopy(time, 0, toCheck, 8, 4);
-//
-//                boolean isMacValid = macValidator.validate(ka, toCheck, mac);
-//
-//                if (!isMacValid) {
-//                    log.info("Discarding authenticated request because MAC is invalid");
-//                    return Optional.of(ResponseEntity.badRequest().build());
-//                }
-//
-//                Optional<ResponseEntity> response = otherValidator.validate(record.get(), epoch);
-//
-//                if (response.isPresent()) {
-//                    return response;
-//                }
-//
-//                System.arraycopy(record.get().getSharedKey(), 0, ka, 0, 32);
-//            } else {
-//                log.info("Discarding authenticated request because id unknown (fake or was deleted)");
-//                return Optional.of(ResponseEntity.notFound().build());
-//            }
         } catch (Exception e1) {
             return ValidationResult.<GetIdFromStatusResponse>builder().error(createErrorTechnicalIssue()).build();
         }
     }
 
-    private boolean checkTime(byte[] timeA, long timeCurrent) {
+    private long convertTimeByteArrayToLong(byte[] timeA) {
         byte[] timeAIn64bits = ByteUtils.addAll(new byte[] { 0, 0, 0, 0 }, timeA);
-        long timeASeconds = ByteUtils.bytesToLong(timeAIn64bits);
-        long delta = Math.abs(timeASeconds - timeCurrent);
-        if (delta < this.timeDeltaTolerance) {
-            return true;
-        } else {
+        return ByteUtils.bytesToLong(timeAIn64bits);
+    }
+
+    private Optional<ValidationResult> checkTime(byte[] time, byte[] idA) {
+        final long currentTime = TimeUtils.convertUnixMillistoNtpSeconds(new Date().getTime());
+        final long timeA = convertTimeByteArrayToLong(time);
+        final long delta = currentTime - timeA;
+
+        // Store drift (timestamp delta) if we have the user id
+        if (Objects.nonNull(idA)) {
+            Optional<Registration> registration = this.registrationService.findById(idA);
+            if (registration.isPresent()) {
+                registration.get().setLastTimestampDrift(delta);
+                this.registrationService.saveRegistration(registration.get());
+            }
+        }
+
+        // Step #2: check if time is close to current time
+        if (Math.abs(delta) > this.timeDeltaTolerance) {
             log.warn("Witnessing abnormal time difference {} between client: {} and server: {}",
                     delta,
-                    timeASeconds,
-                    timeCurrent);
-            return false;
+                    timeA,
+                    currentTime);
+            return Optional.of(ValidationResult.<GetIdFromAuthResponse>builder()
+                    .error(createErrorBadRequestCustom(
+                            "Discarding authenticated request because provided time is too far from current server time")
+                            .get())
+                    .build());
         }
+        return Optional.empty();
     }
+
 }

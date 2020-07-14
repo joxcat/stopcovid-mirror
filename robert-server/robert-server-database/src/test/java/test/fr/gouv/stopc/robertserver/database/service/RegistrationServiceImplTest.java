@@ -1,31 +1,26 @@
 package test.fr.gouv.stopc.robertserver.database.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
+import fr.gouv.stopc.robertserver.database.model.Registration;
+import fr.gouv.stopc.robertserver.database.repository.RegistrationRepository;
+import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import fr.gouv.stopc.robertserver.database.model.Registration;
-import fr.gouv.stopc.robertserver.database.repository.RegistrationRepository;
-import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
 
 import javax.crypto.KeyGenerator;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
@@ -143,6 +138,32 @@ public class RegistrationServiceImplTest {
 	}
 
 	@Test
+	public void testSaveAllWhenIsNull() {
+
+		// When
+		this.registrationService.saveAll(null);
+
+		// Then
+		verify(this.registrationRepository, never()).saveAll(any(List.class));
+	}
+
+	@Test
+	public void testSaveAllWhenNotNull() {
+
+		// Given
+		List<Registration> registrations = new ArrayList<>();
+		registrations.add(Registration.builder().build());
+		registrations.add(Registration.builder().build());
+
+		// When
+		this.registrationService.saveAll(registrations);
+
+		// Then
+		verify(this.registrationRepository).saveAll(registrations);
+	}
+
+
+	@Test
 	public void testDeleteWhenIsNull() {
 
 		// When
@@ -173,6 +194,26 @@ public class RegistrationServiceImplTest {
 
 		// Then
 		verify(this.registrationRepository).findAll();
+	}
+
+	@Test
+	public void testCount() {
+
+		// When
+		this.registrationService.count();
+
+		// Then
+		verify(this.registrationRepository).count();
+	}
+
+	@Test
+	public void countNbUsersWithOldEpochExpositions() {
+
+		// When
+		this.registrationService.countNbUsersWithOldEpochExpositions(3000);
+
+		// Then
+		verify(this.registrationRepository).countNbUsersWithOldEpochExpositions(3000);
 	}
 
 }

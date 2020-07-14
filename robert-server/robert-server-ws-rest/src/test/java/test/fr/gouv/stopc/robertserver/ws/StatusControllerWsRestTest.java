@@ -219,8 +219,8 @@ public class StatusControllerWsRestTest {
                 HttpMethod.POST, this.requestEntity, StatusResponseDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(this.registrationService, times(1)).findById(ArgumentMatchers.any());
-        verify(this.registrationService, times(1)).saveRegistration(reg);
+        verify(this.registrationService, times(2)).findById(ArgumentMatchers.any());
+        verify(this.registrationService, times(2)).saveRegistration(reg);
     }
 
     @Test
@@ -260,7 +260,7 @@ public class StatusControllerWsRestTest {
 
         // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(this.registrationService, times(1)).findById(ArgumentMatchers.any());
+        verify(this.registrationService, times(2)).findById(ArgumentMatchers.any());
         verify(this.registrationService, times(0)).saveRegistration(ArgumentMatchers.any());
     }
 
@@ -578,8 +578,8 @@ public class StatusControllerWsRestTest {
         assertNotNull(response.getBody().getTuples());
         assertTrue(reg.isNotified());
         assertTrue(currentEpoch - 3 < reg.getLastStatusRequestEpoch());
-        verify(this.registrationService, times(1)).findById(idA);
-        verify(this.registrationService, times(1)).saveRegistration(reg);
+        verify(this.registrationService, times(2)).findById(idA);
+        verify(this.registrationService, times(2)).saveRegistration(reg);
     }
 
     @Test
@@ -628,8 +628,8 @@ public class StatusControllerWsRestTest {
         assertTrue(!response.getBody().isAtRisk());
         assertNotNull(response.getBody().getTuples());
         assertTrue(currentEpoch - 3 < reg.getLastStatusRequestEpoch());
-        verify(this.registrationService, times(1)).findById(idA);
-        verify(this.registrationService, times(1)).saveRegistration(reg);
+        verify(this.registrationService, times(2)).findById(idA);
+        verify(this.registrationService, times(2)).saveRegistration(reg);
     }
 
     @Test
@@ -700,8 +700,8 @@ public class StatusControllerWsRestTest {
         assertNotNull(response.getBody().getTuples());
         assertEquals(false, reg.isAtRisk());
         assertEquals(true, reg.isNotified());
-        verify(this.registrationService, times(1)).findById(idA);
-        verify(this.registrationService, times(1)).saveRegistration(reg);
+        verify(this.registrationService, times(2)).findById(idA);
+        verify(this.registrationService, times(2)).saveRegistration(reg);
     }
 
     @Test
@@ -769,14 +769,23 @@ public class StatusControllerWsRestTest {
         assertNotNull(response.getBody().getTuples());
         assertEquals(false, reg.isAtRisk());
         assertEquals(true, reg.isNotified());
-        verify(this.registrationService, times(1)).findById(idA);
-        verify(this.registrationService, times(1)).saveRegistration(reg);
+        verify(this.registrationService, times(2)).findById(idA);
+        verify(this.registrationService, times(2)).saveRegistration(reg);
     }
 
     @Test
     public void testStatusRequestESRThrottleFails() {
 
         // Given
+        String message = "Discarding ESR request because epochs are too close:";
+        String errorMessage = String.format("%s"
+                + " last ESR request epoch %d vs current epoch %d => %d < %d (tolerance)",
+                message,
+                currentEpoch,
+                currentEpoch,
+                0,
+                this.propertyLoader.getStatusRequestMinimumEpochGap());
+
         byte[] idA = this.generateKey(5);
         byte[] kA = this.generateKA();
         Registration reg = Registration.builder()
@@ -816,10 +825,12 @@ public class StatusControllerWsRestTest {
         // Then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
-        verify(this.registrationService, times(1)).findById(idA);
-        verify(this.registrationService, times(0)).saveRegistration(reg);
+        assertEquals(currentEpoch, reg.getLastFailedStatusRequestEpoch());
+        assertEquals(errorMessage, reg.getLastFailedStatusRequestMessage());
+        verify(this.registrationService, times(2)).findById(idA);
+        verify(this.registrationService, times(2)).saveRegistration(reg);
     }
- 
+
     @Test
     public void testStatusRequestESRThrottleShouldSucceedsWhenLimitIsZero() {
 
@@ -869,7 +880,128 @@ public class StatusControllerWsRestTest {
         assertNotNull(response.getBody().getTuples());
         assertEquals(false, reg.isAtRisk());
         assertEquals(true, reg.isNotified());
-        verify(this.registrationService, times(1)).findById(idA);
-        verify(this.registrationService, times(1)).saveRegistration(reg);
+        verify(this.registrationService, times(2)).findById(idA);
+        verify(this.registrationService, times(2)).saveRegistration(reg);
+    }
+
+    @Test
+    public void testStatusStoreDriftWhenRequestOKSucceeds() {
+        byte[] idA = this.generateKey(5);
+        byte[] kA = this.generateKA();
+
+        List<EpochExposition> epochExpositions = new ArrayList<>();
+
+        // Before latest notification
+        epochExpositions.add(EpochExposition.builder()
+                .epochId(currentEpoch - 7)
+                .expositionScores(Arrays.asList(3.00, 4.30))
+                .build());
+
+        epochExpositions.add(EpochExposition.builder()
+                .epochId(currentEpoch - 4)
+                .expositionScores(Arrays.asList(0.076, 0.15))
+                .build());
+
+        epochExpositions.add(EpochExposition.builder()
+                .epochId(currentEpoch - 3)
+                .expositionScores(Arrays.asList(0.052, 0.16))
+                .build());
+
+        Registration reg = Registration.builder()
+                .permanentIdentifier(idA)
+                .atRisk(true)
+                .isNotified(true)
+                .lastStatusRequestEpoch(currentEpoch - 3)
+                .latestRiskEpoch(currentEpoch - 8)
+                .exposedEpochs(epochExpositions)
+                .build();
+
+        int timestampDelta = -20;
+
+        byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch, timestampDelta);
+
+        byte[] decryptedEbid = new byte[8];
+        System.arraycopy(idA, 0, decryptedEbid, 3, 5);
+        System.arraycopy(ByteUtils.intToBytes(currentEpoch), 1, decryptedEbid, 0, 3);
+
+        doReturn(Optional.of(reg)).when(this.registrationService).findById(idA);
+
+        doReturn(Optional.of(GetIdFromStatusResponse.newBuilder()
+                .setEpochId(currentEpoch)
+                .setIdA(ByteString.copyFrom(idA))
+                .setTuples(ByteString.copyFrom("Base64encodedEncryptedJSONStringWithTuples".getBytes()))
+                .build()))
+                .when(this.cryptoServerClient).getIdFromStatus(any());
+
+        statusBody = StatusVo.builder()
+                .ebid(Base64.encode(reqContent[0]))
+                .epochId(currentEpoch)
+                .time(Base64.encode(reqContent[1]))
+                .mac(Base64.encode(reqContent[2]))
+                .build();
+
+        this.requestEntity = new HttpEntity<>(this.statusBody, this.headers);
+
+        ResponseEntity<StatusResponseDto> response = this.restTemplate.exchange(this.targetUrl.toString(),
+                HttpMethod.POST, this.requestEntity, StatusResponseDto.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
+        assertEquals(true, response.getBody().isAtRisk());
+        assertNotNull(response.getBody().getTuples());
+        assertEquals(false, reg.isAtRisk());
+        assertEquals(true, reg.isNotified());
+        assertTrue(reg.getLastTimestampDrift() == Math.abs(timestampDelta) + 1 || reg.getLastTimestampDrift() == Math.abs(timestampDelta));
+        verify(this.registrationService, times(2)).findById(idA);
+        verify(this.registrationService, times(2)).saveRegistration(reg);
+    }
+
+    @Test
+    public void testStatusStoreDriftWhenRequestKOSucceeds() {
+        // Given
+        byte[] idA = this.generateKey(5);
+        byte[] kA = this.generateKA();
+        Registration reg = Registration.builder()
+                .permanentIdentifier(idA)
+                .atRisk(false)
+                .isNotified(false)
+                .lastStatusRequestEpoch(currentEpoch).build();
+
+        int timestampDelta = -23;
+
+        byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch, timestampDelta);
+
+        statusBody = StatusVo.builder()
+                .ebid(Base64.encode(reqContent[0]))
+                .epochId(currentEpoch)
+                .time(Base64.encode(reqContent[1]))
+                .mac(Base64.encode(reqContent[2])).build();
+
+        byte[] decryptedEbid = new byte[8];
+        System.arraycopy(idA, 0, decryptedEbid, 3, 5);
+        System.arraycopy(ByteUtils.intToBytes(currentEpoch), 1, decryptedEbid, 0, 3);
+
+        doReturn(Optional.of(reg)).when(this.registrationService).findById(idA);
+
+        doReturn(Optional.of(GetIdFromStatusResponse.newBuilder()
+                .setEpochId(currentEpoch)
+                .setIdA(ByteString.copyFrom(idA))
+                .setTuples(ByteString.copyFrom("Base64encodedEncryptedJSONStringWithTuples".getBytes()))
+                .build()))
+                .when(this.cryptoServerClient).getIdFromStatus(any());
+
+        this.requestEntity = new HttpEntity<>(this.statusBody, this.headers);
+
+
+        // When
+        ResponseEntity<StatusResponseDto> response = this.restTemplate.exchange(this.targetUrl.toString(),
+                HttpMethod.POST, this.requestEntity, StatusResponseDto.class);
+
+        // Then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
+        assertTrue(reg.getLastTimestampDrift() == Math.abs(timestampDelta) + 1 || reg.getLastTimestampDrift() == Math.abs(timestampDelta));
+        verify(this.registrationService, times(2)).findById(idA);
+        verify(this.registrationService, times(2)).saveRegistration(reg);
     }
 }
