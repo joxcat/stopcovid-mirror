@@ -12,7 +12,6 @@ import org.springframework.util.CollectionUtils;
 import fr.gouv.stopc.robertserver.database.model.Contact;
 import fr.gouv.stopc.robertserver.database.repository.ContactRepository;
 import fr.gouv.stopc.robertserver.database.service.ContactService;
-import org.springframework.util.CollectionUtils;
 
 
 @Service

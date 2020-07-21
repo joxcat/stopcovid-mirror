@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import fr.gouv.stopc.robertserver.ws.dto.RobertServerKpi;
 import fr.gouv.stopc.robertserver.ws.service.IKpiService;
-import fr.gouv.stopc.robertserver.ws.vo.RobertServerKpi;
 
 /**
  * Endpoint definition for Kpi generation

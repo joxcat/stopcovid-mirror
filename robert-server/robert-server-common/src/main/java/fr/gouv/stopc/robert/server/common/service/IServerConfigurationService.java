@@ -24,5 +24,4 @@ public interface IServerConfigurationService {
      * @return The duration that must be covered by an epoch bundle returned in /register and /status (in days)
      */
     int getEpochBundleDurationInDays();
-
 }

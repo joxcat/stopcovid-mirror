@@ -51,6 +51,13 @@ public interface IRegistrationService {
 	 */
 	Long countNbExposedUsersButNotAtRisk();
 
+	/**
+	 * Return the number of users notified and scored again (isNotified = true, atRisk = false, exposedEpochs not empty)
+	 * 
+	 * @return the number
+	 */
+	Long countNbNotifiedUsersScoredAgain();
+	
 	Long count();
 
 	/**

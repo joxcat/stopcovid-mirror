@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -84,6 +85,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import test.fr.gouv.stopc.robert.crypto.grpc.server.utils.CryptoTestUtils;
+
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
@@ -818,7 +820,6 @@ class CryptoServiceGrpcServerTest {
         assertTrue(ByteUtils.isNotEmpty(response.getIdA().toByteArray()));
         assertTrue(Arrays.equals(clientIdentifierBundle.get().getId(), response.getIdA().toByteArray()));
     }
-
 
     @Test
     void testGetIdFromAuthWithEbidEncodedWithFutureKSFails() {
@@ -1763,7 +1764,6 @@ class CryptoServiceGrpcServerTest {
         assertTrue(!res.isError());
         assertTrue(response.hasError());
         assertTrue(response.getError().getCode() == 400);
-
     }
 
     @AllArgsConstructor

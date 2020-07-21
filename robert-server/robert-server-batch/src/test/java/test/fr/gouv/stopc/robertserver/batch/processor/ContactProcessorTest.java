@@ -38,7 +38,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.CollectionUtils;
 
 import com.google.protobuf.ByteString;
-
 import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcClient;
 import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetInfoFromHelloMessageResponse;
 import fr.gouv.stopc.robert.server.batch.RobertServerBatchApplication;
@@ -1178,6 +1177,7 @@ public class ContactProcessorTest {
 
 	private void assertRiskThresholdExceededBasedOnConfiguration(Registration expectedRegistration) {
 		boolean atRisk = expectedRegistration.isAtRisk();
+
 		if (this.propertyLoader.getRiskThreshold() >= sumRiskScores(expectedRegistration.getExposedEpochs())) {
 			assertFalse(atRisk);
 		} else {

@@ -13,6 +13,7 @@ import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import lombok.AllArgsConstructor;
 
+
 @AllArgsConstructor
 public class RegistrationProcessor implements ItemProcessor<Registration, Registration> {
 

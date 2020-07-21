@@ -134,7 +134,7 @@ public class RegisterControllerWsRestTest {
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		verify(this.registrationService, times(0)).saveRegistration(ArgumentMatchers.any());
 	}
-	
+
 	@Test
 	public void testNoCaptcha() {
 		this.body = RegisterVo.builder().build();
@@ -147,6 +147,7 @@ public class RegisterControllerWsRestTest {
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		verify(this.registrationService, times(0)).saveRegistration(ArgumentMatchers.any());
 	}
+
 
 	@Test
 	public void testBadRequests() {
@@ -168,7 +169,7 @@ public class RegisterControllerWsRestTest {
 					RegisterInternalVo.builder().captcha("mycaptcha").build()
 					, this.headers), String.class).getStatusCode());
 	}
-	
+
 	@Test
 	public void testCaptchaFailure() {
 		this.body = RegisterVo.builder()

@@ -43,6 +43,14 @@ public interface RegistrationRepository extends MongoRepository<Registration, by
     Long countNbExposedUsersButNotAtRisk();
 
 	/**
+	 * Retrieve the number of users already notified and scored again
+	 *
+	 * @return the count result
+	 */
+	@Query(value = "{ atRisk: {$eq: false}, isNotified: {$eq: true} , exposedEpochs: {$exists:true, $ne: []}}", count = true)
+	Long countNbNotifiedUsersScoredAgain();
+    
+	/**
 	 * Retrieve the number of users than epoch exposition with an epochId <= the epochId in parameter.
 	 *
 	 * @param minEpochId

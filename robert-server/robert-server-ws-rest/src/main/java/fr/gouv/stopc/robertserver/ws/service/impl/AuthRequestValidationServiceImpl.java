@@ -234,5 +234,4 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
         }
         return Optional.empty();
     }
-
 }

@@ -11,8 +11,6 @@ import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
-
 
 @Slf4j
 public final class ScoringUtils {

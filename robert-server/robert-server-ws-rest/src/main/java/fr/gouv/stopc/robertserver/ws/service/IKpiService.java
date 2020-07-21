@@ -3,7 +3,7 @@ package fr.gouv.stopc.robertserver.ws.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import fr.gouv.stopc.robertserver.ws.vo.RobertServerKpi;
+import fr.gouv.stopc.robertserver.ws.dto.RobertServerKpi;
 
 /**
  * Service for Kpis generation

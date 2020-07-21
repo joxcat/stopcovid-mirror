@@ -1,23 +1,23 @@
 package test.fr.gouv.stopc.robertserver.database.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.ContextConfiguration;
 
 import fr.gouv.stopc.robertserver.database.RobertServerDatabaseApplication;
+import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.repository.RegistrationRepository;
-import lombok.extern.slf4j.Slf4j;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@Slf4j
 @ContextConfiguration(classes = {RobertServerDatabaseApplication.class})
 @DataMongoTest
 public class RegistrationRepositoryTest {

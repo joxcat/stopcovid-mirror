@@ -7,8 +7,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
+import fr.gouv.stopc.robertserver.ws.dto.RobertServerKpi;
 import fr.gouv.stopc.robertserver.ws.service.IKpiService;
-import fr.gouv.stopc.robertserver.ws.vo.RobertServerKpi;
 
 /**
  * Default implementation of the <code>IKpiService</code>
@@ -44,9 +44,10 @@ public class KpiServiceImpl implements IKpiService {
 				+ registrationDbService.countNbUsersNotified();
 		Long nbExposedUsersNotAtRisk = registrationDbService.countNbExposedUsersButNotAtRisk();
 		Long nbInfectedUsersNotNotified = registrationDbService.countNbUsersAtRiskAndNotNotified();
-
+		Long nbNotifiedUsersScoredAgain = registrationDbService.countNbNotifiedUsersScoredAgain();
+		
 		return Arrays.asList(new RobertServerKpi(LocalDate.now(), nbAlertedUsers, nbExposedUsersNotAtRisk,
-				nbInfectedUsersNotNotified));
+				nbInfectedUsersNotNotified, nbNotifiedUsersScoredAgain));
 	}
 
 }

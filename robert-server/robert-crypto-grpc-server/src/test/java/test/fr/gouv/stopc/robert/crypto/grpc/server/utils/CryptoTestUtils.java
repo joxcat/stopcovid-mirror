@@ -1,11 +1,13 @@
 package test.fr.gouv.stopc.robert.crypto.grpc.server.utils;
 
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.ECGenParameterSpec;
 
 import lombok.extern.slf4j.Slf4j;
-
-import javax.crypto.spec.DHGenParameterSpec;
 
 @Slf4j
 public final class CryptoTestUtils {
