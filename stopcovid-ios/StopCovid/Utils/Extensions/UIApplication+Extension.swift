@@ -32,4 +32,9 @@ extension UIApplication {
         applicationIconBadgeNumber = 0
     }
     
+    func killCleanly() {
+        UIControl().sendAction(#selector(URLSessionTask.suspend), to: UIApplication.shared, for: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: { exit(EXIT_SUCCESS) })
+    }
+    
 }

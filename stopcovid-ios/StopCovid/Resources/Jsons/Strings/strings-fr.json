@@ -298,5 +298,6 @@
     "captchaController.alert.invalidCode.title": "Attention",
     "captchaController.alert.invalidCode.message": "Le code entré n'est pas valide.",
     
-    "proximityController.error.noBackgroundAppRefresh" : "L’actualisation en arrière-plan est nécessaire. Appuyez sur ce bandeau pour l’activer."
+    "proximityController.error.noBackgroundAppRefresh" : "L’actualisation en arrière-plan est nécessaire. Appuyez sur ce bandeau pour l’activer.",
+    "common.retry": "Réessayer"
 }

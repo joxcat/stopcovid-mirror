@@ -64,34 +64,28 @@ final class CaptchaManager: NSObject {
     }
     
     private func generate(captchaType: CaptchaType, completion: @escaping (_ result: Result<CaptchaGenerationResponse, Error>) -> ()) {
-        ParametersManager.shared.fetchConfig { _ in
-            let generateBody: CaptchaGenerationBody = CaptchaGenerationBody(type: captchaType.rawValue, locale: Locale.currentLanguageCode)
-            self.processRequest(url: CaptchaConstant.Url.create, method: .post, body: generateBody) { result in
-                switch result {
-                case let .success(data):
-                    do {
-                        let response: CaptchaGenerationResponse = try CaptchaGenerationResponse.from(data: data)
-                        completion(.success(response))
-                    } catch {
-                        completion(.failure(error))
-                    }
-                case let .failure(error):
+        let generateBody: CaptchaGenerationBody = CaptchaGenerationBody(type: captchaType.rawValue, locale: Locale.currentLanguageCode)
+        self.processRequest(url: CaptchaConstant.Url.create, method: .post, body: generateBody) { result in
+            switch result {
+            case let .success(data):
+                do {
+                    let response: CaptchaGenerationResponse = try CaptchaGenerationResponse.from(data: data)
+                    completion(.success(response))
+                } catch {
                     completion(.failure(error))
                 }
+            case let .failure(error):
+                completion(.failure(error))
             }
         }
     }
     
     private func getCaptchaImage(id: String, completion: @escaping (_ result: Result<Data, Error>) -> ()) {
-        ParametersManager.shared.fetchConfig { _ in
-            self.processRequest(url: CaptchaConstant.Url.getImage(id: id), method: .get, completion: completion)
-        }
+        processRequest(url: CaptchaConstant.Url.getImage(id: id), method: .get, completion: completion)
     }
     
     private func getCaptchaAudio(id: String, completion: @escaping (_ result: Result<Data, Error>) -> ()) {
-        ParametersManager.shared.fetchConfig { _ in
-            self.processRequest(url: CaptchaConstant.Url.getAudio(id: id), method: .get, completion: completion)
-        }
+        processRequest(url: CaptchaConstant.Url.getAudio(id: id), method: .get, completion: completion)
     }
     
     private func processRequest(url: URL, method: Method, body: CaptchaServerBody? = nil, completion: @escaping (_ result: Result<Data, Error>) -> ()) {

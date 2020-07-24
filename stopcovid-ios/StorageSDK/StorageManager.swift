@@ -148,12 +148,19 @@ public final class StorageManager: RBStorage {
     
     // MARK: - Proximity -
     public func save(proximityActivated: Bool) {
-        keychain.set(proximityActivated, forKey: KeychainKey.proximityActivated.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+        UserDefaults.standard.set(proximityActivated, forKey: KeychainKey.proximityActivated.rawValue)
+        UserDefaults.standard.synchronize()
         notifyStatusDataChanged()
     }
     
     public func isProximityActivated() -> Bool {
-        keychain.getBool(KeychainKey.proximityActivated.rawValue) ?? false
+        if let bool = UserDefaults.standard.object(forKey: KeychainKey.proximityActivated.rawValue) as? Bool {
+            return bool
+        } else {
+            let bool: Bool = keychain.getBool(KeychainKey.proximityActivated.rawValue) ?? false
+            save(proximityActivated: bool)
+            return bool
+        }
     }
     
     // MARK: - Status: isAtRisk -
@@ -247,10 +254,14 @@ public final class StorageManager: RBStorage {
                 keychain.delete($0.rawValue)
             }
         }
+        deleteDb(includingFile: includingDBKey)
+    }
+    
+    private func deleteDb(includingFile: Bool) {
         try? realm?.write {
             realm?.deleteAll()
         }
-        if includingDBKey {
+        if includingFile {
             realm = nil
             Realm.deleteDb()
         }
@@ -261,6 +272,7 @@ public final class StorageManager: RBStorage {
         if let key = getDbKey() {
             realm = try! Realm.db(key: key)
         } else if let newKey = Realm.generateEncryptionKey(), !keychain.allKeys.contains("SC\(KeychainKey.dbKey.rawValue)") {
+            deleteDb(includingFile: true)
             realm = try! Realm.db(key: newKey)
             save(dbKey: newKey)
         }

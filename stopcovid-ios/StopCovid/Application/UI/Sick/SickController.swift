@@ -81,9 +81,10 @@ final class SickController: CVTableViewController {
         let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
         let remainingIsolationDaysCount: Int = max((ParametersManager.shared.quarantinePeriod ?? 14) - (RBManager.shared.lastExposureTimeFrame ?? 0), 0)
         let isolationEndDate: Date? = notificationDate?.dateByAddingDays(remainingIsolationDaysCount)
+        let notificationDateString: String = String(format: "\("sickController.state.date".localized), %@", notificationDate?.dayMonthFormatted() ?? "N/A", notificationDate?.timeFormatted() ?? "N/A")
         let stateRow: CVRow = CVRow(title: "sickController.state.contact.title".localized,
                                     subtitle: String(format: "sickController.state.contact.subtitle".localized, isolationEndDate?.dayMonthFormatted() ?? "N/A"),
-                                    accessoryText: String(format: "sickController.state.date".localized, notificationDate?.dayMonthFormatted() ?? "N/A"),
+                                    accessoryText: notificationDateString,
                                     buttonTitle: "common.readMore".localized,
                                     xibName: .sickStateHeaderCell,
                                     theme: CVRow.Theme(backgroundColor: Appearance.Cell.Notification.backgroundColor,
@@ -108,9 +109,11 @@ final class SickController: CVTableViewController {
         let imageRow: CVRow = CVRow(image: Asset.Images.diagnosis.image,
                                     xibName: .onboardingImageCell,
                                     theme: CVRow.Theme(imageRatio: Appearance.Cell.Image.defaultRatio))
+        let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
+        let notificationDateString: String = String(format: "\("sickController.state.date".localized), %@", notificationDate?.dayMonthFormatted() ?? "N/A", notificationDate?.timeFormatted() ?? "N/A")
         let stateRow: CVRow = CVRow(title: "sickController.state.nothing.title".localized,
                                     subtitle: "sickController.state.nothing.subtitle".localized,
-                                    accessoryText: String(format: "sickController.state.date".localized, RBManager.shared.lastStatusReceivedDate?.dayMonthFormatted() ?? "N/A"),
+                                    accessoryText: notificationDateString,
                                     buttonTitle: "common.readMore".localized,
                                     xibName: .sickStateHeaderCell,
                                     theme: CVRow.Theme(backgroundColor: Appearance.Cell.Notification.backgroundColor,

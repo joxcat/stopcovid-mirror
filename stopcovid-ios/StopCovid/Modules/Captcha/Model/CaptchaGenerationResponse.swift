@@ -11,6 +11,5 @@ import Foundation
 struct CaptchaGenerationResponse: CaptchaServerResponse {
 
     let id: String
-    let captchaId: String
     
 }

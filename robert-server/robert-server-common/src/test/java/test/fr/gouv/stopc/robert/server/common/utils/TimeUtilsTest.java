@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -13,6 +11,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+
+import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TimeUtilsTest {

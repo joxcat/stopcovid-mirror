@@ -12,6 +12,13 @@ import Foundation
 
 extension Date {
     
+    func timeFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter.string(from: self)
+    }
+    
     func dayMonthFormatted() -> String {
         let formatter: DateFormatter = DateFormatter()
         formatter.dateFormat = "d MMMM"

@@ -99,7 +99,7 @@ final class EnterCodeController: CVTableViewController {
     }
     
     private func didTouchValidate() {
-        if let code = code, ServerConstant.acceptedReportCodeLength.contains(code.count) {
+        if let code = code, code.isShortCode || code.isUuidCode {
             tableView.endEditing(true)
             didEnterCode(code)
         } else {

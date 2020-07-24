@@ -105,7 +105,6 @@ public final class ParametersManager: NSObject {
         }
     }
     
-    // TODO: Fetch config using background url session.
     public func fetchConfig(_ completion: @escaping (_ result: Result<Double, Error>) -> ()) {
         let requestId: String = UUID().uuidString
         completions[requestId] = completion

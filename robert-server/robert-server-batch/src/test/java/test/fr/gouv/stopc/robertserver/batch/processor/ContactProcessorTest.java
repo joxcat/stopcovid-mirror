@@ -60,7 +60,9 @@ import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.ContactService;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 import lombok.extern.slf4j.Slf4j;
+
 import test.fr.gouv.stopc.robertserver.batch.utils.ProcessorTestUtils;
+
 
 @Slf4j
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
@@ -451,7 +453,6 @@ public class ContactProcessorTest {
 			System.arraycopy(encryptedCountryCode, 0, helloMessage, 0, encryptedCountryCode.length);
 			System.arraycopy(ebid, 0, helloMessage, encryptedCountryCode.length, ebid.length);
 			System.arraycopy(time, 0, helloMessage, encryptedCountryCode.length + ebid.length, time.length);
-
 
 			doReturn(Optional.of(
 					GetInfoFromHelloMessageResponse.newBuilder()

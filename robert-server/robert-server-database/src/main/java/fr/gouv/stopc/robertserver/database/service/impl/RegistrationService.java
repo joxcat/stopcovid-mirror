@@ -42,14 +42,14 @@ public class RegistrationService implements IRegistrationService {
     }
 
     @Override
-	public void saveAll(final List<Registration> registrations) {
+    public void saveAll(final List<Registration> registrations) {
 
-		if (!CollectionUtils.isEmpty(registrations)) {
-			this.registrationRepository.saveAll(registrations);
-		}
-	}
+        if (!CollectionUtils.isEmpty(registrations)) {
+            this.registrationRepository.saveAll(registrations);
+        }
+    }
 
-	@Override
+    @Override
     public void delete(Registration registration) {
         Optional.ofNullable(registration).ifPresent(this.registrationRepository::delete);
     }
@@ -64,53 +64,53 @@ public class RegistrationService implements IRegistrationService {
         return this.registrationRepository.findAll();
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Long countNbUsersAtRiskAgain() {
-		return this.registrationRepository.countNbUsersAtRiskAgain();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long countNbUsersAtRiskAgain() {
+        return this.registrationRepository.countNbUsersAtRiskAgain();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Long countNbUsersAtRiskAndNotNotified() {
-		return this.registrationRepository.countNbUsersAtRiskAndNotNotified();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long countNbUsersAtRiskAndNotNotified() {
+        return this.registrationRepository.countNbUsersAtRiskAndNotNotified();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Long countNbUsersNotified() {
-		return this.registrationRepository.countNbUsersNotified();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long countNbUsersNotified() {
+        return this.registrationRepository.countNbUsersNotified();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Long countNbExposedUsersButNotAtRisk() {
-		return this.registrationRepository.countNbExposedUsersButNotAtRisk();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long countNbExposedUsersButNotAtRisk() {
+        return this.registrationRepository.countNbExposedUsersButNotAtRisk();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Long countNbNotifiedUsersScoredAgain() {
-		return this.registrationRepository.countNbNotifiedUsersScoredAgain();
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long countNbNotifiedUsersScoredAgain() {
+        return this.registrationRepository.countNbNotifiedUsersScoredAgain();
+    }
 
-	@Override
-	public Long count() {
-		return this.registrationRepository.count();
-	}
+    @Override
+    public Long count() {
+        return this.registrationRepository.count();
+    }
 
-	@Override
-	public Long countNbUsersWithOldEpochExpositions(int minEpochId) {
-		return this.registrationRepository.countNbUsersWithOldEpochExpositions(minEpochId);
-	}
+    @Override
+    public Long countNbUsersWithOldEpochExpositions(int minEpochId) {
+        return this.registrationRepository.countNbUsersWithOldEpochExpositions(minEpochId);
+    }
 }

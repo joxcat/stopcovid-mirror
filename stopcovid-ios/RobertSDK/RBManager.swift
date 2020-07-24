@@ -80,7 +80,13 @@ public final class RBManager {
         }
         self.storage.start()
         if isProximityActivated && restartProximityIfPossible && !isFirstInstall {
-            startProximityDetection()
+            if isRegistered {
+                startProximityDetection()
+            } else {
+                isProximityActivated = false
+                stopProximityDetection()
+                clearAllLocalData()
+            }
         }
         NotificationCenter.default.addObserver(self, selector: #selector(applicationWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
     }

@@ -134,12 +134,13 @@
 		371C28D42476BD2800D46DD2 /* AppMaintenanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371C28D32476BD2800D46DD2 /* AppMaintenanceController.swift */; };
 		371C28D62476C34D00D46DD2 /* MaintenanceSupportingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371C28D52476C34D00D46DD2 /* MaintenanceSupportingCoordinator.swift */; };
 		371C28D92476C48F00D46DD2 /* AppMaintenanceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371C28D82476C48F00D46DD2 /* AppMaintenanceCoordinator.swift */; };
+		371C43B824BC61AE007B5A73 /* NSRegularExpression+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371C43B724BC61AE007B5A73 /* NSRegularExpression+Extension.swift */; };
 		3725276E2446DBE9007A2054 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3725276C2446DBE9007A2054 /* Colors.xcassets */; };
 		372527722446F66E007A2054 /* CVNavigationChild.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 372527702446F66E007A2054 /* CVNavigationChild.storyboard */; };
 		3741A4D12472573600DC7EC2 /* RemoteFileConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3741A4D02472573600DC7EC2 /* RemoteFileConstant.swift */; };
 		3741A4D62472668600DC7EC2 /* CameraAuthorizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3741A4D52472668600DC7EC2 /* CameraAuthorizationManager.swift */; };
 		3741A4D92472738100DC7EC2 /* ReCaptchaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3741A4D82472738100DC7EC2 /* ReCaptchaController.swift */; };
-		3766102224A0F01C00A5F13D /* params.json in Resources */ = {isa = PBXBuildFile; fileRef = 3766102024A0F01C00A5F13D /* params.json */; };
+		3766102224A0F01C00A5F13D /* config-preprod.json in Resources */ = {isa = PBXBuildFile; fileRef = 3766102024A0F01C00A5F13D /* config-preprod.json */; };
 		3766102324A0F01C00A5F13D /* config.json in Resources */ = {isa = PBXBuildFile; fileRef = 3766102124A0F01C00A5F13D /* config.json */; };
 		3766102624A0FB4500A5F13D /* config-int.json in Resources */ = {isa = PBXBuildFile; fileRef = 3766102424A0FB4400A5F13D /* config-int.json */; };
 		3766102724A0FB4500A5F13D /* config-rec.json in Resources */ = {isa = PBXBuildFile; fileRef = 3766102524A0FB4400A5F13D /* config-rec.json */; };
@@ -386,6 +387,7 @@
 		371C28D32476BD2800D46DD2 /* AppMaintenanceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMaintenanceController.swift; sourceTree = "<group>"; };
 		371C28D52476C34D00D46DD2 /* MaintenanceSupportingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceSupportingCoordinator.swift; sourceTree = "<group>"; };
 		371C28D82476C48F00D46DD2 /* AppMaintenanceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMaintenanceCoordinator.swift; sourceTree = "<group>"; };
+		371C43B724BC61AE007B5A73 /* NSRegularExpression+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSRegularExpression+Extension.swift"; sourceTree = "<group>"; };
 		3725276C2446DBE9007A2054 /* Colors.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Colors.xcassets; sourceTree = "<group>"; };
 		372527702446F66E007A2054 /* CVNavigationChild.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = CVNavigationChild.storyboard; sourceTree = "<group>"; };
 		373A3445243E1CFD00148FCF /* Step.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Step.swift; sourceTree = "<group>"; };
@@ -429,7 +431,7 @@
 		374840A62456C17700032061 /* RBServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBServer.swift; sourceTree = "<group>"; };
 		374840AA2456CA4900032061 /* RBStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBStorage.swift; sourceTree = "<group>"; };
 		374840AD2456D01E00032061 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
-		3766102024A0F01C00A5F13D /* params.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = params.json; sourceTree = "<group>"; };
+		3766102024A0F01C00A5F13D /* config-preprod.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "config-preprod.json"; sourceTree = "<group>"; };
 		3766102124A0F01C00A5F13D /* config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = config.json; sourceTree = "<group>"; };
 		3766102424A0FB4400A5F13D /* config-int.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "config-int.json"; sourceTree = "<group>"; };
 		3766102524A0FB4400A5F13D /* config-rec.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "config-rec.json"; sourceTree = "<group>"; };
@@ -999,7 +1001,7 @@
 				3766102124A0F01C00A5F13D /* config.json */,
 				3766102424A0FB4400A5F13D /* config-int.json */,
 				3766102524A0FB4400A5F13D /* config-rec.json */,
-				3766102024A0F01C00A5F13D /* params.json */,
+				3766102024A0F01C00A5F13D /* config-preprod.json */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -1084,13 +1086,13 @@
 				379B7EF324437722004E26B2 /* Information */,
 				371C28D22476BD0E00D46DD2 /* Maintenance */,
 				378A269A2461A78D000F2FD8 /* ManageData */,
+				373A347F243EE78B00148FCF /* PowerSaveMode */,
+				37013E132440389E00FCB360 /* Proximity */,
 				378A264324606CE4000F2FD8 /* SendHistory */,
 				373A3489243EF32600148FCF /* Sick */,
 				37013DF9243F756900FCB360 /* Sharing */,
 				378A262F246057EE000F2FD8 /* Symptoms */,
 				379B7EF924437C6A004E26B2 /* TabBar */,
-				37013E132440389E00FCB360 /* Proximity */,
-				373A347F243EE78B00148FCF /* PowerSaveMode */,
 				37663CED243DA53F009F1D98 /* StoryboardScenes.swift */,
 				37663CFA243DB5B8009F1D98 /* XibName.swift */,
 			);
@@ -1259,6 +1261,7 @@
 				373A345D243E25CA00148FCF /* Locale+Extension.swift */,
 				373A3466243E315900148FCF /* NSError+Extension.swift */,
 				37014C9C24460BB900CE0BF1 /* NSNotification+Extension.swift */,
+				371C43B724BC61AE007B5A73 /* NSRegularExpression+Extension.swift */,
 				370AA9C024485BC5009CEB0D /* String+Extension.swift */,
 				373A3468243E319600148FCF /* UIApplication+Extension.swift */,
 				37A7FB962447356900A4B99E /* UIBarButtonItem+Extension.swift */,
@@ -2065,7 +2068,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3766102724A0FB4500A5F13D /* config-rec.json in Resources */,
-				3766102224A0F01C00A5F13D /* params.json in Resources */,
+				3766102224A0F01C00A5F13D /* config-preprod.json in Resources */,
 				3766102624A0FB4500A5F13D /* config-int.json in Resources */,
 				3766102324A0F01C00A5F13D /* config.json in Resources */,
 			);
@@ -2192,6 +2195,7 @@
 				37689F81246A918600D99BC4 /* ReCaptchaManager.swift in Sources */,
 				37EB2FBD2487EC04003D999A /* TitleCell.swift in Sources */,
 				37D8F28F246475B4008E8005 /* Data+Extension.swift in Sources */,
+				371C43B824BC61AE007B5A73 /* NSRegularExpression+Extension.swift in Sources */,
 				37014CA324460CD000CE0BF1 /* UIViewController+Extension.swift in Sources */,
 				37014CA424460CD000CE0BF1 /* LocalizationsManager.swift in Sources */,
 				37EB2FF12488CB08003D999A /* CaptchaManager.swift in Sources */,
@@ -2461,7 +2465,8 @@
 				CODE_SIGN_ENTITLEMENTS = StopCovid/StopCovid.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 62;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = PR958DC548;
 				INFOPLIST_FILE = StopCovid/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
@@ -2469,7 +2474,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.5;
+				MARKETING_VERSION = 1.1.2;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS -DPROD -DOFFICIAL";
 				PRODUCT_BUNDLE_IDENTIFIER = fr.gouv.stopcovid.ios;
 				PRODUCT_NAME = StopCovid;
@@ -2487,7 +2492,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = StopCovid/StopCovid.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 62;
 				DEVELOPMENT_TEAM = PR958DC548;
 				INFOPLIST_FILE = StopCovid/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
@@ -2495,7 +2500,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.5;
+				MARKETING_VERSION = 1.1.2;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS -DPROD -DOFFICIAL";
 				PRODUCT_BUNDLE_IDENTIFIER = fr.gouv.stopcovid.ios;
 				PRODUCT_NAME = StopCovid;

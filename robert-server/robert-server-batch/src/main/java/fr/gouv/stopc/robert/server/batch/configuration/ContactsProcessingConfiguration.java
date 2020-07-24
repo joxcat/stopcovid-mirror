@@ -23,7 +23,7 @@ import org.springframework.batch.item.data.builder.MongoItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -228,7 +228,7 @@ public class ContactsProcessingConfiguration {
 
 	public TaskExecutor taskExecutor() {
 
-		return new SimpleAsyncTaskExecutor();
+		return new SyncTaskExecutor();
 	}
 
 	public Step contactWorkerStep(StepBuilderFactory stepBuilderFactory, MongoItemReader<Contact> mongoItemReader) {
@@ -268,7 +268,7 @@ public class ContactsProcessingConfiguration {
 														   @Value("#{stepExecutionContext[start]}") final int start,
 														   @Value("#{stepExecutionContext[end]}") final int end) {
 
-		log.info("{} currently reading registrations from itemId collections from id={} - to id= {} ", name, start, end);
+		log.info("{} currently reading Contact(s) from itemId collections from id={} - to id= {} ", name, start, end);
 
 		List<String> itemIdentifiers = (List<String>)itemIdMappingService.getItemIdMappingsBetweenIds(start, end);
 
@@ -288,7 +288,7 @@ public class ContactsProcessingConfiguration {
 																	 @Value("#{stepExecutionContext[name]}") final String name,
 																	 @Value("#{stepExecutionContext[start]}") final int start,
 																	 @Value("#{stepExecutionContext[end]}") final int end) {
-		log.info("{} currently reading registrations from itemId collections from id={} - to id= {} ", name, start, end);
+		log.info("{} currently reading Registration(s) from itemId collections from id={} - to id= {} ", name, start, end);
 
 		List<byte[]> itemIdentifiers = (List<byte[]>)itemIdMappingService.getItemIdMappingsBetweenIds(start, end);
 
@@ -308,7 +308,7 @@ public class ContactsProcessingConfiguration {
 																	   @Value("#{stepExecutionContext[name]}") final String name,
 																	   @Value("#{stepExecutionContext[start]}") final long start,
 																	   @Value("#{stepExecutionContext[end]}") final long end) {
-		log.info("{} currently reading registrations from itemId collections from id={} - to id= {} ", name, start, end);
+		log.info("{} currently reading Registration(s) from itemId collections from id={} - to id= {} ", name, start, end);
 
 		List<byte[]> itemIdentifiers = (List<byte[]>)itemIdMappingService.getItemIdMappingsBetweenIds(start, end);
 

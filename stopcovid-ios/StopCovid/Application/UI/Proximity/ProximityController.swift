@@ -286,14 +286,18 @@ final class ProximityController: CVTableViewController {
                     isChangingState = false
                 }
             } else {
-                switch ParametersManager.shared.apiVersion {
-                case .v1:
-                    processRegisterWithReCaptcha {
-                        self.isChangingState = false
-                    }
-                case .v2:
-                    processRegisterWithCaptcha {
-                        self.isChangingState = false
+                HUD.show(.progress)
+                ParametersManager.shared.fetchConfig { _ in
+                    HUD.hide()
+                    switch ParametersManager.shared.apiVersion {
+                    case .v1:
+                        self.processRegisterWithReCaptcha {
+                            self.isChangingState = false
+                        }
+                    case .v2:
+                        self.processRegisterWithCaptcha {
+                            self.isChangingState = false
+                        }
                     }
                 }
             }
@@ -309,7 +313,10 @@ final class ProximityController: CVTableViewController {
             guard let token = token else {
                 self.showAlert(title: "common.error".localized,
                                message: "proximityService.error.captchaError".localized,
-                               okTitle: "common.ok".localized)
+                               okTitle: "common.retry".localized,
+                               cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                self?.didChangeSwitchValue(isOn: true)
+                })
                 completion()
                 return
             }
@@ -324,7 +331,10 @@ final class ProximityController: CVTableViewController {
                     } else {
                         self.showAlert(title: "common.error".localized,
                                        message: "common.error.server".localized,
-                                       okTitle: "common.ok".localized)
+                                       okTitle: "common.retry".localized,
+                                       cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                        self?.didChangeSwitchValue(isOn: true)
+                        })
                     }
                 } else {
                     self.processRegistrationDone()
@@ -349,10 +359,20 @@ final class ProximityController: CVTableViewController {
                                 self.showAlert(title: "common.error.clockNotAligned.title".localized,
                                                message: "common.error.clockNotAligned.message".localized,
                                                okTitle: "common.ok".localized)
+                            } else if (error as NSError).code == 401 {
+                                self.showAlert(title: "captchaController.alert.invalidCode.title".localized,
+                                               message: "captchaController.alert.invalidCode.message".localized,
+                                               okTitle: "common.retry".localized,
+                                               cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                                self?.didChangeSwitchValue(isOn: true)
+                                })
                             } else {
                                 self.showAlert(title: "common.error".localized,
                                                message: "common.error.server".localized,
-                                               okTitle: "common.ok".localized)
+                                               okTitle: "common.retry".localized,
+                                               cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                                self?.didChangeSwitchValue(isOn: true)
+                                })
                             }
                         } else {
                             self.processRegistrationDone()
@@ -365,7 +385,10 @@ final class ProximityController: CVTableViewController {
             case .failure:
                 self.showAlert(title: "common.error".localized,
                                message: "common.error.server".localized,
-                               okTitle: "common.ok".localized)
+                               okTitle: "common.retry".localized,
+                               cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                self?.didChangeSwitchValue(isOn: true)
+                })
                 completion()
             }
         }

@@ -174,6 +174,7 @@ public class DeleteHistoryControllerWsRestTest {
 	}
 
     /** Test the access for API V1, should not be used since API V2 */
+
 	@Test
 	public void testAccessV1() {
     	deleteHistoryWithExposedEpochsSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefix_V1).path(UriConstants.DELETE_HISTORY).build().encode().toUri());

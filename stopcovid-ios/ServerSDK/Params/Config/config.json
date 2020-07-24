@@ -1,6 +1,10 @@
 {
   "config": [
     {
+      "name": "app.apiVersion",
+      "value": "v2"
+    },
+    {
       "name": "app.randomStatusHour",
       "value": 12
     },
@@ -47,6 +51,14 @@
     {
       "name": "ble.backgroundServiceManufacturerData",
       "value": "1.0.0.0.0.0.0.0.0.0.0.8.0.0.0.0.0"
+    },
+    {
+      "name": "ble.filterConfig",
+      "value": "{\"a\":4.3429448190325175,\"b\":0.1,\"deltas\":[39.0,27.0,23.0,21.0,20.0,19.0,18.0,17.0,16.0,15.0],\"durationThreshold\":120,\"p0\":-66.0,\"rssiThreshold\":-25,\"timeOverlap\":60,\"timeWindow\":120,\"riskThreshold\":0.1}"
+    },
+    {
+      "name": "ble.filterMode",
+      "value": "RISKS"
     },
     {
       "name": "ble.calibration",

@@ -30,6 +30,15 @@ extension String {
         }
     }
     
+    var isUuidCode: Bool { self ~= "^[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}$" }
+    var isShortCode: Bool { self ~= "^[A-Za-z0-9]{6}$" }
+    
+    static func ~= (lhs: String, rhs: String) -> Bool {
+        guard let regex = try? NSRegularExpression(pattern: rhs) else { return false }
+        let range: NSRange = NSRange(location: 0, length: lhs.utf16.count)
+        return regex.firstMatch(in: lhs, options: [], range: range) != nil
+    }
+    
     func removingEmojis() -> String {
         components(separatedBy: .symbols).filter { !$0.isEmpty }.joined().trimmingCharacters(in: .whitespaces)
     }

@@ -299,6 +299,6 @@
     "captchaController.alert.invalidCode.title": "Attention",
     "captchaController.alert.invalidCode.message": "The code you entered is not valid.",
     
-    "proximityController.error.noBackgroundAppRefresh" : "The background app refresh is necessary. Tap to change this parameter."
-
+    "proximityController.error.noBackgroundAppRefresh" : "The background app refresh is necessary. Tap to change this parameter.",
+    "common.retry": "Retry"
 }

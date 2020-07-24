@@ -1113,6 +1113,7 @@ class CryptoServiceGrpcServerTest {
                         (stub, req, observer) -> stub.deleteId(req, observer),
                         (t) -> fail(),
                         res);
+
         assertTrue(!res.isError());
         assertTrue(ByteUtils.isNotEmpty(response.getIdA().toByteArray()));
         assertTrue(Arrays.equals(clientIdentifierBundle.get().getId(), response.getIdA().toByteArray()));
@@ -1144,10 +1145,10 @@ class CryptoServiceGrpcServerTest {
                         (stub, req, observer) -> stub.deleteId(req, observer),
                         (t) -> fail(),
                         res);
+
         assertTrue(!res.isError());
         assertTrue(response.hasError());
         assertTrue(response.getError().getCode() == 400);
-
     }
 
     @Test
@@ -1427,7 +1428,7 @@ class CryptoServiceGrpcServerTest {
         when(this.cryptographicStorageService.getServerKeys(this.currentEpochId,
                 this.serverConfigurationService.getServiceTimeStart(),
                 4))
-        .thenReturn(serverKeys);
+                .thenReturn(serverKeys);
 
         // Given
         GetIdFromStatusRequest request = GetIdFromStatusRequest

@@ -50,6 +50,7 @@ final class CaptchaViewController: CVTableViewController {
     }
     
     deinit {
+        player?.stop()
         try? AVAudioSession.sharedInstance().setActive(false)
         deinitBlock()
     }

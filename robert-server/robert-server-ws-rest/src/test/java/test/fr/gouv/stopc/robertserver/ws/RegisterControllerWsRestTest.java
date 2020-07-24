@@ -169,7 +169,7 @@ public class RegisterControllerWsRestTest {
 					RegisterInternalVo.builder().captcha("mycaptcha").build()
 					, this.headers), String.class).getStatusCode());
 	}
-
+	
 	@Test
 	public void testCaptchaFailure() {
 		this.body = RegisterVo.builder()

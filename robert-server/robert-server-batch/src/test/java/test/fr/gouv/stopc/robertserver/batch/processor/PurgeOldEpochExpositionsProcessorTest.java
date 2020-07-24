@@ -18,6 +18,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import test.fr.gouv.stopc.robertserver.batch.utils.ProcessorTestUtils;
 
 import fr.gouv.stopc.robert.server.batch.RobertServerBatchApplication;
 import fr.gouv.stopc.robert.server.batch.configuration.ContactsProcessingConfiguration;
@@ -30,7 +31,6 @@ import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 
-import test.fr.gouv.stopc.robertserver.batch.utils.ProcessorTestUtils;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ExtendWith(SpringExtension.class)

@@ -24,6 +24,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
     
+    private var lastStatusTriggerOnWake: TimeInterval = 0.0
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         initAppearance()
         initUrlCache()
@@ -52,8 +54,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                 NotificationsManager.shared.scheduleAtRiskNotification(minHour: ParametersManager.shared.minHourContactNotif, maxHour: ParametersManager.shared.maxHourContactNotif)
             }
         }, didStopProximityDueToLackOfEpochsHandler: {
+            self.triggerStatusRequestIfNeeded()
             NotificationsManager.shared.triggerRestartNotification()
         }, didReceiveProximityHandler: {
+            let nowTimestamp: TimeInterval = Date().timeIntervalSince1970
+            guard nowTimestamp - self.lastStatusTriggerOnWake > 10.0 else { return }
+            self.lastStatusTriggerOnWake = nowTimestamp
             self.triggerStatusRequestIfNeeded()
         })
         ParametersManager.shared.start()
@@ -94,7 +100,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     private func initAppMaintenance() {
         MaintenanceManager.shared.start(coordinator: rootCoordinator)
     }
-    
+
     private func triggerStatusRequestIfNeeded(completion: ((_ error: Error?) -> ())? = nil) {
         if RBManager.shared.isRegistered {
             let lastStatusRequestTimestamp: Double = RBManager.shared.lastStatusRequestDate?.timeIntervalSince1970 ?? 0.0
@@ -111,5 +117,5 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             completion?(nil)
         }
     }
-    
+
 }

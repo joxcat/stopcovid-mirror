@@ -62,7 +62,15 @@ extension FlashCodeController: QRScannerViewDelegate {
     func qrScanningDidFail() {}
     
     func qrScanningSucceededWithCode(_ str: String?) {
-        didFlash?(str)
+        if str?.isUuidCode == true {
+            didFlash?(str)
+        } else {
+            showAlert(title: "enterCodeController.alert.invalidCode.title".localized,
+                      message: "enterCodeController.alert.invalidCode.message".localized,
+                      okTitle: "common.ok".localized, handler: {
+                        self.scanView.startScanning()
+            })
+        }
     }
     
 }
