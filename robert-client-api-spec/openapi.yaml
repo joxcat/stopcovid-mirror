@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: "#STOPCOVID, Robert Proximity Tracing Client API"
-  version: 2.0.1
+  version: 2.1.0
   title: "#STOPCOVID, Robert Proximity Tracing"
   termsOfService: https://github.com/ROBERT-proximity-tracing/
   contact:
@@ -145,7 +145,7 @@ paths:
         This request must the '0x02' salt when creating its MAC digest
       operationId: ESR
       requestBody:
-        $ref: "#/components/requestBodies/AuthentifiedRequest"
+        $ref: "#/components/requestBodies/ExposureStatusRequest"
       responses:
         "200":
           description: Returns whether the app user was exposed to a risk. The app must
@@ -201,7 +201,7 @@ paths:
         This request must use the '0x03' salt when creating its MAC digest
       operationId: unregister
       requestBody:
-        $ref: "#/components/requestBodies/AuthentifiedRequest"
+        $ref: "#/components/requestBodies/UnregisterRequest"
       responses:
         "200":
           description: Returns whether unregistering was successful
@@ -248,6 +248,16 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/AuthentifiedRequest"
+    ExposureStatusRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ExposureStatusRequest"
+    UnregisterRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UnregisterRequest"
   schemas:
     UnregisterResponse:
       type: object
@@ -294,6 +304,22 @@ components:
         - epochId
         - time
         - mac
+    UnregisterRequest:
+      allOf:
+        - $ref: '#/components/schemas/AuthentifiedRequest'
+        - type: object
+          properties:
+            pushToken:
+              type: string
+              description: The push token that is associated with the app in order to delete it from the database
+    ExposureStatusRequest:
+      allOf:
+        - $ref: '#/components/schemas/AuthentifiedRequest'
+        - type: object
+          properties:
+            pushInfo:
+              $ref: "#/components/schemas/PushInfo"
+              description: Information to configure push notifications
     ExposureStatusResponse:
       type: object
       properties:
@@ -347,6 +373,9 @@ components:
 
 
             Base64 encoded
+        pushInfo:
+          $ref: "#/components/schemas/PushInfo"
+          description: Information to configure push notifications
       required:
         - captcha
         - captchaId
@@ -530,6 +559,23 @@ components:
             $ref: "#/components/schemas/KeyPair"
       description: Identifiers to be broadcast by the app during the next M epochs.
         Provided as (EBID, ECC, epochid) tuples.
+    PushInfo:
+      type: object
+      description: Information to configure push notifications
+      properties:
+        token:
+          type: string
+          description: The push token as provided by the OS for the app
+        locale:
+          type: string
+          description: The locale of the phone as an ISO-639 code (e.g. fr-FR, en-US), used to localize the text sent in the push notification messages
+        timezone:
+          type: string
+          description: The timezone of the phone as a TZ Database name (e.g. Europe/Paris, Indian/Reunion, America/Cayenne), used to schedule the sending of the notification during the day only
+      required:
+        - token
+        - locale
+        - timezone
     ClientConfiguration:
       type: array
       items:
