@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   description: "#STOPCOVID, Robert Proximity Tracing Client API"
-  version: 2.1.0
+  version: 3.0.0
   title: "#STOPCOVID, Robert Proximity Tracing"
   termsOfService: https://github.com/ROBERT-proximity-tracing/
   contact:
@@ -240,7 +240,7 @@ externalDocs:
   description: Find out more about ROBERT
   url: https://github.com/ROBERT-proximity-tracing/
 servers:
-  - url: https://yourrobertserver.org/v2
+  - url: https://yourrobertserver.org/v3
 components:
   requestBodies:
     AuthentifiedRequest:
