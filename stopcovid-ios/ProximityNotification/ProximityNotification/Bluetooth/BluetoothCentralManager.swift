@@ -67,11 +67,13 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
         logger.log(logLevel: .debug, "stop central manager")
         
         stopCentralManager()
-        dispatchQueue.async {
-            self.disconnectPeripherals()
-        }
+        
         centralManager?.delegate = nil
         centralManager = nil
+        
+        dispatchQueue.sync {
+            self.cleanPeripherals()
+        }
     }
     
     private func stopCentralManager() {
@@ -173,19 +175,36 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
         }
     }
     
-    private func disconnectPeripheral(_ peripheral: CBPeripheral) {
-        logger.log(logLevel: .debug, "disconnect peripheral \(peripheral)")
+    private func cleanPeripheral(_ peripheral: CBPeripheral) {
+        logger.log(logLevel: .debug, "clean peripheral \(peripheral)")
         
-        connectingPeripherals.remove(peripheral)
-        peripheralsToWriteValue.remove(peripheral)
+        peripheral.delegate = nil
         connectionTimeoutTimersForPeripheralIdentifiers[peripheral.identifier]?.invalidate()
         connectionTimeoutTimersForPeripheralIdentifiers[peripheral.identifier] = nil
+        connectingPeripherals.remove(peripheral)
+        peripheralsToWriteValue.remove(peripheral)
+    }
+    
+    private func cleanPeripherals() {
+        logger.log(logLevel: .debug, "clean peripherals (\(connectingPeripherals.count))")
+        
+        connectingPeripherals.forEach({ $0.delegate = nil })
+        connectionTimeoutTimersForPeripheralIdentifiers.values.forEach({ $0.invalidate() })
+        connectionTimeoutTimersForPeripheralIdentifiers.removeAll()
+        connectingPeripherals.removeAll()
+        peripheralsToWriteValue.removeAll()
+    }
+    
+    private func disconnectPeripheral(_ peripheral: CBPeripheral) {
+        logger.log(logLevel: .debug, "disconnect peripheral \(peripheral)")
         
         if peripheral.state == .connecting || peripheral.state == .connected {
             logger.log(logLevel: .debug, "central manager cancelling connection to peripheral \(peripheral)")
             centralManager?.cancelPeripheralConnection(peripheral)
+            peripheral.delegate = nil
+        } else {
+            cleanPeripheral(peripheral)
         }
-        peripheral.delegate = nil
     }
     
     private func disconnectPeripherals() {
@@ -264,13 +283,13 @@ extension BluetoothCentralManager: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         logger.log(logLevel: .debug, "central manager did fail to connect to peripheral \(peripheral)")
         
-        disconnectPeripheral(peripheral)
+        cleanPeripheral(peripheral)
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         logger.log(logLevel: .debug, "central manager did disconnect to peripheral \(peripheral)")
         
-        disconnectPeripheral(peripheral)
+        cleanPeripheral(peripheral)
     }
 }
 

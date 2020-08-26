@@ -12,11 +12,11 @@ enum CaptchaConstant {
 
     enum Url {
         
-        static var create: URL { Constant.Server.baseUrl.appendingPathComponent("/captcha") } // PROD Version (Cap Backend)
+        static var create: URL { Constant.Server.baseUrl.appendingPathComponent("/captcha") }
         
-        static func getImage(id: String) -> URL { Constant.Server.baseUrl.appendingPathComponent("/captcha/\(id)/image") } // PROD Version (Cap Backend)
+        static func getImage(id: String) -> URL { Constant.Server.baseUrl.appendingPathComponent("/captcha/\(id)/image") }
         
-        static func getAudio(id: String) -> URL { Constant.Server.baseUrl.appendingPathComponent("/captcha/\(id)/audio") } // PROD Version (Cap Backend)
+        static func getAudio(id: String) -> URL { Constant.Server.baseUrl.appendingPathComponent("/captcha/\(id)/audio") }
         
     }
 }

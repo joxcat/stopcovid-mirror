@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		09D83221249CC08100064733 /* RBFiltering.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D8321C249CC08100064733 /* RBFiltering.swift */; };
 		09D83225249CC0D800064733 /* FilteringManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09D83224249CC0D800064733 /* FilteringManager.swift */; };
+		15CD805B6B87084795B00EB7 /* Pods_StopCovid.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8B811C7C90280F9FE650EC7 /* Pods_StopCovid.framework */; };
 		37014CA124460CD000CE0BF1 /* ModalContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37013E0B243F895000FCB360 /* ModalContainerViewController.swift */; };
 		37014CA224460CD000CE0BF1 /* OnboardingGestureCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373A3478243E7E6B00148FCF /* OnboardingGestureCell.swift */; };
 		37014CA324460CD000CE0BF1 /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E657AE243DC8220089D8B3 /* UIViewController+Extension.swift */; };
@@ -178,6 +179,7 @@
 		37A00FF5247501A7006DC3C5 /* MaintenanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A00FF4247501A7006DC3C5 /* MaintenanceManager.swift */; };
 		37A00FF724750471006DC3C5 /* MaintenanceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A00FF624750471006DC3C5 /* MaintenanceInfo.swift */; };
 		37A00FF9247506C6006DC3C5 /* MaintenanceConstant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A00FF8247506C6006DC3C5 /* MaintenanceConstant.swift */; };
+		37A7AEA324D719A0001B704D /* StateAnimationCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37A7AEA224D7199F001B704D /* StateAnimationCell.xib */; };
 		37A7FB982447356900A4B99E /* UIBarButtonItem+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A7FB962447356900A4B99E /* UIBarButtonItem+Extension.swift */; };
 		37A7FB9B24473C9900A4B99E /* InteractivePopGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A7FB9924473C9900A4B99E /* InteractivePopGestureRecognizer.swift */; };
 		37A9250D246EC20C0081862C /* RobertSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B0231624595ADF002281E9 /* RobertSDK.framework */; };
@@ -204,6 +206,11 @@
 		37B02345245AA892002281E9 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B02344245AA892002281E9 /* BluetoothManager.swift */; };
 		37B02348245AA902002281E9 /* RBBluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B02346245AA900002281E9 /* RBBluetooth.swift */; };
 		37B0234C245AAD67002281E9 /* BluetoothStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B0234B245AAD67002281E9 /* BluetoothStateManager.swift */; };
+		37B4A2B124CFF90500018320 /* OffToOn.json in Resources */ = {isa = PBXBuildFile; fileRef = 37B4A2AF24CFF90500018320 /* OffToOn.json */; };
+		37B4A2B324CFF90500018320 /* OnWaving.json in Resources */ = {isa = PBXBuildFile; fileRef = 37B4A2B024CFF90500018320 /* OnWaving.json */; };
+		37B4A2B724CFF9E200018320 /* StateAnimationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B4A2B524CFF9E200018320 /* StateAnimationCell.swift */; };
+		37B4A2BD24D00EF300018320 /* OffToOn-Dark.json in Resources */ = {isa = PBXBuildFile; fileRef = 37B4A2BB24D00EF300018320 /* OffToOn-Dark.json */; };
+		37B4A2BF24D00EF300018320 /* OnWaving-Dark.json in Resources */ = {isa = PBXBuildFile; fileRef = 37B4A2BC24D00EF300018320 /* OnWaving-Dark.json */; };
 		37B854942476DD880007709F /* SickBlockingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B854932476DD880007709F /* SickBlockingCoordinator.swift */; };
 		37C772CA2481195C00B01BAE /* RBCryptoKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C772C92481195C00B01BAE /* RBCryptoKeys.swift */; };
 		37C772D824816E3E00B01BAE /* strings-ar.json in Resources */ = {isa = PBXBuildFile; fileRef = 37C772D624816E3E00B01BAE /* strings-ar.json */; };
@@ -258,7 +265,7 @@
 		37EB30052488CD2F003D999A /* CaptchaServerBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37EB30042488CD2F003D999A /* CaptchaServerBody.swift */; };
 		9D1D8FEB8492319A58F00442 /* Pods_StorageSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 687CFE18D0E0E598C5A3BB2A /* Pods_StorageSDK.framework */; };
 		C67476FB3395F72144291F30 /* Pods_RobertSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DA02CBEDACA215063614C6F /* Pods_RobertSDK.framework */; };
-		E652832EEEE3F63E9E65FD88 /* Pods_StopCovid.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37EB2E5724855B3F003D999A /* Pods_StopCovid.framework */; };
+		E652832EEEE3F63E9E65FD88 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -520,6 +527,7 @@
 		37A00FF4247501A7006DC3C5 /* MaintenanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceManager.swift; sourceTree = "<group>"; };
 		37A00FF624750471006DC3C5 /* MaintenanceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceInfo.swift; sourceTree = "<group>"; };
 		37A00FF8247506C6006DC3C5 /* MaintenanceConstant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceConstant.swift; sourceTree = "<group>"; };
+		37A7AEA224D7199F001B704D /* StateAnimationCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = StateAnimationCell.xib; sourceTree = "<group>"; };
 		37A7FB942447251000A4B99E /* RemoteFileSyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFileSyncManager.swift; sourceTree = "<group>"; };
 		37A7FB962447356900A4B99E /* UIBarButtonItem+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIBarButtonItem+Extension.swift"; sourceTree = "<group>"; };
 		37A7FB9924473C9900A4B99E /* InteractivePopGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InteractivePopGestureRecognizer.swift; sourceTree = "<group>"; };
@@ -538,6 +546,11 @@
 		37B02344245AA892002281E9 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
 		37B02346245AA900002281E9 /* RBBluetooth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBBluetooth.swift; sourceTree = "<group>"; };
 		37B0234B245AAD67002281E9 /* BluetoothStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothStateManager.swift; sourceTree = "<group>"; };
+		37B4A2AF24CFF90500018320 /* OffToOn.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = OffToOn.json; sourceTree = "<group>"; };
+		37B4A2B024CFF90500018320 /* OnWaving.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = OnWaving.json; sourceTree = "<group>"; };
+		37B4A2B524CFF9E200018320 /* StateAnimationCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateAnimationCell.swift; sourceTree = "<group>"; };
+		37B4A2BB24D00EF300018320 /* OffToOn-Dark.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "OffToOn-Dark.json"; sourceTree = "<group>"; };
+		37B4A2BC24D00EF300018320 /* OnWaving-Dark.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "OnWaving-Dark.json"; sourceTree = "<group>"; };
 		37B854932476DD880007709F /* SickBlockingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SickBlockingCoordinator.swift; sourceTree = "<group>"; };
 		37C772C92481195C00B01BAE /* RBCryptoKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBCryptoKeys.swift; sourceTree = "<group>"; };
 		37C772D424816D6F00B01BAE /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -560,7 +573,6 @@
 		37EB2E4B24855B0B003D999A /* StorageSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = StorageSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37EB2E4D24855B0B003D999A /* StorageSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StorageSDK.h; sourceTree = "<group>"; };
 		37EB2E4E24855B0B003D999A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		37EB2E5724855B3F003D999A /* Pods_StopCovid.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_StopCovid.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37EB2E6F24855E3F003D999A /* NSError+STExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSError+STExtension.swift"; sourceTree = "<group>"; };
 		37EB2E7124855E82003D999A /* FileManager+STExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+STExtension.swift"; sourceTree = "<group>"; };
 		37EB2E7324855EBF003D999A /* URL+STExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+STExtension.swift"; sourceTree = "<group>"; };
@@ -598,6 +610,7 @@
 		37F97A04245231BC00CDA154 /* RBEpoch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBEpoch.swift; sourceTree = "<group>"; };
 		37F97A07245232B100CDA154 /* RBStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBStorable.swift; sourceTree = "<group>"; };
 		3A65D27D95992A7AB7C924E2 /* Pods_Proximity.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Proximity.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4607405F5664C3D27FF5BF84 /* Pods_StopCovid_Preprod.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_StopCovid_Preprod.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		60A676794253CACB1D2C2E8C /* Pods_StopCovid_Int.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_StopCovid_Int.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		687CFE18D0E0E598C5A3BB2A /* Pods_StorageSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_StorageSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D65CB902EE2DF612868AB1F /* Pods-StorageSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorageSDK.release.xcconfig"; path = "Target Support Files/Pods-StorageSDK/Pods-StorageSDK.release.xcconfig"; sourceTree = "<group>"; };
@@ -605,6 +618,7 @@
 		9C7C23D86C8D131C164CAADE /* Pods_StopCovidTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_StopCovidTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B130EF6D37FCF486F81B6E07 /* Pods-RobertSDK.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RobertSDK.debug.xcconfig"; path = "Target Support Files/Pods-RobertSDK/Pods-RobertSDK.debug.xcconfig"; sourceTree = "<group>"; };
 		DFDA4D3378410AAC7FAD02F1 /* Pods-RobertSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RobertSDK.release.xcconfig"; path = "Target Support Files/Pods-RobertSDK/Pods-RobertSDK.release.xcconfig"; sourceTree = "<group>"; };
+		E8B811C7C90280F9FE650EC7 /* Pods_StopCovid.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_StopCovid.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F82A3795149A99D435FF24CC /* Pods-StopCovid.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StopCovid.debug.xcconfig"; path = "Target Support Files/Pods-StopCovid/Pods-StopCovid.debug.xcconfig"; sourceTree = "<group>"; };
 		FA4F6E21CA0C924E56B05780 /* Pods-StorageSDK.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StorageSDK.debug.xcconfig"; path = "Target Support Files/Pods-StorageSDK/Pods-StorageSDK.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -618,7 +632,8 @@
 				37EB2E91248646CD003D999A /* ServerSDK.framework in Frameworks */,
 				37A9250D246EC20C0081862C /* RobertSDK.framework in Frameworks */,
 				37EB2E5224855B0B003D999A /* StorageSDK.framework in Frameworks */,
-				E652832EEEE3F63E9E65FD88 /* Pods_StopCovid.framework in Frameworks */,
+				E652832EEEE3F63E9E65FD88 /* (null) in Frameworks */,
+				15CD805B6B87084795B00EB7 /* Pods_StopCovid.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -728,6 +743,8 @@
 			children = (
 				37013E1B2440451E00FCB360 /* SwitchCell.swift */,
 				37013E192440450E00FCB360 /* SwitchCell.xib */,
+				37B4A2B524CFF9E200018320 /* StateAnimationCell.swift */,
+				37A7AEA224D7199F001B704D /* StateAnimationCell.xib */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -1167,6 +1184,7 @@
 				37663D00243DBB89009F1D98 /* Fonts */,
 				373A3449243E234C00148FCF /* Jsons */,
 				37689F90246AF31F00D99BC4 /* Certificates */,
+				37B4A2AD24CFF8E300018320 /* Lottie */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -1592,13 +1610,14 @@
 		37B02340245AA719002281E9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				37EB2E5724855B3F003D999A /* Pods_StopCovid.framework */,
 				9C7C23D86C8D131C164CAADE /* Pods_StopCovidTests.framework */,
 				3A65D27D95992A7AB7C924E2 /* Pods_Proximity.framework */,
 				2DA02CBEDACA215063614C6F /* Pods_RobertSDK.framework */,
 				60A676794253CACB1D2C2E8C /* Pods_StopCovid_Int.framework */,
 				9B6E3B17FCB31C84A0BCB98D /* Pods_StopCovid_Rec.framework */,
 				687CFE18D0E0E598C5A3BB2A /* Pods_StorageSDK.framework */,
+				4607405F5664C3D27FF5BF84 /* Pods_StopCovid_Preprod.framework */,
+				E8B811C7C90280F9FE650EC7 /* Pods_StopCovid.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1610,6 +1629,17 @@
 				37B0234B245AAD67002281E9 /* BluetoothStateManager.swift */,
 			);
 			path = Bluetooth;
+			sourceTree = "<group>";
+		};
+		37B4A2AD24CFF8E300018320 /* Lottie */ = {
+			isa = PBXGroup;
+			children = (
+				37B4A2AF24CFF90500018320 /* OffToOn.json */,
+				37B4A2B024CFF90500018320 /* OnWaving.json */,
+				37B4A2BB24D00EF300018320 /* OffToOn-Dark.json */,
+				37B4A2BC24D00EF300018320 /* OnWaving-Dark.json */,
+			);
+			path = Lottie;
 			sourceTree = "<group>";
 		};
 		37C772B1247FE3B600B01BAE /* Params */ = {
@@ -2007,6 +2037,7 @@
 				37C772D924816E3E00B01BAE /* strings-de.json in Resources */,
 				371134B02472A6C700E70547 /* Marianne-Bold.otf in Resources */,
 				3768A0A0246D278A00D99BC4 /* strings-it.json in Resources */,
+				37A7AEA324D719A0001B704D /* StateAnimationCell.xib in Resources */,
 				3769280D24603A6A00310876 /* CenteredImageTextCell.xib in Resources */,
 				37C772D824816E3E00B01BAE /* strings-ar.json in Resources */,
 				3768A09D246D276F00D99BC4 /* privacy-pt.json in Resources */,
@@ -2026,10 +2057,14 @@
 				37014D0324460CD000CE0BF1 /* BottomButtonContainer.storyboard in Resources */,
 				37014D0424460CD000CE0BF1 /* TextFieldCell.xib in Resources */,
 				370AA9BC244763D9009CEB0D /* SF-Pro-Text-Semibold.otf in Resources */,
+				37B4A2BD24D00EF300018320 /* OffToOn-Dark.json in Resources */,
 				37014D0524460CD000CE0BF1 /* LaunchScreen.storyboard in Resources */,
 				37014D0624460CD000CE0BF1 /* Images.xcassets in Resources */,
 				3725276E2446DBE9007A2054 /* Colors.xcassets in Resources */,
+				37B4A2B324CFF90500018320 /* OnWaving.json in Resources */,
 				37014D0724460CD000CE0BF1 /* TextCell.xib in Resources */,
+				37B4A2BF24D00EF300018320 /* OnWaving-Dark.json in Resources */,
+				37B4A2B124CFF90500018320 /* OffToOn.json in Resources */,
 				37045668249356540042B7E6 /* AudioCell.xib in Resources */,
 				37014D0824460CD000CE0BF1 /* AppVersionCell.xib in Resources */,
 				37689F87246AE4B200D99BC4 /* privacy-es.json in Resources */,
@@ -2205,6 +2240,7 @@
 				37014CA624460CD000CE0BF1 /* Appearance.swift in Sources */,
 				37014CA724460CD000CE0BF1 /* OnboardingPrivacyController.swift in Sources */,
 				37B854942476DD880007709F /* SickBlockingCoordinator.swift in Sources */,
+				37B4A2B724CFF9E200018320 /* StateAnimationCell.swift in Sources */,
 				37014CA824460CD000CE0BF1 /* OnboardingBeAwareController.swift in Sources */,
 				37EB30052488CD2F003D999A /* CaptchaServerBody.swift in Sources */,
 				37A00FF9247506C6006DC3C5 /* MaintenanceConstant.swift in Sources */,
@@ -2466,7 +2502,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 62;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = PR958DC548;
 				INFOPLIST_FILE = StopCovid/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
@@ -2474,7 +2510,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.1.4;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS -DPROD -DOFFICIAL";
 				PRODUCT_BUNDLE_IDENTIFIER = fr.gouv.stopcovid.ios;
 				PRODUCT_NAME = StopCovid;
@@ -2494,13 +2530,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 62;
 				DEVELOPMENT_TEAM = PR958DC548;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = StopCovid/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.1.4;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D COCOAPODS -DPROD -DOFFICIAL";
 				PRODUCT_BUNDLE_IDENTIFIER = fr.gouv.stopcovid.ios;
 				PRODUCT_NAME = StopCovid;
@@ -2663,6 +2700,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -2726,6 +2764,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -2787,6 +2826,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;

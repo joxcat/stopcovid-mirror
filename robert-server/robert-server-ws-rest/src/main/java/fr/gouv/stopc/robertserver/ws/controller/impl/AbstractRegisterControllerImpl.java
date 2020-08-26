@@ -24,6 +24,7 @@ import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 import fr.gouv.stopc.robertserver.ws.dto.ClientConfigDto;
 import fr.gouv.stopc.robertserver.ws.dto.RegisterResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
+import fr.gouv.stopc.robertserver.ws.service.IRestApiService;
 import fr.gouv.stopc.robertserver.ws.utils.MessageConstants;
 import fr.gouv.stopc.robertserver.ws.vo.RegisterVo;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public abstract class AbstractRegisterControllerImpl {
 	protected IServerConfigurationService serverConfigurationService;
 	protected IApplicationConfigService applicationConfigService;
 	protected ICryptoServerGrpcClient cryptoServerClient;
+	protected IRestApiService restApiService;
 
 	protected ResponseEntity<RegisterResponseDto> postCheckRegister(RegisterVo registerVo) throws RobertServerException {
 	
@@ -79,6 +81,9 @@ public abstract class AbstractRegisterControllerImpl {
 	
 	        registerResponseDto.setTuples(Base64.encode(identity.getTuples().toByteArray()));
 	        registerResponseDto.setTimeStart(this.serverConfigurationService.getServiceTimeStart());
+
+            Optional.ofNullable(registerVo.getPushInfo()).ifPresent(this.restApiService::registerPushNotif);
+
 	        return ResponseEntity.status(HttpStatus.CREATED).body(registerResponseDto);
 	    }
 	

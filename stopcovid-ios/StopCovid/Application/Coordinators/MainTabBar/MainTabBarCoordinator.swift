@@ -55,7 +55,6 @@ final class MainTabBarCoordinator: WindowedCoordinator {
         let informationCoordinator: InformationCoordinator = InformationCoordinator(presentingController: tabBarController?.topPresentedController, parent: self)
         addChild(coordinator: informationCoordinator)
     }
-    
 }
 
 // MARK: - Notifications -

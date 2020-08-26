@@ -1,7 +1,5 @@
 package test.fr.gouv.stopc.robertserver.ws;
 
-import static fr.gouv.stopc.robertserver.ws.config.Config.API_V1;
-import static fr.gouv.stopc.robertserver.ws.config.Config.API_V2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,6 +40,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import fr.gouv.stopc.robertserver.ws.RobertServerWsRestApplication;
+import fr.gouv.stopc.robertserver.ws.config.RobertServerWsConfiguration;
 import fr.gouv.stopc.robertserver.ws.dto.ReportBatchResponseDto;
 import fr.gouv.stopc.robertserver.ws.dto.VerifyResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.ApiError;
@@ -73,11 +72,17 @@ public class ReportControllerWsRestTest {
     @MockBean
     private IRestApiService restApiService;
 
-    @Value("${controller.path.prefix}" + API_V1)
-    private String pathPrefix_V1;
+    @Value("${controller.path.prefix}" + UriConstants.API_V1)
+    private String pathPrefixV1;
 
-    @Value("${controller.path.prefix}" + API_V2)
+    @Value("${controller.path.prefix}" + UriConstants.API_V2)
+    private String pathPrefixV2;
+
+    @Value("${controller.path.prefix}" + UriConstants.API_V3)
     private String pathPrefix;
+
+    @MockBean
+    private RobertServerWsConfiguration config;
 
     private URI targetUrl;
 
@@ -237,15 +242,21 @@ public class ReportControllerWsRestTest {
         }
     }
 
-    /** Test the access for API V1, should not be used since API V2 */
+    /** Test the access for API V1, should not be used since API V3 */
     @Test
     public void testAccessV1() {
-    	reportContactHistorySucceeds(UriComponentsBuilder.fromUriString(this.pathPrefix).path(UriConstants.REPORT).build().encode().toUri());
+        reportContactHistorySucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV1).path(UriConstants.REPORT).build().encode().toUri());
+    }
+
+    /** Test the access for API V2, should not be used since API V3 */
+    @Test
+    public void testAccessV2() {
+        reportContactHistorySucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV2).path(UriConstants.REPORT).build().encode().toUri());
     }
 
     /** {@link #reportContactHistorySucceeds(URI)} and shortcut to test for API V2 exposure */
     @Test
-    public void testReportContactHistorySucceedsV2() {
+    public void testReportContactHistorySucceedsV3() {
     	reportContactHistorySucceeds(this.targetUrl);
     }
 

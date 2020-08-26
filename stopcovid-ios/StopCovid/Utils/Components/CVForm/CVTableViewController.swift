@@ -21,15 +21,18 @@ class CVTableViewController: UITableViewController {
     
     func createRows() -> [CVRow] { [] }
     
-    func reloadUI(animated: Bool = false) {
+    func reloadUI(animated: Bool = false, completion: (() -> ())? = nil) {
         rows = createRows()
         registerXibs()
         if animated {
             UIView.transition(with: tableView, duration: 0.2, options: [.transitionCrossDissolve], animations: {
                 self.tableView.reloadData()
-            }, completion: nil)
+            }) { _ in
+                completion?()
+            }
         } else {
             tableView.reloadData()
+            completion?()
         }
     }
     

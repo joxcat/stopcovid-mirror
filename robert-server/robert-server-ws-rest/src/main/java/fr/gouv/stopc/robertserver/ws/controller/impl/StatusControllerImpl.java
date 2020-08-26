@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.bson.internal.Base64;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -17,7 +18,6 @@ import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromStatusResponse
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import fr.gouv.stopc.robertserver.database.model.ApplicationConfigurationModel;
-import fr.gouv.stopc.robertserver.database.model.EpochExposition;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IApplicationConfigService;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
@@ -26,6 +26,7 @@ import fr.gouv.stopc.robertserver.ws.dto.ClientConfigDto;
 import fr.gouv.stopc.robertserver.ws.dto.StatusResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
 import fr.gouv.stopc.robertserver.ws.service.AuthRequestValidationService;
+import fr.gouv.stopc.robertserver.ws.service.IRestApiService;
 import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
 import fr.gouv.stopc.robertserver.ws.vo.StatusVo;
 import lombok.extern.slf4j.Slf4j;
@@ -44,18 +45,23 @@ public class StatusControllerImpl implements IStatusController {
 
 	private final PropertyLoader propertyLoader;
 
+	private final IRestApiService restApiService;
+
 	@Inject
 	public StatusControllerImpl(
 			final IServerConfigurationService serverConfigurationService,
 			final IRegistrationService registrationService,
 			final IApplicationConfigService applicationConfigService,
 			final AuthRequestValidationService authRequestValidationService,
-			final PropertyLoader propertyLoader) {
+			final PropertyLoader propertyLoader,
+			final IRestApiService restApiService) {
+
 		this.serverConfigurationService = serverConfigurationService;
 		this.registrationService = registrationService;
 		this.applicationConfigService = applicationConfigService;
 		this.authRequestValidationService = authRequestValidationService;
 		this.propertyLoader = propertyLoader;
+		this.restApiService = restApiService;
 	}
 
 	@Override
@@ -92,6 +98,12 @@ public class StatusControllerImpl implements IStatusController {
 				Optional<ResponseEntity> responseEntity = validate(record.get(), response.getEpochId(), response.getTuples().toByteArray());
 
 				if (responseEntity.isPresent()) {
+
+				    Optional.ofNullable(statusVo.getPushInfo())
+				    .filter(push -> Objects.nonNull(responseEntity.get().getStatusCode()))
+				    .filter(push -> responseEntity.get().getStatusCode().equals(HttpStatus.OK))
+				    .ifPresent(this.restApiService::registerPushNotif);
+
 					return responseEntity.get();
 				} else {
 					log.info("Status request failed validation");

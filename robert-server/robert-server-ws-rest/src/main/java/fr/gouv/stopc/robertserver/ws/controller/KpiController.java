@@ -1,7 +1,5 @@
 package fr.gouv.stopc.robertserver.ws.controller;
 
-import static fr.gouv.stopc.robertserver.ws.config.Config.API_V1;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.gouv.stopc.robertserver.ws.dto.RobertServerKpi;
 import fr.gouv.stopc.robertserver.ws.service.IKpiService;
+import fr.gouv.stopc.robertserver.ws.utils.UriConstants;
 
 /**
  * Endpoint definition for Kpi generation
@@ -22,7 +21,8 @@ import fr.gouv.stopc.robertserver.ws.service.IKpiService;
  *
  */
 @RestController
-@RequestMapping(value = "${controller.internal.path.prefix}" + API_V1, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "${controller.internal.path.prefix}" + 
+        UriConstants.API_V1, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class KpiController {
 
 	/**

@@ -7,6 +7,7 @@ def projectPods
   pod 'PKHUD'
   pod 'ReCaptcha'
   pod 'SwiftGen'
+  pod 'lottie-ios'
 end
 
 target 'StopCovid' do

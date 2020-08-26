@@ -12,35 +12,39 @@ import UIKit
 import RobertSDK
 
 final class RootCoordinator: Coordinator {
-    
+
     enum State {
         case onboarding
         case main
         case off
         case unknown
     }
-    
+
     weak var parent: Coordinator?
     var childCoordinators: [Coordinator] = []
-    
+
     private var state: State = .unknown
     private weak var currentCoordinator: WindowedCoordinator?
     private var powerSaveModeWindow: UIWindow?
     private var lastBrightnessLevel: CGFloat = UIScreen.main.brightness
     private var isPowerSaveMode: Bool = false
-    
+
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
-    
+
     func start() {
         if RBManager.shared.isSick {
             switchTo(state: .off)
         } else {
-            switchTo(state: isOnboardingDone ? .main : .onboarding)
+            switchTo(state: currentNotBlockingState())
         }
         addObservers()
     }
     
+    private func currentNotBlockingState() -> State {
+        isOnboardingDone ? .main : .onboarding
+    }
+
     private func switchTo(state: State) {
         self.state = state
         if let newCoordinator: WindowedCoordinator = coordinator(for: state) {
@@ -55,7 +59,7 @@ final class RootCoordinator: Coordinator {
             childCoordinators.removeAll()
         }
     }
-    
+
     private func coordinator(for state: State) -> WindowedCoordinator? {
         switch state {
         case .onboarding:
@@ -68,10 +72,10 @@ final class RootCoordinator: Coordinator {
             return nil
         }
     }
-    
+
     private func onboardingDidEnd() {
         isOnboardingDone = true
-        switchTo(state: .main)
+        switchTo(state: currentNotBlockingState())
     }
 
 }
@@ -98,10 +102,13 @@ extension RootCoordinator {
     }
     
     @objc private func statusDataChanged() {
-        if RBManager.shared.isSick && state != .off {
+        if RBManager.shared.isSick {
+            guard state != .off else { return }
             switchTo(state: .off)
-        } else if !RBManager.shared.isSick && state != .main {
-            switchTo(state: .main)
+        } else {
+            let state: State = currentNotBlockingState()
+            guard self.state != state else { return }
+            switchTo(state: state)
         }
     }
     

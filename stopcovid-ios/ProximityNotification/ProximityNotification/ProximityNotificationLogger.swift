@@ -48,12 +48,7 @@ protocol ProximityNotificationLoggerProtocol {
 }
 
 class ProximityNotificationConsoleLogger: ProximityNotificationLoggerProtocol {
-    
-    #if DEBUG
-    var minimumLogLevel: ProximityNotificationLoggerLevel = .debug
-    #else
     var minimumLogLevel: ProximityNotificationLoggerLevel = .none
-    #endif
     
     init() {}
     

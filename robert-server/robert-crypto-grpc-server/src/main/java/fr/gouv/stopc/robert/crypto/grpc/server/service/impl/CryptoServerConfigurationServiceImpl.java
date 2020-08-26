@@ -1,7 +1,8 @@
 package fr.gouv.stopc.robert.crypto.grpc.server.service.impl;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import javax.annotation.PostConstruct;
@@ -34,9 +35,10 @@ public class CryptoServerConfigurationServiceImpl implements ICryptoServerConfig
     @PostConstruct
     private void initTimeStartNtp() {
         LocalDate ld = LocalDate.parse(this.propertyLoader.getTimeStart(), DateTimeFormatter.BASIC_ISO_DATE);
-        timeStartNtp = TimeUtils.convertUnixMillistoNtpSeconds(ld.atStartOfDay().toEpochSecond(ZoneOffset.UTC));
+        final ZonedDateTime zdt = ld.atStartOfDay().atZone(ZoneId.of("UTC"));
+        timeStartNtp = TimeUtils.convertUnixMillistoNtpSeconds(zdt.toInstant().toEpochMilli());
     }
-    
+
     @Override
     public long getServiceTimeStart() {
         return this.timeStartNtp;

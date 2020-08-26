@@ -70,4 +70,22 @@ public class PropertyLoader {
     @Value("${robert.server.captcha-challenge-timestamp-tolerance}")
     private Integer captchaChallengeTimestampTolerance;
 
+    @Value("${controller.internal.path.prefix}")
+    private String internalPathPrefix;
+
+    @Value("${push.server.host}")
+    private String pushServerHost;
+
+    @Value("${push.server.port}")
+    private String pushServerPort;
+
+    @Value("${push.api.version}")
+    private String pushApiVersion;
+
+    @Value("${push.api.path}")
+    private String pushApiPath;
+
+    @Value("${push.api.path.token}")
+    private String pushApiTokenPath;
+
 }

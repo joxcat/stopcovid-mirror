@@ -28,4 +28,7 @@ public class RegisterVo {
   @ToString.Exclude
   private String clientPublicECDHKey;
 
+  @ToString.Exclude
+  private PushInfoVo pushInfo;
+
 }

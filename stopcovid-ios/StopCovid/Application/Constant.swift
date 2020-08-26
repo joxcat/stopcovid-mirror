@@ -32,11 +32,11 @@ enum Constant {
         static var baseUrl: URL { URL(string: "https://api.stopcovid.gouv.fr/api/\(ParametersManager.shared.apiVersion.rawValue)")! }
         
         static let publicKey: Data = Data(base64Encoded: "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAc9IDt6qJq453SwyWPB94JaLB2VfTAcL43YVtMr3HhDCd22gKaQXIbX1d+tNhfvaKM51sxeaXziPjntUzbTNiw==")!
-        
+
         static var certificate: Data { Bundle.main.fileDataFor(fileName: "api.stopcovid.gouv.fr", ofType: "pem") ?? Data() }
-        
+
         static var resourcesCertificate: Data { Bundle.main.fileDataFor(fileName: "app.stopcovid.gouv.fr", ofType: "pem") ?? Data() }
-        
+
         static let configUrl: URL = URL(string: "https://app.stopcovid.gouv.fr/json/version-22/config.json")!
 
     }

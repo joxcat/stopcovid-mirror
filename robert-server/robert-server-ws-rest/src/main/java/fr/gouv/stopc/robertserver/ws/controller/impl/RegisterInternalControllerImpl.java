@@ -15,6 +15,7 @@ import fr.gouv.stopc.robertserver.ws.controller.IRegisterInternalController;
 import fr.gouv.stopc.robertserver.ws.dto.RegisterResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
 import fr.gouv.stopc.robertserver.ws.service.CaptchaInternalService;
+import fr.gouv.stopc.robertserver.ws.service.IRestApiService;
 import fr.gouv.stopc.robertserver.ws.vo.RegisterInternalVo;
 
 @Service
@@ -27,13 +28,15 @@ public class RegisterInternalControllerImpl extends AbstractRegisterControllerIm
             final IServerConfigurationService serverConfigurationService,
             final IApplicationConfigService applicationConfigService,
             final CaptchaInternalService captchaInternalService,
-            final ICryptoServerGrpcClient cryptoServerClient) {
+            final ICryptoServerGrpcClient cryptoServerClient,
+            final IRestApiService restApiService) {
 
         this.registrationService = registrationService;
         this.serverConfigurationService = serverConfigurationService;
         this.applicationConfigService = applicationConfigService;
         this.captchaInternalService = captchaInternalService;
         this.cryptoServerClient = cryptoServerClient;
+        this.restApiService = restApiService;
 
     }
 

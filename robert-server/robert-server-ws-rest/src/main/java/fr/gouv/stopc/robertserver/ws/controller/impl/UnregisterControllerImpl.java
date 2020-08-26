@@ -5,32 +5,34 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdRequest;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdResponse;
-import fr.gouv.stopc.robert.crypto.grpc.server.messaging.GetIdFromAuthResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
+import fr.gouv.stopc.robert.crypto.grpc.server.messaging.DeleteIdResponse;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
 import fr.gouv.stopc.robertserver.ws.controller.IUnregisterController;
 import fr.gouv.stopc.robertserver.ws.dto.UnregisterResponseDto;
 import fr.gouv.stopc.robertserver.ws.service.AuthRequestValidationService;
+import fr.gouv.stopc.robertserver.ws.service.IRestApiService;
 import fr.gouv.stopc.robertserver.ws.vo.UnregisterRequestVo;
+import io.micrometer.core.instrument.util.StringUtils;
 
 @Service
 public class UnregisterControllerImpl implements IUnregisterController {
 
     private final IRegistrationService registrationService;
     private final AuthRequestValidationService authRequestValidationService;
+    private final IRestApiService restApiService;
 
     @Inject
     public UnregisterControllerImpl(final IRegistrationService registrationService,
-                                    final AuthRequestValidationService authRequestValidationService) {
+                                    final AuthRequestValidationService authRequestValidationService,
+                                    final IRestApiService restApiService) {
 
         this.registrationService = registrationService;
         this.authRequestValidationService = authRequestValidationService;
+        this.restApiService = restApiService;;
     }
 
     @Override
@@ -53,6 +55,10 @@ public class UnregisterControllerImpl implements IUnregisterController {
             this.registrationService.delete(record);
 
             UnregisterResponseDto response = UnregisterResponseDto.builder().success(true).build();
+
+            if(StringUtils.isNotBlank(unregisterRequestVo.getPushToken())) {
+                this.restApiService.unregisterPushNotif(unregisterRequestVo.getPushToken());
+            }
 
             return ResponseEntity.ok(response);
         } else {

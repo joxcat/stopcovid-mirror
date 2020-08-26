@@ -46,5 +46,4 @@ extension UserDefault {
         case lastStatusBackgroundFetchTimestamp
         case lastStatusBackgroundFetchDidSucceed
     }
-    
 }
