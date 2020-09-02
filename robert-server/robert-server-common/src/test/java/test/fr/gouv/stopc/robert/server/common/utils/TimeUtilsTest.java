@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +38,7 @@ public class TimeUtilsTest {
         final ZonedDateTime zdt = ldt.atZone(ZoneId.of("UTC"));
         return TimeUtils.convertUnixMillistoNtpSeconds(zdt.toInstant().toEpochMilli());
     }
- 
+
     @Test
     void testGetDateFromEpochTimezone() {
         for (int i = 0; i < 96 * 2; i++) {

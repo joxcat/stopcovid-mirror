@@ -96,6 +96,7 @@ public class CaptchaServiceImplTest {
 
         when(this.propertyLoader.getCaptchaChallengeTimestampTolerance()).thenReturn(3600);
 
+
         // When
         boolean isVerified = this.captchaServiceImpl.verifyCaptcha(this.registerVo);
 

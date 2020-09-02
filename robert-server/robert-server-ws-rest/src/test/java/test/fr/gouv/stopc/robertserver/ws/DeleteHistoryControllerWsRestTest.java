@@ -532,4 +532,5 @@ public class DeleteHistoryControllerWsRestTest {
             verify(this.registrationService, times(saveRegistrationCalls)).saveRegistration(ArgumentMatchers.any());
         }
     }
+
 }

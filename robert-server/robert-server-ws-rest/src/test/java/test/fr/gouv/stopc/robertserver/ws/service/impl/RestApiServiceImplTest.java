@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,7 +95,7 @@ public class RestApiServiceImplTest {
 
         // Then
         assertFalse(response.isPresent());
-        verify(this.restTemplate, never()).getForEntity(any(URI.class), any(Class.class));
+        verify(this.restTemplate, never()).getForEntity(any(URI.class), any());
     }
 
     @Test
@@ -107,7 +106,7 @@ public class RestApiServiceImplTest {
 
         // Then
         assertFalse(response.isPresent());
-        verify(this.restTemplate, never()).getForEntity(any(URI.class), any(Class.class));
+        verify(this.restTemplate, never()).getForEntity(any(URI.class), any());
     }
 
     @Test
@@ -118,7 +117,7 @@ public class RestApiServiceImplTest {
 
         // Then
         assertFalse(response.isPresent());
-        verify(this.restTemplate, never()).getForEntity(any(URI.class), any(Class.class));
+        verify(this.restTemplate, never()).getForEntity(any(URI.class), any());
     }
 
     @Test
@@ -129,14 +128,14 @@ public class RestApiServiceImplTest {
 
         // Then
         assertFalse(response.isPresent());
-        verify(this.restTemplate, never()).getForEntity(any(URI.class), any(Class.class));
+        verify(this.restTemplate, never()).getForEntity(any(URI.class), any());
     }
 
     @Test
     public void testVerifyReportTokenAnExceptionIsThrownFails() {
 
         // Given
-        when(this.restTemplate.getForEntity(any(URI.class), any(Class.class))).thenThrow(
+        when(this.restTemplate.getForEntity(any(URI.class), any())).thenThrow(
                 new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
         // When
@@ -144,7 +143,7 @@ public class RestApiServiceImplTest {
 
         // Then
         assertFalse(response.isPresent());
-        verify(this.restTemplate).getForEntity(any(URI.class), any(Class.class));
+        verify(this.restTemplate).getForEntity(any(URI.class), any());
     }
 
     @Test
@@ -153,7 +152,7 @@ public class RestApiServiceImplTest {
         // Given
         VerifyResponseDto verified  = VerifyResponseDto.builder().valid(true).build();
 
-        when(this.restTemplate.getForEntity(any(URI.class), any(Class.class))).thenReturn(ResponseEntity.ok(verified));
+        when(this.restTemplate.getForEntity(any(URI.class), any())).thenReturn(ResponseEntity.ok(verified));
 
         // When
         Optional<VerifyResponseDto> response = this.restApiServiceImpl.verifyReportToken("token", "type");
@@ -161,7 +160,7 @@ public class RestApiServiceImplTest {
         // Then
         assertTrue(response.isPresent());
         assertEquals(verified, response.get());
-        verify(this.restTemplate).getForEntity(any(URI.class), any(Class.class));
+        verify(this.restTemplate).getForEntity(any(URI.class), any());
     }
 
     @Test
@@ -174,7 +173,7 @@ public class RestApiServiceImplTest {
         this.restApiServiceImpl.registerPushNotif(pushInfo);
 
         // Then
-        verify(this.restTemplate, never()).postForEntity(any(URI.class), any(PushInfoVo.class), any(Class.class));
+        verify(this.restTemplate, never()).postForEntity(any(URI.class), any(PushInfoVo.class), any());
     }
 
     @Test
@@ -183,14 +182,14 @@ public class RestApiServiceImplTest {
         // Given
         PushInfoVo pushInfo = PushInfoVo.builder().build();
 
-        when(this.restTemplate.postForEntity(any(URI.class), any(PushInfoVo.class), any(Class.class)))
+        when(this.restTemplate.postForEntity(any(URI.class), any(PushInfoVo.class), any()))
         .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
 
         // When
         this.restApiServiceImpl.registerPushNotif(pushInfo);
 
         // Then
-        verify(this.restTemplate).postForEntity(any(URI.class), any(PushInfoVo.class), any(Class.class));
+        verify(this.restTemplate).postForEntity(any(URI.class), any(PushInfoVo.class), any());
     }
 
     @Test
@@ -200,14 +199,14 @@ public class RestApiServiceImplTest {
             // Given
             PushInfoVo pushInfo = PushInfoVo.builder().build();
 
-            when(this.restTemplate.postForEntity(any(URI.class), any(PushInfoVo.class), any(Class.class)))
+            when(this.restTemplate.postForEntity(any(URI.class), any(PushInfoVo.class), any()))
             .thenReturn(ResponseEntity.status(HttpStatus.CREATED).build());
 
             // When
             this.restApiServiceImpl.registerPushNotif(pushInfo);
 
             // Then
-            verify(this.restTemplate).postForEntity(any(URI.class), any(PushInfoVo.class), any(Class.class));
+            verify(this.restTemplate).postForEntity(any(URI.class), any(PushInfoVo.class), any());
         } catch (Exception e) {
 
             fail(SHOULD_NOT_FAIL);
@@ -224,7 +223,7 @@ public class RestApiServiceImplTest {
         this.restApiServiceImpl.unregisterPushNotif(pushToken);
 
         // Then
-        verify(this.restTemplate, never()).getForEntity(any(URI.class), any(Class.class));
+        verify(this.restTemplate, never()).getForEntity(any(URI.class), any());
     }
 
     @Test
@@ -237,7 +236,7 @@ public class RestApiServiceImplTest {
         this.restApiServiceImpl.unregisterPushNotif(pushToken);
 
         // Then
-        verify(this.restTemplate, never()).getForEntity(any(URI.class), any(Class.class));
+        verify(this.restTemplate, never()).getForEntity(any(URI.class), any());
     }
 
     @Test

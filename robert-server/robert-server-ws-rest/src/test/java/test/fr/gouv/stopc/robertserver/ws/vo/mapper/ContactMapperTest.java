@@ -1,11 +1,15 @@
 package test.fr.gouv.stopc.robertserver.ws.vo.mapper;
 
-import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
-import fr.gouv.stopc.robertserver.database.model.Contact;
-import fr.gouv.stopc.robertserver.ws.vo.HelloMessageDetailVo;
-import fr.gouv.stopc.robertserver.ws.vo.ContactVo;
-import fr.gouv.stopc.robertserver.ws.vo.mapper.ContactMapper;
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.bson.internal.Base64;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,12 +17,13 @@ import org.mockito.InjectMocks;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
+import fr.gouv.stopc.robertserver.database.model.Contact;
+import fr.gouv.stopc.robertserver.ws.vo.ContactVo;
+import fr.gouv.stopc.robertserver.ws.vo.HelloMessageDetailVo;
+import fr.gouv.stopc.robertserver.ws.vo.mapper.ContactMapper;
 
 @ExtendWith(SpringExtension.class)
-@Slf4j
 public class ContactMapperTest {
     @InjectMocks
     private ContactMapper contactMapper;
