@@ -21,6 +21,7 @@ import fr.gouv.stopc.robertserver.database.model.ApplicationConfigurationModel;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IApplicationConfigService;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
+import fr.gouv.stopc.robertserver.ws.config.WsServerConfiguration;
 import fr.gouv.stopc.robertserver.ws.controller.IStatusController;
 import fr.gouv.stopc.robertserver.ws.dto.ClientConfigDto;
 import fr.gouv.stopc.robertserver.ws.dto.StatusResponseDto;
@@ -44,6 +45,8 @@ public class StatusControllerImpl implements IStatusController {
 	private final AuthRequestValidationService authRequestValidationService;
 
 	private final PropertyLoader propertyLoader;
+	
+	private final WsServerConfiguration wsServerConfiguration;
 
 	private final IRestApiService restApiService;
 
@@ -54,14 +57,15 @@ public class StatusControllerImpl implements IStatusController {
 			final IApplicationConfigService applicationConfigService,
 			final AuthRequestValidationService authRequestValidationService,
 			final PropertyLoader propertyLoader,
-			final IRestApiService restApiService) {
-
+			final IRestApiService restApiService,
+			final WsServerConfiguration wsServerConfiguration) {
 		this.serverConfigurationService = serverConfigurationService;
 		this.registrationService = registrationService;
 		this.applicationConfigService = applicationConfigService;
 		this.authRequestValidationService = authRequestValidationService;
 		this.propertyLoader = propertyLoader;
 		this.restApiService = restApiService;
+		this.wsServerConfiguration = wsServerConfiguration;
 	}
 
 	@Override
@@ -130,7 +134,7 @@ public class StatusControllerImpl implements IStatusController {
 		// Step #7: Check that epochs are not too distant
 		int currentEpoch = TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart());
 		int epochDistance = currentEpoch - record.getLastStatusRequestEpoch();
-		if(epochDistance < this.propertyLoader.getStatusRequestMinimumEpochGap() 
+		if(epochDistance < this.wsServerConfiguration.getStatusRequestMinimumEpochGap() 
 		        && this.propertyLoader.getEsrLimit() != 0) {
 
             String message = "Discarding ESR request because epochs are too close:";
@@ -140,12 +144,12 @@ public class StatusControllerImpl implements IStatusController {
                     record.getLastStatusRequestEpoch(),
                     currentEpoch,
                     epochDistance,
-                    this.propertyLoader.getStatusRequestMinimumEpochGap());
+                    this.wsServerConfiguration.getStatusRequestMinimumEpochGap());
 
 			log.info("{} {} < {} (tolerance)",
 			        message,
 					epochDistance,
-					this.propertyLoader.getStatusRequestMinimumEpochGap());
+					this.wsServerConfiguration.getStatusRequestMinimumEpochGap());
 
 			record.setLastFailedStatusRequestEpoch(currentEpoch);
 			record.setLastFailedStatusRequestMessage(errorMessage);

@@ -21,6 +21,7 @@ import fr.gouv.stopc.robertserver.database.model.ApplicationConfigurationModel;
 import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.IApplicationConfigService;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
+import fr.gouv.stopc.robertserver.ws.config.WsServerConfiguration;
 import fr.gouv.stopc.robertserver.ws.dto.ClientConfigDto;
 import fr.gouv.stopc.robertserver.ws.dto.RegisterResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
@@ -38,6 +39,8 @@ public abstract class AbstractRegisterControllerImpl {
 	protected ICryptoServerGrpcClient cryptoServerClient;
 	protected IRestApiService restApiService;
 
+	protected WsServerConfiguration wsServerConfiguration;
+
 	protected ResponseEntity<RegisterResponseDto> postCheckRegister(RegisterVo registerVo) throws RobertServerException {
 	
 	    byte[] clientPublicECDHKey = Base64.decode(registerVo.getClientPublicECDHKey());
@@ -46,7 +49,7 @@ public abstract class AbstractRegisterControllerImpl {
 	
 	    CreateRegistrationRequest request = CreateRegistrationRequest.newBuilder()
 	            .setClientPublicKey(ByteString.copyFrom(clientPublicECDHKey))
-	            .setNumberOfDaysForEpochBundles(this.serverConfigurationService.getEpochBundleDurationInDays())
+	            .setNumberOfDaysForEpochBundles(this.wsServerConfiguration.getEpochBundleDurationInDays())
 	            .setServerCountryCode(ByteString.copyFrom(serverCountryCode))
 	            .setFromEpochId(TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart()))
 	            .build();

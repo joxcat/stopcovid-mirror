@@ -21,6 +21,7 @@ import fr.gouv.stopc.robert.server.common.DigestSaltEnum;
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robert.server.common.utils.ByteUtils;
 import fr.gouv.stopc.robert.server.common.utils.TimeUtils;
+import fr.gouv.stopc.robertserver.ws.config.WsServerConfiguration;
 import fr.gouv.stopc.robertserver.ws.service.AuthRequestValidationService;
 import fr.gouv.stopc.robertserver.ws.vo.AuthRequestVo;
 import fr.gouv.stopc.robertserver.ws.vo.StatusVo;
@@ -39,13 +40,17 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
 
     private final IRegistrationService registrationService;
 
+    private final WsServerConfiguration wsServerConfiguration;
+
     @Inject
     public AuthRequestValidationServiceImpl(final IServerConfigurationService serverConfigurationService,
                                             final ICryptoServerGrpcClient cryptoServerClient,
-                                            final IRegistrationService registrationService) {
+                                            final IRegistrationService registrationService,
+                                            final WsServerConfiguration wsServerConfiguration) {
         this.serverConfigurationService = serverConfigurationService;
         this.cryptoServerClient = cryptoServerClient;
         this.registrationService = registrationService;
+        this.wsServerConfiguration = wsServerConfiguration;
     }
 
     private ResponseEntity createErrorValidationFailed() {
@@ -177,7 +182,7 @@ public class AuthRequestValidationServiceImpl implements AuthRequestValidationSe
                         .setTime(Integer.toUnsignedLong(ByteUtils.bytesToInt(Base64.decode(statusVo.getTime()))))
                         .setMac(ByteString.copyFrom(Base64.decode(statusVo.getMac())))
                         .setFromEpochId(TimeUtils.getCurrentEpochFrom(this.serverConfigurationService.getServiceTimeStart()))
-                        .setNumberOfDaysForEpochBundles(this.serverConfigurationService.getEpochBundleDurationInDays())
+                        .setNumberOfDaysForEpochBundles(this.wsServerConfiguration.getEpochBundleDurationInDays())
                         .setServerCountryCode(ByteString.copyFrom(new byte[] { this.serverConfigurationService.getServerCountryCode() }))
                     .build();
 

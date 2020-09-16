@@ -11,6 +11,7 @@ import fr.gouv.stopc.robert.crypto.grpc.server.client.service.ICryptoServerGrpcC
 import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robertserver.database.service.IApplicationConfigService;
 import fr.gouv.stopc.robertserver.database.service.IRegistrationService;
+import fr.gouv.stopc.robertserver.ws.config.WsServerConfiguration;
 import fr.gouv.stopc.robertserver.ws.controller.IRegisterInternalController;
 import fr.gouv.stopc.robertserver.ws.dto.RegisterResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
@@ -29,7 +30,8 @@ public class RegisterInternalControllerImpl extends AbstractRegisterControllerIm
             final IApplicationConfigService applicationConfigService,
             final CaptchaInternalService captchaInternalService,
             final ICryptoServerGrpcClient cryptoServerClient,
-            final IRestApiService restApiService) {
+            final IRestApiService restApiService,
+            final WsServerConfiguration wsServerConfiguration) {
 
         this.registrationService = registrationService;
         this.serverConfigurationService = serverConfigurationService;
@@ -37,7 +39,7 @@ public class RegisterInternalControllerImpl extends AbstractRegisterControllerIm
         this.captchaInternalService = captchaInternalService;
         this.cryptoServerClient = cryptoServerClient;
         this.restApiService = restApiService;
-
+        this.wsServerConfiguration = wsServerConfiguration;
     }
 
 	@Override

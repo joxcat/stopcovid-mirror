@@ -53,9 +53,4 @@ public class ServerConfigurationServiceImpl implements IServerConfigurationServi
         return TimeUtils.EPOCH_DURATION_SECS;
     }
 
-    @Override
-    public int getEpochBundleDurationInDays() {
-        return 4;
-    }
-
 }

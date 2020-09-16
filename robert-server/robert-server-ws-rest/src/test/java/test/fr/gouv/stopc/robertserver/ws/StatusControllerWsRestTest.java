@@ -60,6 +60,7 @@ import fr.gouv.stopc.robertserver.database.model.Registration;
 import fr.gouv.stopc.robertserver.database.service.impl.RegistrationService;
 import fr.gouv.stopc.robertserver.ws.RobertServerWsRestApplication;
 import fr.gouv.stopc.robertserver.ws.config.RobertServerWsConfiguration;
+import fr.gouv.stopc.robertserver.ws.config.WsServerConfiguration;
 import fr.gouv.stopc.robertserver.ws.dto.StatusResponseDto;
 import fr.gouv.stopc.robertserver.ws.service.IRestApiService;
 import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
@@ -115,6 +116,9 @@ public class StatusControllerWsRestTest {
     private PropertyLoader propertyLoader;
 
     @MockBean
+    private WsServerConfiguration wsServerConfiguration;
+
+    @MockBean
     private RobertServerWsConfiguration config;
 
     @MockBean
@@ -134,7 +138,7 @@ public class StatusControllerWsRestTest {
         this.currentEpoch = this.getCurrentEpoch();
 
         when(this.propertyLoader.getEsrLimit()).thenReturn(-1);
-        when(this.propertyLoader.getStatusRequestMinimumEpochGap()).thenReturn(this.statusRequestMinimumEpochGap);
+        when(this.wsServerConfiguration.getStatusRequestMinimumEpochGap()).thenReturn(this.statusRequestMinimumEpochGap);
 
         this.serverKey = this.generateKey(24);
     }
@@ -882,7 +886,7 @@ public class StatusControllerWsRestTest {
                 currentEpoch,
                 currentEpoch,
                 0,
-                this.propertyLoader.getStatusRequestMinimumEpochGap());
+                this.wsServerConfiguration.getStatusRequestMinimumEpochGap());
 
         byte[] idA = this.generateKey(5);
         byte[] kA = this.generateKA();
@@ -941,7 +945,7 @@ public class StatusControllerWsRestTest {
                 currentEpoch,
                 currentEpoch,
                 0,
-                this.propertyLoader.getStatusRequestMinimumEpochGap());
+                this.wsServerConfiguration.getStatusRequestMinimumEpochGap());
 
         byte[] idA = this.generateKey(5);
         byte[] kA = this.generateKA();

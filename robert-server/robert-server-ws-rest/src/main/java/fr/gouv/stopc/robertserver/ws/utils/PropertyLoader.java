@@ -64,9 +64,6 @@ public class PropertyLoader {
     @Value("${robert.server.request-time-delta-tolerance}")
     private Integer requestTimeDeltaTolerance;
 
-    @Value("${robert.server.status-request-minimum-epoch-gap}")
-    private Integer statusRequestMinimumEpochGap;
-
     @Value("${robert.server.captcha-challenge-timestamp-tolerance}")
     private Integer captchaChallengeTimestampTolerance;
 
