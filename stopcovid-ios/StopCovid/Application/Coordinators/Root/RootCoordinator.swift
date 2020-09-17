@@ -28,6 +28,7 @@ final class RootCoordinator: Coordinator {
     private var powerSaveModeWindow: UIWindow?
     private var lastBrightnessLevel: CGFloat = UIScreen.main.brightness
     private var isPowerSaveMode: Bool = false
+    private var didStartOnboarding: Bool = false
 
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
@@ -61,16 +62,19 @@ final class RootCoordinator: Coordinator {
     }
 
     private func coordinator(for state: State) -> WindowedCoordinator? {
+        let coordinator: WindowedCoordinator?
         switch state {
         case .onboarding:
-            return OnboardingCoordinator(parent: self) { [weak self] in self?.onboardingDidEnd() }
+            coordinator = OnboardingCoordinator(parent: self) { [weak self] in self?.onboardingDidEnd() }
         case .main:
-            return MainTabBarCoordinator(parent: self)
+            coordinator = MainTabBarCoordinator(parent: self, showLaunchScreen: !didStartOnboarding)
         case .off:
-            return SickBlockingCoordinator(parent: self)
+            coordinator = SickBlockingCoordinator(parent: self)
         default:
             return nil
         }
+        didStartOnboarding = state == .onboarding
+        return coordinator
     }
 
     private func onboardingDidEnd() {

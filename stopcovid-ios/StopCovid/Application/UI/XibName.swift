@@ -32,5 +32,6 @@ enum XibName: String {
     case emptyCell = "EmptyCell"
     case audioCell = "AudioCell"
     case stateAnimationCell = "StateAnimationCell"
+    case standardTextFieldCell = "StandardTextFieldCell"
     
 }

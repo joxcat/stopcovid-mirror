@@ -25,9 +25,9 @@ final class PrivacyCoordinator: Coordinator {
     }
     
     private func start() {
-        let controller: UIViewController = CVNavigationChildController.controller(OnboardingPrivacyController(isOpenedFromOnboarding: false) { [weak self] in
+        let controller: UIViewController = CVNavigationChildController.controller(OnboardingPrivacyController(isOpenedFromOnboarding: false, deinitBlock:  { [weak self] in
             self?.didDeinit()
-        })
+        }))
         self.currentController = controller
         controller.hidesBottomBarWhenPushed = true
         self.navigationController?.pushViewController(controller, animated: true)

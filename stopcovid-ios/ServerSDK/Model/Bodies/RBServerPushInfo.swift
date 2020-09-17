@@ -2,23 +2,18 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
-//  CaptchaValidationResponse.swift
+//  RBServerPushInfo.swift
 //  STOP-COVID
 //
 //  Created by Lunabee Studio / Date - 08/04/2020 - for the STOP-COVID project.
 //
 
-import UIKit
+import Foundation
 
-struct CaptchaValidationResponse: CaptchaServerResponse {
+struct RBServerPushInfo: Encodable {
 
-    enum ResultType: String, Decodable {
-        case success = "SUCCESS"
-        case failed = "FAILED"
-    }
-    
-    let result: ResultType?
-    let code: String?
-    let message: String?
+    var token: String
+    var locale: String
+    var timezone: String
     
 }

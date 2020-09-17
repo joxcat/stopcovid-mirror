@@ -1,8 +1,24 @@
 {
   "config": [
+	{
+      "name": "lastUpdate",
+      "value": "14 September 2020"
+    },
     {
       "name": "app.apiVersion",
-      "value": "v2"
+      "value": "v3"
+    },
+    {
+      "name": "app.push.displayOnSuccess",
+      "value": false
+    },
+    {
+      "name": "app.push.displayAll",
+      "value": false
+    },
+    {
+      "name": "app.push.minHoursBetweenVisibleNotifications",
+      "value": 13.0
     },
     {
       "name": "app.randomStatusHour",
@@ -62,7 +78,488 @@
     },
     {
       "name": "ble.calibration",
-      "value": []
+      "value": [
+		  {
+		    "device_handset_model": "DEFAULT",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPad",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "CLT-L09",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "CPH1921",
+		    "tx_RSS_correction_factor": -20,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "F700F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "FIG-LX1",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone8,4",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone9,2",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone9,4",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone10,1",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -15
+		  },
+		  {
+		    "device_handset_model": "iPhone10,2",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone10,3",
+		    "tx_RSS_correction_factor": -20,
+		    "rx_RSS_correction_factor": -15
+		  },
+		  {
+		    "device_handset_model": "iPhone10,4",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -15
+		  },
+		  {
+		    "device_handset_model": "iPhone10,5",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone10,6",
+		    "tx_RSS_correction_factor": -20,
+		    "rx_RSS_correction_factor": -15
+		  },
+		  {
+		    "device_handset_model": "iPhone11,2",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone11,4",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone11,6",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone11,8",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone12,1",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone12,3",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone12,5",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone12,8",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone5,3",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone5,4",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone6,1",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone6,2",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone7,1",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone7,2",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone8,1",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone8,2",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone9,1",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone9,3",
+		    "tx_RSS_correction_factor": -10,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "iPhone9,4",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "MAR-LX1A",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "Mi 9 SE",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "Moto G (5)",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "moto g(6) play",
+		    "tx_RSS_correction_factor": -15,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "MRD-LX1N",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "Nexus 6",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "Pixel 2",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "Pixel 3",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "Pixel 3 XL",
+		    "tx_RSS_correction_factor": -20,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "Pixel 3a",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "Pixel 3a XL",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "Pixel 4",
+		    "tx_RSS_correction_factor": -5,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "POT-LX1",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "Redmi 7A",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-A105FN",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A202F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A310F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A320FL",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A405FN",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A505F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A505FN",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A510F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A520F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A530F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A600F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-A600FN",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-A705F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "SM-A705FN",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "SM-A750F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-A750FN",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-F900F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-G390F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-G398F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-G920F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "SM-G925F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "SM-G930F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "SM-G935F",
+		    "tx_RSS_correction_factor": -40,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "SM-G950F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-G955F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-G960F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "SM-G965F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "SM-G970F",
+		    "tx_RSS_correction_factor": -35,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-G973F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-G975F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-G980F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-J330FN",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-J415F",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-J415FN",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-J510F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-J510FN",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-J530F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-J600F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-J600FN",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-J610F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-J610FN",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": 0
+		  },
+		  {
+		    "device_handset_model": "SM-N950F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-N960F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SM-N975F",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "SNE-LX1",
+		    "tx_RSS_correction_factor": -25,
+		    "rx_RSS_correction_factor": -10
+		  },
+		  {
+		    "device_handset_model": "Trekker-X4",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": -5
+		  },
+		  {
+		    "device_handset_model": "WAS-LX1A",
+		    "tx_RSS_correction_factor": -30,
+		    "rx_RSS_correction_factor": 0
+		  }
+		]
     }
   ]
 }

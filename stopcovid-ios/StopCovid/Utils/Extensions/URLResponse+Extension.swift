@@ -2,23 +2,23 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
-//  CaptchaValidationResponse.swift
+//  URLResponse+Extension.swift
 //  STOP-COVID
 //
 //  Created by Lunabee Studio / Date - 08/04/2020 - for the STOP-COVID project.
 //
 
-import UIKit
+import Foundation
 
-struct CaptchaValidationResponse: CaptchaServerResponse {
-
-    enum ResultType: String, Decodable {
-        case success = "SUCCESS"
-        case failed = "FAILED"
+extension URLResponse {
+    
+    var responseStatusCode: Int? {
+        (self as? HTTPURLResponse)?.statusCode
     }
     
-    let result: ResultType?
-    let code: String?
-    let message: String?
+    var isError: Bool? {
+        guard let statusCode = responseStatusCode else { return nil }
+        return "\(statusCode)".first != "2"
+    }
     
 }

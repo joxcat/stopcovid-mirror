@@ -56,8 +56,8 @@ final class SickController: CVTableViewController {
         if RBManager.shared.isSick {
             return sickRows()
         } else {
-            if let isAtRisk = RBManager.shared.isAtRisk {
-                return isAtRisk ? contactRows() : nothingRows()
+            if RBManager.shared.lastStatusReceivedDate != nil {
+                return RBManager.shared.isAtRisk ? contactRows() : nothingRows()
             } else {
                 return startRows()
             }
@@ -79,11 +79,10 @@ final class SickController: CVTableViewController {
         let imageRow: CVRow = CVRow(image: Asset.Images.diagnosis.image, xibName: .onboardingImageCell)
         
         let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
-        let remainingIsolationDaysCount: Int = max((ParametersManager.shared.quarantinePeriod ?? 14) - (RBManager.shared.lastExposureTimeFrame ?? 0), 0)
-        let isolationEndDate: Date? = notificationDate?.dateByAddingDays(remainingIsolationDaysCount)
+        
         let notificationDateString: String = String(format: "\("sickController.state.date".localized), %@", notificationDate?.dayMonthFormatted() ?? "N/A", notificationDate?.timeFormatted() ?? "N/A")
         let stateRow: CVRow = CVRow(title: "sickController.state.contact.title".localized,
-                                    subtitle: String(format: "sickController.state.contact.subtitle".localized, isolationEndDate?.dayMonthFormatted() ?? "N/A"),
+                                    subtitle: "sickController.state.contact.subtitle".localized,
                                     accessoryText: notificationDateString,
                                     buttonTitle: "common.readMore".localized,
                                     xibName: .sickStateHeaderCell,
@@ -270,14 +269,32 @@ final class SickController: CVTableViewController {
                   okTitle: "common.yes".localized,
                   isOkDestructive: true,
                   cancelTitle: "common.no".localized) {
-            HUD.show(.progress)
-            RBManager.shared.unregister { [weak self] error in
-                HUD.hide()
-                if let error = error {
-                    self?.showAlert(title: "common.error".localized, message: error.localizedDescription, okTitle: "common.ok".localized)
-                } else {
-                    ParametersManager.shared.clearConfig()
-                    NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
+            switch ParametersManager.shared.apiVersion {
+            case .v3:
+                HUD.show(.progress)
+                RBManager.shared.unregisterV3 { [weak self] error, isErrorBlocking in
+                    HUD.hide()
+                    if error != nil && isErrorBlocking {
+                        self?.showAlert(title: "common.error".localized,
+                                        message: "common.error.server".localized,
+                                        okTitle: "common.ok".localized)
+                    } else {
+                        ParametersManager.shared.clearConfig()
+                        NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
+                    }
+                }
+            default:
+                HUD.show(.progress)
+                RBManager.shared.unregister { [weak self] error, isErrorBlocking in
+                    HUD.hide()
+                    if error != nil && isErrorBlocking {
+                        self?.showAlert(title: "common.error".localized,
+                                        message: "common.error.server".localized,
+                                        okTitle: "common.ok".localized)
+                    } else {
+                        ParametersManager.shared.clearConfig()
+                        NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
+                    }
                 }
             }
         }

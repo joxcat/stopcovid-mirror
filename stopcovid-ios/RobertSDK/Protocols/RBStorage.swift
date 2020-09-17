@@ -38,13 +38,13 @@ public protocol RBStorage {
     func isProximityActivated() -> Bool
     
     // MARK: - Local Proximity -
-    func save(localProximity: RBLocalProximity)
+    func save(localProximity: RBLocalProximity) -> Bool
     func getLocalProximityList() -> [RBLocalProximity]
     func getLocalProximityList(from: Date, to: Date) -> [RBLocalProximity]
     func clearProximityList(before date: Date)
     
     // MARK: - Status: isAtRisk -
-    func save(isAtRisk: Bool?)
+    func clearIsAtRisk()
     func isAtRisk() -> Bool?
     
     // MARK: - Status: last exposure time frame -
@@ -59,9 +59,17 @@ public protocol RBStorage {
     func saveLastStatusReceivedDate(_ date: Date?)
     func lastStatusReceivedDate() -> Date?
     
+    // MARK: - Status: last risk received date -
+    func saveLastRiskReceivedDate(_ date: Date?)
+    func lastRiskReceivedDate() -> Date?
+    
     // MARK: - Status: Is sick -
     func save(isSick: Bool)
     func isSick() -> Bool
+    
+    // MARK: - Push token -
+    func save(pushToken: String?)
+    func pushToken() -> String?
     
     // MARK: - Data cleraing -
     func clearLocalEpochs()

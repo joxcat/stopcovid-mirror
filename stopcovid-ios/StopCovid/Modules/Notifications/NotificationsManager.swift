@@ -15,6 +15,9 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
 
     static let shared: NotificationsManager = NotificationsManager()
 
+    @UserDefault(key: .lastNotificationTimestamp)
+    private var lastNotificationTimeStamp: Double  = 0.0
+
     override init() {
         super.init()
         UNUserNotificationCenter.current().delegate = self
@@ -29,6 +32,7 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     func requestAuthorization(completion: ((_ granted: Bool) -> ())? = nil) {
+        UIApplication.shared.registerForRemoteNotifications()
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound], completionHandler: { (granted, _) in
             DispatchQueue.main.async {
                 completion?(granted)
@@ -84,27 +88,72 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     }
     
     func triggerRestartNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "notification.error.title".localized
-        content.body = "notification.error.message".localized
-        content.sound = .default
-        content.badge = 1
-        let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.error, content: content, trigger: nil)
-        requestAuthorization { _ in
-            UNUserNotificationCenter.current().add(request) { _ in }
+        checkIfNotificationIsAlreadySentOrStillVisible(for: NotificationsContant.Identifier.error) { alreadySentOrStillVisible in
+            guard !alreadySentOrStillVisible else { return }
+            let content = UNMutableNotificationContent()
+            content.title = "notification.error.title".localized
+            content.body = "notification.error.message".localized
+            content.sound = .default
+            let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.error, content: content, trigger: nil)
+            self.requestAuthorization { _ in
+                UNUserNotificationCenter.current().add(request) { _ in }
+            }
         }
     }
     
     func triggerDeviceTimeErrorNotification() {
+        checkIfNotificationIsAlreadySentOrStillVisible(for: NotificationsContant.Identifier.deviceTimeError) { alreadySentOrStillVisible in
+            guard !alreadySentOrStillVisible else { return }
+            let content = UNMutableNotificationContent()
+            content.title = "common.error.clockNotAligned.title".localized
+            content.body = "common.error.clockNotAligned.message".localized
+            content.sound = .default
+            let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.deviceTimeError, content: content, trigger: nil)
+            self.requestAuthorization { _ in
+                UNUserNotificationCenter.current().add(request) { _ in }
+            }
+        }
+    }
+
+    func triggerProximityServiceRunningNotification(minHoursBetweenNotif: Int) {
+        guard shouldShowNotification(minHoursBetweenNotif) else { return }
         let content = UNMutableNotificationContent()
-        content.title = "common.error.clockNotAligned.title".localized
-        content.body = "common.error.clockNotAligned.message".localized
+        content.title = "notification.proximityServiceRunning.title".localized
+        content.body = "notification.proximityServiceRunning.message".localized
         content.sound = .default
-        content.badge = 1
-        let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.error, content: content, trigger: nil)
+        let request: UNNotificationRequest = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         requestAuthorization { _ in
             UNUserNotificationCenter.current().add(request) { _ in }
         }
     }
+
+    func triggerProximityServiceNotRunningNotification(minHoursBetweenNotif: Int) {
+        guard shouldShowNotification(minHoursBetweenNotif) else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "notification.proximityServiceNotRunning.title".localized
+        content.body = "notification.proximityServiceNotRunning.message".localized
+        content.sound = .default
+        let request: UNNotificationRequest = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+        requestAuthorization { _ in
+            UNUserNotificationCenter.current().add(request) { _ in }
+        }
+    }
+
+    private func shouldShowNotification(_ minHoursBetweenNotif: Int) -> Bool {
+        let timestamp: Double = Date().timeIntervalSince1970
+        guard timestamp - lastNotificationTimeStamp > Double(minHoursBetweenNotif * 3600) else { return false }
+        lastNotificationTimeStamp = timestamp
+        return true
+    }
     
+    private func checkIfNotificationIsAlreadySentOrStillVisible(for identifier: String, completion: @escaping (_ alreadySentOrStillVisible: Bool) -> ()) {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { pendingRequests in
+            UNUserNotificationCenter.current().getDeliveredNotifications { deliveredNotifications in
+                let didFindMatchingPendingRequest: Bool = !pendingRequests.filter { $0.identifier == identifier }.isEmpty
+                let didFindMatchingDeliveredNotification: Bool = !deliveredNotifications.filter { $0.request.identifier == identifier }.isEmpty
+                completion(didFindMatchingPendingRequest || didFindMatchingDeliveredNotification)
+            }
+        }
+    }
+
 }

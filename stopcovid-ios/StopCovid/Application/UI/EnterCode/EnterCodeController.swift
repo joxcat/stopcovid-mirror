@@ -18,8 +18,10 @@ final class EnterCodeController: CVTableViewController {
     
     private let didEnterCode: (_ code: String?) -> ()
     private let deinitBlock: () -> ()
+    private var isFirstLoad: Bool = true
     
-    init(didEnterCode: @escaping (_ code: String?) -> (), deinitBlock: @escaping () -> ()) {
+    init(initialCode: String?, didEnterCode: @escaping (_ code: String?) -> (), deinitBlock: @escaping () -> ()) {
+        self.code = initialCode
         self.didEnterCode = didEnterCode
         self.deinitBlock = deinitBlock
         super.init(style: .plain)
@@ -39,7 +41,19 @@ final class EnterCodeController: CVTableViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        textField?.becomeFirstResponder()
+        if isFirstLoad {
+            isFirstLoad = false
+            if let code = code {
+                textField?.text = code
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    self.didTouchValidate()
+                }
+            } else {
+                textField?.becomeFirstResponder()
+            }
+        } else {
+            textField?.becomeFirstResponder()
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {

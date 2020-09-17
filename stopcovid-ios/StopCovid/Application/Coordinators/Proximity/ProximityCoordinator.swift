@@ -17,10 +17,12 @@ final class ProximityCoordinator: Coordinator {
     
     private weak var tabBarController: UITabBarController?
     private weak var navigationController: UINavigationController?
+    private var didFinishLoadingController: (() -> ())?
     
-    init(in tabBarController: UITabBarController, parent: Coordinator) {
+    init(in tabBarController: UITabBarController, parent: Coordinator, didFinishLoadingController: (() -> ())?) {
         self.tabBarController = tabBarController
         self.parent = parent
+        self.didFinishLoadingController = didFinishLoadingController
         start()
     }
     
@@ -33,6 +35,8 @@ final class ProximityCoordinator: Coordinator {
             self?.showManageData()
         }, didTouchPrivacy: { [weak self] in
             self?.showPrivacy()
+        }, didFinishLoad: { [weak self] in
+            self?.didFinishLoadingController?()
         }, deinitBlock: { [weak self] in
             self?.didDeinit()
         }))

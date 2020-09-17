@@ -1,9 +1,11 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  CaptchaViewController.swift
-//  StopCovid
+//  STOP-COVID
 //
-//  Created by Nicolas on 04/06/2020.
-//  Copyright © 2020 Lunabee Studio. All rights reserved.
+//  Created by Lunabee Studio / Date - 08/04/2020 - for the STOP-COVID project.
 //
 
 import UIKit
@@ -12,7 +14,7 @@ import AVFoundation
 
 final class CaptchaViewController: CVTableViewController {
     
-    weak var textField: UITextField?
+    private weak var textField: UITextField?
     private var captcha: Captcha
     private var answer: String?
     private var player: AVAudioPlayer?
@@ -177,7 +179,7 @@ final class CaptchaViewController: CVTableViewController {
         tableView.keyboardDismissMode = .onDrag
         navigationController?.navigationBar.titleTextAttributes = [.font: Appearance.NavigationBar.titleFont]
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "common.close".localized, style: .plain, target: self, action: #selector(didTouchCloseButton))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "captchaController.button.title".localized, style: .plain, target: self, action: #selector(validateCaptcha))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "captchaController.button.title".localized, style: .plain, target: self, action: #selector(didTouchConfirm))
     }
     
     private func loadAudio() {
@@ -200,14 +202,16 @@ final class CaptchaViewController: CVTableViewController {
         tableView.reloadRows(at: [audioCellIndexPath].compactMap { $0 }, with: .automatic)
     }
     
-    private func didTouchConfirm() {
+    @objc private func didTouchConfirm() {
         if let answer = answer, !answer.isEmpty {
             tableView.endEditing(true)
             validateCaptcha()
         } else {
             showAlert(title: "captchaController.alert.noAnswer.title".localized,
                       message: "captchaController.alert.noAnswer.message".localized,
-                      okTitle: "common.ok".localized)
+                      okTitle: "common.ok".localized) { [weak self] in
+                self?.textField?.becomeFirstResponder()
+            }
         }
     }
     
@@ -250,7 +254,7 @@ final class CaptchaViewController: CVTableViewController {
         }
     }
     
-    @objc private func validateCaptcha() {
+    private func validateCaptcha() {
         didEnterCaptcha(captcha.id, answer ?? "")
     }
     

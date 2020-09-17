@@ -89,10 +89,19 @@ final class SendHistoryController: CVTableViewController {
                 }
                 self.bottomButtonContainerController?.unlockButtons()
             } else {
-                RBManager.shared.unregister { error in
-                    ParametersManager.shared.clearConfig()
-                    RBManager.shared.isSick = true
-                    self.dismissBlock()
+                switch ParametersManager.shared.apiVersion {
+                case .v3:
+                    RBManager.shared.unregisterV3 { error, _ in
+                        ParametersManager.shared.clearConfig()
+                        RBManager.shared.isSick = true
+                        self.dismissBlock()
+                    }
+                default:
+                    RBManager.shared.unregister { error, _ in
+                        ParametersManager.shared.clearConfig()
+                        RBManager.shared.isSick = true
+                        self.dismissBlock()
+                    }
                 }
             }
         }

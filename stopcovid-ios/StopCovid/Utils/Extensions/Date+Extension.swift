@@ -43,9 +43,34 @@ extension Date {
         formatter.timeStyle = .short
         return formatter.string(from: self)
     }
-    
+
+    func fullDateTimeFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .medium
+        return formatter.string(from: self)
+    }
+
     func dateByAddingDays(_ days: Int) -> Date {
         addingTimeInterval(Double(days) * 24.0 * 3600.0)
     }
-    
+
+    func fullDateFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter.string(from: self)
+    }
+
+    func testCodeFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.dateFormat = "dMMMyyyy"
+        return formatter.string(from: self).uppercased()
+    }
+
+    func underscoreDateFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.dateFormat = "dd_MM_yyyy"
+        return formatter.string(from: self).uppercased()
+    }
+
 }

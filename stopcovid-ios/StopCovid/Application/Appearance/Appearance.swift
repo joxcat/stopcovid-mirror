@@ -82,6 +82,7 @@ enum Appearance {
                     return .black
                 }
             }
+            static var headTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 25.0)) }
             static var titleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 17.0)) }
             static var titleHighlightFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .medium(size: 17.0)) }
             static var subtitleColor: UIColor {

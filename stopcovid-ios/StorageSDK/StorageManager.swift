@@ -25,8 +25,10 @@ public final class StorageManager: RBStorage {
         case lastExposureTimeFrame
         case lastStatusRequestDate
         case lastStatusReceivedDate
+        case lastRiskReceivedDate
         case isSick
         case positiveToSymptoms
+        case pushToken
     }
     
     let keychain: KeychainSwift = KeychainSwift(keyPrefix: "SC")
@@ -112,14 +114,17 @@ public final class StorageManager: RBStorage {
     }
     
     // MARK: - Local Proximity -
-    public func save(localProximity: RBLocalProximity) {
-        guard let realm = realm else { return }
+    public func save(localProximity: RBLocalProximity) -> Bool {
+        guard let realm = realm else { return false }
         let proximity: RealmLocalProximity = RealmLocalProximity.from(localProximity: localProximity)
         if realm.object(ofType: RealmLocalProximity.self, forPrimaryKey: proximity.id) == nil {
             try! realm.write {
                 realm.add(proximity, update: .all)
             }
             notifyLocalProximityDataChanged()
+            return true
+        } else {
+            return false
         }
     }
     
@@ -164,13 +169,8 @@ public final class StorageManager: RBStorage {
     }
     
     // MARK: - Status: isAtRisk -
-    public func save(isAtRisk: Bool?) {
-        if let isAtRisk = isAtRisk {
-            keychain.set(isAtRisk, forKey: KeychainKey.isAtRisk.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-        } else {
-            keychain.delete(KeychainKey.isAtRisk.rawValue)
-        }
-        notifyStatusDataChanged()
+    public func clearIsAtRisk() {
+        keychain.delete(KeychainKey.isAtRisk.rawValue)
     }
     
     public func isAtRisk() -> Bool? {
@@ -222,6 +222,21 @@ public final class StorageManager: RBStorage {
         return Date(timeIntervalSince1970: timestamp)
     }
     
+    // MARK: - Status: last risk received date -
+    public func saveLastRiskReceivedDate(_ date: Date?) {
+        if let date = date {
+            keychain.set("\(date.timeIntervalSince1970)", forKey: KeychainKey.lastRiskReceivedDate.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+        } else {
+            keychain.delete(KeychainKey.lastRiskReceivedDate.rawValue)
+        }
+        notifyStatusDataChanged()
+    }
+    
+    public func lastRiskReceivedDate() -> Date? {
+        guard let timestampString = keychain.get(KeychainKey.lastRiskReceivedDate.rawValue), let timestamp = Double(timestampString) else { return nil }
+        return Date(timeIntervalSince1970: timestamp)
+    }
+    
     // MARK: - Status: Is sick -
     public func save(isSick: Bool) {
         keychain.set(isSick, forKey: KeychainKey.isSick.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
@@ -230,6 +245,20 @@ public final class StorageManager: RBStorage {
     
     public func isSick() -> Bool {
         keychain.getBool(KeychainKey.isSick.rawValue) ?? false
+    }
+    
+    // MARK: - Push token -
+    public func save(pushToken: String?) {
+        if let pushToken = pushToken {
+            keychain.set(pushToken, forKey: KeychainKey.pushToken.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+        } else {
+            keychain.delete(KeychainKey.pushToken.rawValue)
+        }
+        notifyStatusDataChanged()
+    }
+    
+    public func pushToken() -> String? {
+        keychain.get(KeychainKey.pushToken.rawValue)
     }
     
     // MARK: - Data cleraing -

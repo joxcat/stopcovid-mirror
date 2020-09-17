@@ -17,15 +17,17 @@ final class EnterCodeCoordinator: Coordinator {
     
     private weak var presentingController: UIViewController?
     private weak var navigationController: UINavigationController?
+    private var initialCode: String?
     
-    init(presentingController: UIViewController?, parent: Coordinator) {
+    init(presentingController: UIViewController?, parent: Coordinator, initialCode: String? = nil) {
         self.presentingController = presentingController
         self.parent = parent
+        self.initialCode = initialCode
         start()
     }
     
     private func start() {
-        let controller: UIViewController = EnterCodeController(didEnterCode: { [weak self] code in
+        let controller: UIViewController = EnterCodeController(initialCode: initialCode, didEnterCode: { [weak self] code in
             guard let code = code else { return }
             self?.showSymptomsOrigin(symptomsParams: SymptomsDeclarationParams(code: code))
         }) { [weak self] in

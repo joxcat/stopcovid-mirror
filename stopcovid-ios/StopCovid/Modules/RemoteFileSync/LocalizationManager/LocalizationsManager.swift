@@ -36,16 +36,16 @@ final class LocalizationsManager: RemoteFileSyncManager {
     override func workingDirectoryName() -> String { "Strings" }
     
     override func initialFileUrl(for languageCode: String) -> URL {
-        Bundle.main.url(forResource: "strings-\(languageCode)", withExtension: "json") ?? Bundle.main.url(forResource: "strings-\(Constant.defaultLanguageCode)", withExtension: "json")!
+        Bundle.main.url(forResource: "\(RemoteFileConstant.stringsFilePrefix)-\(languageCode)", withExtension: "json") ?? Bundle.main.url(forResource: "\(RemoteFileConstant.stringsFilePrefix)-\(Constant.defaultLanguageCode)", withExtension: "json")!
     }
     
     override func localFileUrl(for languageCode: String) -> URL {
         let directoryUrl: URL = self.createWorkingDirectoryIfNeeded()
-        return directoryUrl.appendingPathComponent("strings-\(languageCode).json")
+        return directoryUrl.appendingPathComponent("\(RemoteFileConstant.stringsFilePrefix)-\(languageCode).json")
     }
     
     override func remoteFileUrl(for languageCode: String) -> URL {
-        URL(string: "\(RemoteFileConstant.baseUrl)/strings-\(languageCode).json")!
+        URL(string: "\(RemoteFileConstant.baseUrl)/\(RemoteFileConstant.stringsFilePrefix)-\(languageCode).json")!
     }
     
     override func processReceivedData(_ data: Data) -> Bool {

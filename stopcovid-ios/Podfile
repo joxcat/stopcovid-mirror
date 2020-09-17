@@ -5,7 +5,6 @@ inhibit_all_warnings!
 def projectPods
   use_frameworks!
   pod 'PKHUD'
-  pod 'ReCaptcha'
   pod 'SwiftGen'
   pod 'lottie-ios'
 end

@@ -1,9 +1,11 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  StateAnimationCell.swift
-//  StopCovid
+//  STOP-COVID
 //
-//  Created by Nicolas on 28/07/2020.
-//  Copyright © 2020 Lunabee Studio. All rights reserved.
+//  Created by Lunabee Studio / Date - 08/04/2020 - for the STOP-COVID project.
 //
 
 import UIKit
@@ -58,6 +60,13 @@ final class StateAnimationCell: CVTableViewCell {
             setOnWaving()
             completion?()
         }
+    }
+    
+    func setLoading() {
+        animationView?.animation = Animation.named(isDarkMode ? "LoadingBle-Dark" : "LoadingBle")!
+        animationView?.animationSpeed = waveAnimationSpeed
+        animationView?.loopMode = .loop
+        animationView?.play()
     }
     
     func continuePlayingIfNeeded() {

@@ -42,8 +42,11 @@ extension UserDefault {
         case lastStringsUpdateDate
         case lastStringsLanguageCode
         case lastMaintenanceUpdateDate
+        case lastReceivedApnsTimestamps
         
         case lastStatusBackgroundFetchTimestamp
         case lastStatusBackgroundFetchDidSucceed
+        case lastNotificationTimestamp
     }
+    
 }

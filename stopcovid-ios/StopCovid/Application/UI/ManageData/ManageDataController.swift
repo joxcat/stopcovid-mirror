@@ -170,24 +170,35 @@ final class ManageDataController: CVTableViewController {
                   okTitle: "common.yes".localized,
                   isOkDestructive: true,
                   cancelTitle: "common.no".localized) {
-            HUD.show(.progress)
-            RBManager.shared.unregister { [weak self] error in
-                HUD.hide()
-                if let error = error {
-                    if (error as NSError).code == -1 {
-                        self?.showAlert(title: "common.error.clockNotAligned.title".localized,
-                                        message: "common.error.clockNotAligned.message".localized,
-                                        okTitle: "common.ok".localized)
-                    } else {
-                        self?.showAlert(title: "common.error".localized,
-                                        message: "common.error.server".localized,
-                                        okTitle: "common.ok".localized)
+                    switch ParametersManager.shared.apiVersion {
+                    case .v3:
+                        HUD.show(.progress)
+                        RBManager.shared.unregisterV3 { [weak self] error, isErrorBlocking in
+                            HUD.hide()
+                            self?.processPostUnregisterActions(error, isErrorBlocking: isErrorBlocking)
+                        }
+                    default:
+                        HUD.show(.progress)
+                        RBManager.shared.unregister { [weak self] error, isErrorBlocking in
+                            HUD.hide()
+                            self?.processPostUnregisterActions(error, isErrorBlocking: isErrorBlocking)
+                        }
                     }
-                } else {
-                    ParametersManager.shared.clearConfig()
-                    NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
-                }
-            }
+        }
+    }
+    
+    private func processPostUnregisterActions(_ error: Error?, isErrorBlocking: Bool) {
+        if let error = error, (error as NSError).code == -1 {
+            showAlert(title: "common.error.clockNotAligned.title".localized,
+                      message: "common.error.clockNotAligned.message".localized,
+                      okTitle: "common.ok".localized)
+        } else if error != nil && isErrorBlocking {
+            showAlert(title: "common.error".localized,
+                      message: "common.error.server".localized,
+                      okTitle: "common.ok".localized)
+        } else {
+            ParametersManager.shared.clearConfig()
+            NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
         }
     }
     

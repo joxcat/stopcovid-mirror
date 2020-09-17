@@ -33,12 +33,14 @@ final class BluetoothStateManager: NSObject {
     
     var isAuthorized: Bool {
         if #available(iOS 13.0, *) {
-            return peripheralManager?.state != .unauthorized || Constant.isSimulator
+            guard let peripheralManager = peripheralManager else { return false }
+            return peripheralManager.state != .unauthorized || Constant.isSimulator
         } else {
             return CBPeripheralManager.authorizationStatus() == .authorized || Constant.isSimulator
         }
     }
     var isActivated: Bool { peripheralManager?.state == .poweredOn || Constant.isSimulator }
+    var isUnknown: Bool { peripheralManager?.state == .unknown }
     private var peripheralManager: CBPeripheralManager?
     private var observers: [BluetoothStateObserverWrapper] = []
     private var authorizationHandler: (() -> ())?

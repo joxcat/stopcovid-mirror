@@ -17,9 +17,12 @@ final class MainTabBarCoordinator: WindowedCoordinator {
     
     var window: UIWindow!
     private weak var tabBarController: UITabBarController?
+    private var launchScreenWindow: UIWindow?
+    private var showLaunchScreen: Bool = false
     
-    init(parent: Coordinator) {
+    init(parent: Coordinator, showLaunchScreen: Bool) {
         self.parent = parent
+        self.showLaunchScreen = showLaunchScreen
         start()
     }
     
@@ -36,13 +39,21 @@ final class MainTabBarCoordinator: WindowedCoordinator {
         }
         createWindow(for: mainTabBarController)
         addObservers()
+        if showLaunchScreen {
+            loadLaunchScreen()
+        }
     }
     
     private func coordinatorFor(tab: Constant.Tab, tabBarController: UITabBarController) -> Coordinator {
         let coordinator: Coordinator
         switch tab {
         case .proximity:
-            coordinator = ProximityCoordinator(in: tabBarController, parent: self)
+            coordinator = ProximityCoordinator(in: tabBarController, parent: self, didFinishLoadingController: { [weak self] in
+                guard let self = self else { return }
+                if self.showLaunchScreen {
+                    self.hideLaunchScreen()
+                }
+            })
         case .sharing:
             coordinator = SharingCoordinator(in: tabBarController, parent: self)
         case .sick:
@@ -55,6 +66,29 @@ final class MainTabBarCoordinator: WindowedCoordinator {
         let informationCoordinator: InformationCoordinator = InformationCoordinator(presentingController: tabBarController?.topPresentedController, parent: self)
         addChild(coordinator: informationCoordinator)
     }
+    
+    private func showEnterCode(code: String) {
+        let enterCodeCoordinator: EnterCodeCoordinator = EnterCodeCoordinator(presentingController: tabBarController, parent: self, initialCode: code)
+        addChild(coordinator: enterCodeCoordinator)
+    }
+    
+    private func loadLaunchScreen() {
+        guard let launchScreen = UIStoryboard(name: "LaunchScreen", bundle: nil).instantiateInitialViewController() else { return }
+        let window: UIWindow = UIWindow(frame: UIScreen.main.bounds)
+        launchScreenWindow = window
+        window.windowLevel = .statusBar
+        window.rootViewController = launchScreen
+        window.makeKeyAndVisible()
+    }
+    
+    private func hideLaunchScreen() {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.launchScreenWindow?.alpha = 0.0
+        }) { _ in
+            self.launchScreenWindow?.resignKey()
+            self.launchScreenWindow = nil
+        }
+    }
 }
 
 // MARK: - Notifications -
@@ -63,6 +97,7 @@ extension MainTabBarCoordinator {
     private func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(selectTabNotificationReceived(_:)), name: .selectTab, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didTouchAtRiskNotification(_:)), name: .didTouchAtRiskNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterCodeFromDeeplink(_:)), name: .didEnterCodeFromDeeplink, object: nil)
     }
     
     private func removeObservers() {
@@ -76,6 +111,11 @@ extension MainTabBarCoordinator {
     
     @objc private func didTouchAtRiskNotification(_ notification: Notification) {
        showInformation()
+    }
+    
+    @objc private func didEnterCodeFromDeeplink(_ notification: Notification) {
+        guard let code = notification.object as? String else { return }
+        showEnterCode(code: code)
     }
     
 }

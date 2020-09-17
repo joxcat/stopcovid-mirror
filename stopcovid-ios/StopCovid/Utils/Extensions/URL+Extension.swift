@@ -26,4 +26,10 @@ extension URL {
         controller.present(activityController, animated: true, completion: nil)
     }
     
+    mutating func addSkipBackupAttribute() throws {
+        var values: URLResourceValues = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try setResourceValues(values)
+    }
+    
 }

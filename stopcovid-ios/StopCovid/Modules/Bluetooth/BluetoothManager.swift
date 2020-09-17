@@ -54,7 +54,6 @@ final class BluetoothManager: RBBluetooth {
                 didReceiveProximity(proximity)
             }
         }
-        
         service?.start(proximityPayloadProvider: proximityPayloadProvider,
                       proximityInfoUpdateHandler: proximityInfoUpdateHandler,
                       identifierFromProximityPayload: identifierFromProximityPayload)

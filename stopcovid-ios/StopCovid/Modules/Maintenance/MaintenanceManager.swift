@@ -39,7 +39,8 @@ final class MaintenanceManager: NSObject {
                     self.processCheckError(error: error, completion: completion)
                 } else {
                     guard let data = data else {
-                        self.processCheckError(error: NSError.localizedError(message: "No data received for app maintenance", code: 400), completion: completion)
+                        let error: Error = NSError.localizedError(message: "No data received for app maintenance", code: 400)
+                        self.processCheckError(error: error, completion: completion)
                         return
                     }
                     do {

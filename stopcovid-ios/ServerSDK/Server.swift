@@ -76,6 +76,45 @@ public final class Server: NSObject, RBServer {
         }
     }
     
+    public func statusV3(epochId: Int, ebid: String, time: String, mac: String, completion: @escaping (_ result: Result<RBStatusResponse, Error>) -> ()) {
+        ParametersManager.shared.fetchConfig { configResult in
+            switch configResult {
+            case let .success(serverTime):
+                let nowTimeStamp: Double = Date().timeIntervalSince1970
+                if abs(nowTimeStamp - serverTime) > ServerConstant.maxClockShiftToleranceInSeconds {
+                    self.deviceTimeNotAlignedToServerTimeDetected()
+                    completion(.failure(NSError.deviceTime))
+                } else {
+                    let body: RBServerStatusBodyV3 = RBServerStatusBodyV3(epochId: epochId,
+                                                                          ebid: ebid,
+                                                                          time: time,
+                                                                          mac: mac,
+                                                                          pushInfo: RBServerPushInfo(token: RBManager.shared.pushToken ?? "",
+                                                                                                     locale: Locale.current.identifier,
+                                                                                                     timezone: TimeZone.current.identifier))
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("status"), method: .post, body: body) { result in
+                        switch result {
+                        case let .success(data):
+                            do {
+                                let response: RBServerStatusResponse = try JSONDecoder().decode(RBServerStatusResponse.self, from: data)
+                                let transformedResponse: RBStatusResponse = RBStatusResponse(atRisk: response.atRisk,
+                                                                                             lastExposureTimeFrame: response.lastExposureTimeframe,
+                                                                                             tuples: response.tuples)
+                                completion(.success(transformedResponse))
+                            } catch {
+                                completion(.failure(error))
+                            }
+                        case let .failure(error):
+                            completion(.failure(error))
+                        }
+                    }
+                }
+            case let .failure(error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
     public func report(code: String, helloMessages: [RBLocalProximity], completion: @escaping (_ error: Error?) -> ()) {
         ParametersManager.shared.fetchConfig { configResult in
             switch configResult {
@@ -189,6 +228,48 @@ public final class Server: NSObject, RBServer {
         }
     }
     
+    public func registerV3(captcha: String, captchaId: String, publicKey: String, completion: @escaping (_ result: Result<RBRegisterResponse, Error>) -> ()) {
+        ParametersManager.shared.fetchConfig { configResult in
+            switch configResult {
+            case let .success(serverTime):
+                let nowTimeStamp: Double = Date().timeIntervalSince1970
+                if abs(nowTimeStamp - serverTime) > ServerConstant.maxClockShiftToleranceInSeconds {
+                    self.deviceTimeNotAlignedToServerTimeDetected()
+                    completion(.failure(NSError.deviceTime))
+                } else {
+                    let body: RBServerRegisterBodyV3 = RBServerRegisterBodyV3(captcha: captcha,
+                                                                              captchaId: captchaId,
+                                                                              clientPublicECDHKey: publicKey,
+                                                                              pushInfo: RBServerPushInfo(token: RBManager.shared.pushToken ?? "",
+                                                                                                         locale: Locale.current.identifier,
+                                                                                                         timezone: TimeZone.current.identifier))
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("register"), method: .post, body: body) { result in
+                        switch result {
+                        case let .success(data):
+                            do {
+                                let response: RBServerRegisterResponse = try JSONDecoder().decode(RBServerRegisterResponse.self, from: data)
+                                
+                                let rootJson: [String: Any] = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] ?? [:]
+                                let config: [[String: Any]] = rootJson["config"] as? [[String: Any]] ?? []
+                                
+                                let transformedResponse: RBRegisterResponse = RBRegisterResponse(tuples: response.tuples,
+                                                                                                 timeStart: response.timeStart,
+                                                                                                 config: config)
+                                completion(.success(transformedResponse))
+                            } catch {
+                                completion(.failure(error))
+                            }
+                        case let .failure(error):
+                            completion(.failure(error))
+                        }
+                    }
+                }
+            case let .failure(error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
     public func unregister(epochId: Int, ebid: String, time: String, mac: String, completion: @escaping (_ error: Error?) -> ()) {
         ParametersManager.shared.fetchConfig { configResult in
             switch configResult {
@@ -199,6 +280,48 @@ public final class Server: NSObject, RBServer {
                     completion(NSError.deviceTime)
                 } else {
                     let body: RBServerUnregisterBody = RBServerUnregisterBody(epochId: epochId, ebid: ebid, time: time, mac: mac)
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("unregister"), method: .post, body: body) { result in
+                        switch result {
+                        case let .success(data):
+                            do {
+                                if data.isEmpty {
+                                    completion(nil)
+                                } else {
+                                    let response: RBServerStandardResponse = try JSONDecoder().decode(RBServerStandardResponse.self, from: data)
+                                    if response.success != false {
+                                        completion(nil)
+                                    } else {
+                                        completion(NSError.svLocalizedError(message: response.message ?? "An unknown error occurred", code: 0))
+                                    }
+                                }
+                            } catch {
+                                completion(error)
+                            }
+                        case let .failure(error):
+                            completion(error)
+                        }
+                    }
+                }
+            case let .failure(error):
+                completion(error)
+            }
+        }
+    }
+    
+    public func unregisterV3(epochId: Int, ebid: String, time: String, mac: String, completion: @escaping (_ error: Error?) -> ()) {
+        ParametersManager.shared.fetchConfig { configResult in
+            switch configResult {
+            case let .success(serverTime):
+                let nowTimeStamp: Double = Date().timeIntervalSince1970
+                if abs(nowTimeStamp - serverTime) > ServerConstant.maxClockShiftToleranceInSeconds {
+                    self.deviceTimeNotAlignedToServerTimeDetected()
+                    completion(NSError.deviceTime)
+                } else {
+                    let body: RBServerUnregisterBodyV3 = RBServerUnregisterBodyV3(epochId: epochId,
+                                                                                  ebid: ebid,
+                                                                                  time: time,
+                                                                                  mac: mac,
+                                                                                  pushToken: RBManager.shared.pushToken ?? "")
                     self.processRequest(url: self.baseUrl().appendingPathComponent("unregister"), method: .post, body: body) { result in
                         switch result {
                         case let .success(data):

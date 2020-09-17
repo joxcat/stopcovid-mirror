@@ -16,11 +16,12 @@ import ServerSDK
 
 final class ProximityController: CVTableViewController {
     
-    var canActivateProximity: Bool = false
+    var canActivateProximity: Bool { areNotificationsAuthorized == true && BluetoothStateManager.shared.isAuthorized && BluetoothStateManager.shared.isActivated }
     private let showCaptchaChallenge: (_ captcha: Captcha, _ didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), _ didCancelCaptcha: @escaping () -> ()) -> ()
     private let didTouchManageData: () -> ()
     private let didTouchPrivacy: () -> ()
     private let didTouchAbout: () -> ()
+    private var didFinishLoad: (() -> ())?
     private let deinitBlock: () -> ()
     
     private var popRecognizer: InteractivePopGestureRecognizer?
@@ -29,18 +30,21 @@ final class ProximityController: CVTableViewController {
     private var wasActivated: Bool = false
     private var isChangingState: Bool = false
     
-    private var areNotificationsAuthorized: Bool = false
+    private var areNotificationsAuthorized: Bool?
     private weak var stateCell: StateAnimationCell?
+    private var isWaitingForNeededInfo: Bool = true
     
     init(didTouchAbout: @escaping () -> (),
          showCaptchaChallenge: @escaping (_ captcha: Captcha, _ didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), _ didCancelCaptcha: @escaping () -> ()) -> (),
          didTouchManageData: @escaping () -> (),
          didTouchPrivacy: @escaping () -> (),
+         didFinishLoad: (() -> ())?,
          deinitBlock: @escaping () -> ()) {
         self.didTouchAbout = didTouchAbout
         self.didTouchManageData = didTouchManageData
         self.didTouchPrivacy = didTouchPrivacy
         self.showCaptchaChallenge = showCaptchaChallenge
+        self.didFinishLoad = didFinishLoad
         self.deinitBlock = deinitBlock
         super.init(style: .plain)
     }
@@ -55,6 +59,12 @@ final class ProximityController: CVTableViewController {
         initBottomMessageContainer()
         addObserver()
         setInteractiveRecognizer()
+        wasActivated = RBManager.shared.isProximityActivated
+        if !RBManager.shared.isRegistered {
+            areNotificationsAuthorized = true
+            isWaitingForNeededInfo = false
+            updateUIForAuthorizationChange()
+        }
         updateNotificationsState {
             self.updateUIForAuthorizationChange()
         }
@@ -85,64 +95,68 @@ final class ProximityController: CVTableViewController {
     private func updateNotificationsState(_ completion: (() -> ())? = nil) {
         NotificationsManager.shared.areNotificationsAuthorized { notificationsAuthorized in
             self.areNotificationsAuthorized = notificationsAuthorized
+            if !BluetoothStateManager.shared.isUnknown {
+                self.isWaitingForNeededInfo = false
+            }
             DispatchQueue.main.async {
                 completion?()
             }
         }
     }
     
-    private func updateUIForAuthorizationChange(_ completion: (() -> ())? = nil) {
+    private func updateUIForAuthorizationChange() {
+        guard let areNotificationsAuthorized = areNotificationsAuthorized, !isWaitingForNeededInfo else { return }
         let messageFont: UIFont? = Appearance.BottomMessage.font
         let messageTextColor: UIColor = .black
         let messageBackgroundColor: UIColor = Asset.Colors.info.color
         if !areNotificationsAuthorized && !BluetoothStateManager.shared.isAuthorized {
             bottomMessageContainerController?.updateMessage(text: "proximityController.error.noNotificationsOrBluetooth".localized,
-                                                                 font: messageFont,
-                                                                 textColor: messageTextColor,
-                                                                 backgroundColor: messageBackgroundColor,
-                                                                 actionHint: "accessibility.hint.proximity.alert.touchToGoToSettings.ios".localized)
+                                                            font: messageFont,
+                                                            textColor: messageTextColor,
+                                                            backgroundColor: messageBackgroundColor,
+                                                            actionHint: "accessibility.hint.proximity.alert.touchToGoToSettings.ios".localized)
         } else if !areNotificationsAuthorized {
             bottomMessageContainerController?.updateMessage(text: "proximityController.error.noNotifications".localized,
-                                                                 font: messageFont,
-                                                                 textColor: messageTextColor,
-                                                                 backgroundColor: messageBackgroundColor,
-                                                                 actionHint: "accessibility.hint.proximity.alert.touchToGoToSettings.ios".localized)
+                                                            font: messageFont,
+                                                            textColor: messageTextColor,
+                                                            backgroundColor: messageBackgroundColor,
+                                                            actionHint: "accessibility.hint.proximity.alert.touchToGoToSettings.ios".localized)
         } else if !BluetoothStateManager.shared.isAuthorized {
             bottomMessageContainerController?.updateMessage(text: "proximityController.error.noBluetooth".localized,
-                                                                 font: messageFont,
-                                                                 textColor: messageTextColor,
-                                                                 backgroundColor: messageBackgroundColor,
-                                                                 actionHint: "accessibility.hint.proximity.alert.touchToGoToSettings.ios".localized)
+                                                            font: messageFont,
+                                                            textColor: messageTextColor,
+                                                            backgroundColor: messageBackgroundColor,
+                                                            actionHint: "accessibility.hint.proximity.alert.touchToGoToSettings.ios".localized)
         } else if !BluetoothStateManager.shared.isActivated {
             bottomMessageContainerController?.updateMessage(text: "proximityController.error.bluetoothOff".localized,
-                                                                 font: messageFont,
-                                                                 textColor: messageTextColor,
-                                                                 backgroundColor: messageBackgroundColor)
+                                                            font: messageFont,
+                                                            textColor: messageTextColor,
+                                                            backgroundColor: messageBackgroundColor)
         } else if !RBManager.shared.isProximityActivated {
             bottomMessageContainerController?.updateMessage(text: "proximityController.error.activateProximity".localized,
-                                                                 font: messageFont,
-                                                                 textColor: messageTextColor,
-                                                                 backgroundColor: messageBackgroundColor)
+                                                            font: messageFont,
+                                                            textColor: messageTextColor,
+                                                            backgroundColor: messageBackgroundColor)
         } else if UIApplication.shared.backgroundRefreshStatus == .denied {
             bottomMessageContainerController?.updateMessage(text: "proximityController.error.noBackgroundAppRefresh".localized,
-                                                                 font: messageFont,
-                                                                 textColor: messageTextColor,
-                                                                 backgroundColor: messageBackgroundColor)
+                                                            font: messageFont,
+                                                            textColor: messageTextColor,
+                                                            backgroundColor: messageBackgroundColor)
         } else {
             bottomMessageContainerController?.updateMessage()
         }
-        canActivateProximity = areNotificationsAuthorized && BluetoothStateManager.shared.isAuthorized && BluetoothStateManager.shared.isActivated
         updateTitle()
         reloadUI(animated: true) {
             if self.wasActivated != self.isActivated {
-               self.wasActivated = self.isActivated
+                self.wasActivated = self.isActivated
                 if self.isActivated == true {
                     self.stateCell?.setOn()
                 } else {
                     self.stateCell?.setOff()
                 }
             }
-            completion?()
+            self.didFinishLoad?()
+            self.didFinishLoad = nil
         }
     }
     
@@ -153,31 +167,31 @@ final class ProximityController: CVTableViewController {
         }
         rows.append(titleRow)
         let subtitleRow: CVRow = CVRow(title: isActivated ? "proximityController.switch.subtitle.activated".localized : "proximityController.switch.subtitle.deactivated".localized,
-                                   xibName: .textCell,
-                                   theme: CVRow.Theme(topInset: 0.0,
-                                                      bottomInset: 20.0,
-                                                      textAlignment: .natural,
-                                                      titleFont: { Appearance.Cell.Text.standardBigFont },
-                                                      separatorLeftInset: nil))
+                                       xibName: .textCell,
+                                       theme: CVRow.Theme(topInset: 0.0,
+                                                          bottomInset: 20.0,
+                                                          textAlignment: .natural,
+                                                          titleFont: { Appearance.Cell.Text.standardBigFont },
+                                                          separatorLeftInset: nil))
         rows.append(subtitleRow)
         let stateRow: CVRow = CVRow(xibName: .stateAnimationCell,
                                     theme: CVRow.Theme(separatorLeftInset: nil),
                                     willDisplay: { [weak self] cell in
-            self?.stateCell = cell as? StateAnimationCell
-            if self?.wasActivated == true {
-                self?.stateCell?.setOn(animated: false)
-            } else {
-                self?.stateCell?.setOff(animated: false)
-            }
+                                        self?.stateCell = cell as? StateAnimationCell
+                                        if self?.wasActivated == true {
+                                            self?.stateCell?.setOn(animated: false)
+                                        } else {
+                                            self?.stateCell?.setOff(animated: false)
+                                        }
         })
         rows.append(stateRow)
         let activationButtonRow: CVRow = CVRow(title: isActivated ? "proximityController.button.deactivateProximity".localized : "proximityController.button.activateProximity".localized,
-                                       xibName: .buttonCell,
-                                       theme: CVRow.Theme(topInset: 20.0, bottomInset: 20.0, buttonStyle: isActivated ? .secondary : .primary),
-                                       enabled: canActivateProximity,
-                                       selectionAction: { [weak self] in
-                                        guard let self = self else { return }
-            self.didChangeSwitchValue(isOn: !self.isActivated)
+                                               xibName: .buttonCell,
+                                               theme: CVRow.Theme(topInset: 20.0, bottomInset: 20.0, buttonStyle: isActivated ? .secondary : .primary),
+                                               enabled: canActivateProximity,
+                                               selectionAction: { [weak self] in
+                                                guard let self = self else { return }
+                                                self.didChangeSwitchValue(isOn: !self.isActivated)
         })
         rows.append(activationButtonRow)
         let textRow: CVRow = CVRow(subtitle: isActivated ? "proximityController.mainMessage.subtitle.on".localized : "proximityController.mainMessage.subtitle.off".localized,
@@ -197,8 +211,8 @@ final class ProximityController: CVTableViewController {
                                                          separatorLeftInset: Appearance.Cell.leftMargin),
                                       selectionAction: { [weak self] in
                                         self?.didTouchPrivacy()
-        }, willDisplay: { cell in
-            cell.cvTitleLabel?.accessibilityTraits = .button
+            }, willDisplay: { cell in
+                cell.cvTitleLabel?.accessibilityTraits = .button
         })
         rows.append(privacyRow)
         let manageDataRow: CVRow = CVRow(title: "proximityController.manageData".localized,
@@ -213,9 +227,9 @@ final class ProximityController: CVTableViewController {
                                                             imageSize: Appearance.Cell.Image.size,
                                                             separatorLeftInset: 0.0),
                                          selectionAction: { [weak self] in
-            self?.didTouchManageData()
-        }, willDisplay: { cell in
-            cell.cvTitleLabel?.accessibilityTraits = .button
+                                            self?.didTouchManageData()
+            }, willDisplay: { cell in
+                cell.cvTitleLabel?.accessibilityTraits = .button
         })
         rows.append(manageDataRow)
         rows.append(.empty)
@@ -252,7 +266,7 @@ final class ProximityController: CVTableViewController {
                 } else {
                     self.didChangeSwitchValue(isOn: true)
                 }
-            } else if !self.areNotificationsAuthorized || !BluetoothStateManager.shared.isAuthorized {
+            } else if self.areNotificationsAuthorized != true || !BluetoothStateManager.shared.isAuthorized {
                 UIApplication.shared.openSettings()
             }
         }
@@ -277,41 +291,17 @@ final class ProximityController: CVTableViewController {
         if isOn {
             if RBManager.shared.isRegistered {
                 if RBManager.shared.currentEpoch == nil {
-                    HUD.show(.progress)
-                    RBManager.shared.status { error in
-                        HUD.hide()
-                        self.isChangingState = false
-                        if let error = error {
-                            if (error as NSError).code == -1 {
-                                self.showAlert(title: "common.error.clockNotAligned.title".localized,
-                                               message: "common.error.clockNotAligned.message".localized,
-                                               okTitle: "common.ok".localized)
-                            } else {
-                                self.showAlert(title: "common.error".localized,
-                                               message: "common.error.server".localized,
-                                               okTitle: "common.ok".localized)
-                            }
-                        } else {
-                            self.processRegistrationDone()
-                        }
-                    }
+                    processStatusV3()
                 } else {
                     processRegistrationDone()
                     isChangingState = false
                 }
             } else {
                 HUD.show(.progress)
-                ParametersManager.shared.fetchConfig { _ in
+                ParametersManager.shared.fetchConfig { result in
                     HUD.hide()
-                    switch ParametersManager.shared.apiVersion {
-                    case .v1:
-                        self.processRegisterWithReCaptcha {
-                            self.isChangingState = false
-                        }
-                    case .v2:
-                        self.processRegisterWithCaptcha {
-                            self.isChangingState = false
-                        }
+                    self.processRegisterWithCaptcha {
+                        self.isChangingState = false
                     }
                 }
             }
@@ -322,42 +312,6 @@ final class ProximityController: CVTableViewController {
         }
     }
     
-    private func processRegisterWithReCaptcha(_ completion: @escaping () -> ()) {
-        ReCaptchaManager.shared.validate(on: self) { token in
-            guard let token = token else {
-                self.showAlert(title: "common.error".localized,
-                               message: "proximityService.error.captchaError".localized,
-                               okTitle: "common.retry".localized,
-                               cancelTitle: "common.cancel".localized, handler: { [weak self] in
-                                self?.didChangeSwitchValue(isOn: true)
-                })
-                completion()
-                return
-            }
-            HUD.show(.progress)
-            RBManager.shared.register(token: token) { error in
-                HUD.hide()
-                if let error = error {
-                    if (error as NSError).code == -1 {
-                        self.showAlert(title: "common.error.clockNotAligned.title".localized,
-                                       message: "common.error.clockNotAligned.message".localized,
-                                       okTitle: "common.ok".localized)
-                    } else {
-                        self.showAlert(title: "common.error".localized,
-                                       message: "common.error.server".localized,
-                                       okTitle: "common.retry".localized,
-                                       cancelTitle: "common.cancel".localized, handler: { [weak self] in
-                                        self?.didChangeSwitchValue(isOn: true)
-                        })
-                    }
-                } else {
-                    self.processRegistrationDone()
-                }
-                completion()
-            }
-        }
-    }
-    
     private func processRegisterWithCaptcha(_ completion: @escaping () -> ()) {
         HUD.show(.progress)
         generateCaptcha { result in
@@ -365,33 +319,11 @@ final class ProximityController: CVTableViewController {
             switch result {
             case let .success(captcha):
                 self.showCaptchaChallenge(captcha, { id, answer in
-                    HUD.show(.progress)
-                    RBManager.shared.registerV2(captcha: answer, captchaId: id) { error in
-                        HUD.hide()
-                        if let error = error {
-                            if (error as NSError).code == -1 {
-                                self.showAlert(title: "common.error.clockNotAligned.title".localized,
-                                               message: "common.error.clockNotAligned.message".localized,
-                                               okTitle: "common.ok".localized)
-                            } else if (error as NSError).code == 401 {
-                                self.showAlert(title: "captchaController.alert.invalidCode.title".localized,
-                                               message: "captchaController.alert.invalidCode.message".localized,
-                                               okTitle: "common.retry".localized,
-                                               cancelTitle: "common.cancel".localized, handler: { [weak self] in
-                                                self?.didChangeSwitchValue(isOn: true)
-                                })
-                            } else {
-                                self.showAlert(title: "common.error".localized,
-                                               message: "common.error.server".localized,
-                                               okTitle: "common.retry".localized,
-                                               cancelTitle: "common.cancel".localized, handler: { [weak self] in
-                                                self?.didChangeSwitchValue(isOn: true)
-                                })
-                            }
-                        } else {
-                            self.processRegistrationDone()
-                        }
-                        completion()
+                    switch ParametersManager.shared.apiVersion {
+                    case .v2:
+                        self.processRegisterV2(answer: answer, captchaId: id, completion: completion)
+                    case .v3:
+                        self.processRegisterV3(answer: answer, captchaId: id, completion: completion)
                     }
                 }, { [weak self] in
                     self?.isChangingState = false
@@ -408,6 +340,110 @@ final class ProximityController: CVTableViewController {
         }
     }
     
+    private func processStatus() {
+        HUD.show(.progress)
+        RBManager.shared.status { error in
+            HUD.hide()
+            self.isChangingState = false
+            if let error = error {
+                if (error as NSError).code == -1 {
+                    self.showAlert(title: "common.error.clockNotAligned.title".localized,
+                                   message: "common.error.clockNotAligned.message".localized,
+                                   okTitle: "common.ok".localized)
+                } else {
+                    self.showAlert(title: "common.error".localized,
+                                   message: "common.error.server".localized,
+                                   okTitle: "common.ok".localized)
+                }
+            } else {
+                self.processRegistrationDone()
+            }
+        }
+    }
+    
+    private func processStatusV3() {
+        HUD.show(.progress)
+        RBManager.shared.statusV3 { error in
+            HUD.hide()
+            self.isChangingState = false
+            if let error = error {
+                if (error as NSError).code == -1 {
+                    self.showAlert(title: "common.error.clockNotAligned.title".localized,
+                                   message: "common.error.clockNotAligned.message".localized,
+                                   okTitle: "common.ok".localized)
+                } else {
+                    self.showAlert(title: "common.error".localized,
+                                   message: "common.error.server".localized,
+                                   okTitle: "common.ok".localized)
+                }
+            } else {
+                self.processRegistrationDone()
+            }
+        }
+    }
+    
+    private func processRegisterV2(answer: String, captchaId: String, completion: @escaping () -> ()) {
+        HUD.show(.progress)
+        RBManager.shared.registerV2(captcha: answer, captchaId: captchaId) { error in
+            HUD.hide()
+            if let error = error {
+                if (error as NSError).code == -1 {
+                    self.showAlert(title: "common.error.clockNotAligned.title".localized,
+                                   message: "common.error.clockNotAligned.message".localized,
+                                   okTitle: "common.ok".localized)
+                } else if (error as NSError).code == 401 {
+                    self.showAlert(title: "captchaController.alert.invalidCode.title".localized,
+                                   message: "captchaController.alert.invalidCode.message".localized,
+                                   okTitle: "common.retry".localized,
+                                   cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                    self?.didChangeSwitchValue(isOn: true)
+                    })
+                } else {
+                    self.showAlert(title: "common.error".localized,
+                                   message: "common.error.server".localized,
+                                   okTitle: "common.retry".localized,
+                                   cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                    self?.didChangeSwitchValue(isOn: true)
+                    })
+                }
+            } else {
+                self.processRegistrationDone()
+            }
+            completion()
+        }
+    }
+    
+    private func processRegisterV3(answer: String, captchaId: String, completion: @escaping () -> ()) {
+        HUD.show(.progress)
+        RBManager.shared.registerV3(captcha: answer, captchaId: captchaId) { error in
+            HUD.hide()
+            if let error = error {
+                if (error as NSError).code == -1 {
+                    self.showAlert(title: "common.error.clockNotAligned.title".localized,
+                                   message: "common.error.clockNotAligned.message".localized,
+                                   okTitle: "common.ok".localized)
+                } else if (error as NSError).code == 401 {
+                    self.showAlert(title: "captchaController.alert.invalidCode.title".localized,
+                                   message: "captchaController.alert.invalidCode.message".localized,
+                                   okTitle: "common.retry".localized,
+                                   cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                    self?.didChangeSwitchValue(isOn: true)
+                    })
+                } else {
+                    self.showAlert(title: "common.error".localized,
+                                   message: "common.error.server".localized,
+                                   okTitle: "common.retry".localized,
+                                   cancelTitle: "common.cancel".localized, handler: { [weak self] in
+                                    self?.didChangeSwitchValue(isOn: true)
+                    })
+                }
+            } else {
+                self.processRegistrationDone()
+            }
+            completion()
+        }
+    }
+    
     private func generateCaptcha(_ completion: @escaping (_ result: Result<Captcha, Error>) -> ()) {
         if UIAccessibility.isVoiceOverRunning {
             CaptchaManager.shared.generateCaptchaAudio { result in
@@ -415,8 +451,8 @@ final class ProximityController: CVTableViewController {
             }
         } else {
             CaptchaManager.shared.generateCaptchaImage { result in
-               completion(result)
-           }
+                completion(result)
+            }
         }
     }
     
@@ -459,6 +495,9 @@ extension ProximityController: LocalizationsChangesObserver {
 extension ProximityController: BluetoothStateObserver {
     
     func bluetoothStateDidUpdate() {
+        if !BluetoothStateManager.shared.isUnknown && areNotificationsAuthorized != nil {
+            isWaitingForNeededInfo = false
+        }
         updateUIForAuthorizationChange()
     }
     

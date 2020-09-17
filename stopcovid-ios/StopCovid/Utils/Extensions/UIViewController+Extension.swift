@@ -37,6 +37,29 @@ extension UIViewController {
         present(alertController, animated: true, completion: nil)
     }
     
+    func showLeftAlignedAlert(title: String? = nil, message: String? = nil, okTitle: String, isOkDestructive: Bool = false, cancelTitle: String? = nil, handler: (() -> ())? = nil) {
+        let paragraphStyle: NSMutableParagraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .left
+        let attributedMessageText: NSMutableAttributedString = NSMutableAttributedString(string: message ?? "",
+                                                                                         attributes: [NSAttributedString.Key.paragraphStyle: paragraphStyle,
+                                                                                                      NSAttributedString.Key.font: UIFont.systemFont(ofSize: 13.0)]
+        )
+        let alertController: UIAlertController = UIAlertController(title: title, message: nil, preferredStyle: .alert)
+        alertController.setValue(attributedMessageText, forKey: "attributedMessage")
+        alertController.addAction(UIAlertAction(title: okTitle, style: isOkDestructive ? .destructive : .default, handler: { _ in handler?() }))
+        if let cancelTitle = cancelTitle {
+            alertController.addAction(UIAlertAction(title: cancelTitle, style: .cancel))
+        }
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func showRetryAlert(title: String? = nil, message: String? = nil, retryTitle: String, retryHandler: @escaping () -> (), cancelTitle: String, isCancelDestructive: Bool = false, cancelHandler: @escaping () -> ()) {
+        let alertController: UIAlertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: retryTitle, style: .default, handler: { _ in retryHandler() }))
+        alertController.addAction(UIAlertAction(title: cancelTitle, style: isCancelDestructive ? .destructive : .default, handler: { _ in cancelHandler() }))
+        present(alertController, animated: true, completion: nil)
+    }
+    
     func showFlash(success: Bool = true) {
         HUD.flash(success ? .success : .error, onView: self.view.window, delay: 0.8)
     }

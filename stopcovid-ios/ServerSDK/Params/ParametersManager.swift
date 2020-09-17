@@ -17,8 +17,8 @@ public final class ParametersManager: NSObject {
     typealias RequestCompletion = (_ result: Result<Double, Error>) -> ()
     
     public enum ApiVersion: String {
-        case v1
         case v2
+        case v3
     }
     
     public static let shared: ParametersManager = ParametersManager()
@@ -38,6 +38,12 @@ public final class ParametersManager: NSObject {
         guard let span = valueFor(name: "app.preSymptomsSpan") as? Double else { return nil }
         return Int(span)
     }
+
+    public var minHoursBetweenVisibleNotif: Int {
+        guard let hour = valueFor(name: "app.push.minHoursBetweenVisibleNotifications") as? Double else { return 24 }
+        return Int(hour)
+    }
+
     private var minStatusRetryDuration: Double? {
         guard let hour = valueFor(name: "app.minStatusRetryDuration") as? Double else { return nil }
         return Double(hour)
@@ -47,6 +53,9 @@ public final class ParametersManager: NSObject {
     }
     var checkStatusFrequency: Double? { valueFor(name: "app.checkStatusFrequency") as? Double }
     var randomStatusHour: Double? { valueFor(name: "app.randomStatusHour") as? Double }
+    public var pushDisplayOnSuccess: Bool { valueFor(name: "app.push.displayOnSuccess") as? Bool ?? false }
+    public var pushDisplayAll: Bool { valueFor(name: "app.push.displayAll") as? Bool ?? false }
+
     public var statusTimeInterval: Double {
         let randomStatusHour: Double = self.randomStatusHour ?? 0.0
         let interval: Double = (self.checkStatusFrequency ?? 0.0) * 3600.0 + (randomStatusHour == 0.0 ? 0.0 : Double.random(in: 0..<randomStatusHour * 3600.0))
@@ -65,7 +74,7 @@ public final class ParametersManager: NSObject {
     public var bleFilteringConfig: String? { valueFor(name: "ble.filterConfig") as? String }
     public var bleFilteringMode: String? { valueFor(name: "ble.filterMode") as? String }
     
-    public var apiVersion: ApiVersion { ApiVersion(rawValue: valueFor(name: "app.apiVersion") as? String ?? "") ?? .v1 }
+    public var apiVersion: ApiVersion { ApiVersion(rawValue: valueFor(name: "app.apiVersion") as? String ?? "") ?? .v2 }
     
     private var config: [[String: Any]] = [] {
         didSet { distributeUpdatedConfig() }

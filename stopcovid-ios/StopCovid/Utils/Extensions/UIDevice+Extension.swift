@@ -24,4 +24,44 @@ extension UIDevice {
         return identifier
     }
     
+    var batteryStateString: String {
+        switch batteryState {
+        case .charging:
+            return "Plugged - Charging"
+        case .full:
+            return "Plugged - Full"
+        case .unknown:
+            return "Unknown"
+        case .unplugged:
+            return "Unplugged"
+        @unknown default:
+            return "-"
+        }
+    }
+    
+    var isPlugged: Bool {
+        [.charging, .full].contains(batteryState)
+    }
+    
+    var orientationString: String {
+        switch orientation {
+        case .faceDown:
+            return "faceDown"
+        case .faceUp:
+            return "faceUp"
+        case .landscapeLeft:
+            return "landscapeLeft"
+        case .landscapeRight:
+            return "landscapeRight"
+        case .portrait:
+            return "portrait"
+        case .portraitUpsideDown:
+            return "portraitUpsideDown"
+        case .unknown:
+            return "unknown"
+        @unknown default:
+            return "-"
+        }
+    }
+    
 }

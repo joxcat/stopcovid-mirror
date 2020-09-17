@@ -37,7 +37,7 @@ final class InformationController: CVTableViewController {
     }
     
     override func createRows() -> [CVRow] {
-        let isAtRisk: Bool = RBManager.shared.isAtRisk ?? false
+        let isAtRisk: Bool = RBManager.shared.isAtRisk
         var rows: [CVRow] = []
         let textVariantToken: String = isAtRisk ? "atRisk" : "nothing"
         let textRow: CVRow = CVRow(title: "informationController.mainMessage.\(textVariantToken).title".localized,
