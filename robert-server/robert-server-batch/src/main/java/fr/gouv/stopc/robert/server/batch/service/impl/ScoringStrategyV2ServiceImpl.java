@@ -167,7 +167,7 @@ public class ScoringStrategyV2ServiceImpl implements ScoringStrategyService {
 			if (np[k] > 0) {
 				kmax = k;
 				int dd = Math.min(np[k], configuration.getDeltas().length - 1);
-				double gamma = (qm[k] - configuration.getP0()) / configuration.getDeltas()[dd];
+				double gamma = (qm[k] - configuration.getP0()) / Double.parseDouble(configuration.getDeltas()[dd]);
 				double vrisk = (gamma <= 0.0) ? 0.0 : (gamma >= 1) ? 1.0 : gamma;
 				if (vrisk > 0) {
 					nbcontacts++;

@@ -1,0 +1,26 @@
+
+
+spring:
+  application:
+    name: robert-batch
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  cloud:
+    consul:
+      enabled: ${CONSUL_ENABLED:false}
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      scheme: ${CONSUL_SCHEME:http}
+      token: ${ROBERT_SERVER_CONSUL_ACL_TOKEN:token}
+      config:
+        enabled: ${CONSUL_CONFIG_ENABLED:false}
+        watch:
+          enabled: false
+    vault:
+      enabled: ${VAULT_ENABLED:false}
+      host: ${VAULT_HOST:localhost}
+      port: ${VAULT_PORT:8200}
+      token: ${VAULT_TOKEN:token}
+      scheme: ${VAULT_SCHEME:http}

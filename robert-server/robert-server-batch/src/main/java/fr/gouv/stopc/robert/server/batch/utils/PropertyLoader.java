@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 @Component
 public class PropertyLoader {
 
@@ -26,7 +28,7 @@ public class PropertyLoader {
 
     @Value("${robert.protocol.contagious-period}")
     private Integer contagiousPeriod;
- 
+
     @Value("${robert.scoring.scoring-algo-r0}")
     private Double r0ScoringAlgorithm;
 
