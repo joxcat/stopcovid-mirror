@@ -5,14 +5,12 @@ import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * Configuration class of the scoring algorithm
  *
  */
 @Getter
-@ToString
 @Setter
 @Component
 @ConfigurationProperties(prefix = "robert.scoring")

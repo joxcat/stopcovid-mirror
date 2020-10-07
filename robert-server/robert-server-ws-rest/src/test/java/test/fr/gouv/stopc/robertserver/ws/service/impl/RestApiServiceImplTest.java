@@ -35,8 +35,6 @@ import fr.gouv.stopc.robertserver.ws.vo.PushInfoVo;
 @TestPropertySource("classpath:application.properties")
 public class RestApiServiceImplTest {
 
-    private static final String SHOULD_NOT_FAIL = "It should not fail";
-
     @InjectMocks
     private RestApiServiceImpl restApiServiceImpl;
 
@@ -259,41 +257,8 @@ public class RestApiServiceImplTest {
 
         // Then
         verify(this.webClient, never()).post();
+
     }
-
-    //    @Test
-    //    public void testRegisterPushNotifShouldNotThrownAnExceptionEvenIfCallFail() {
-    //
-    //        // Given
-    //        PushInfoVo pushInfo = PushInfoVo.builder().build();
-    //
-    //        when(this.restTemplate.postForEntity(any(URI.class), any(PushInfoVo.class), any()))
-    //        .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
-    //
-    //        // When
-    //        this.restApiServiceImpl.registerPushNotif(pushInfo);
-    //
-    //        // Then
-    //        verify(this.restTemplate).postForEntity(any(URI.class), any(PushInfoVo.class), any());
-    //    }
-
-//    @Test
-//    public void testRegisterPushNotifShouldCallPushServerWhenPushInfoIsNotNull() {
-//
-//        try {
-//            // Given
-//            PushInfoVo pushInfo = PushInfoVo.builder().build();
-//
-//            // When
-//            this.restApiServiceImpl.registerPushNotif(pushInfo);
-//
-//            // Then
-//            verify(this.webClient, never()).post();
-//        } catch (Exception e) {
-//
-//            fail(SHOULD_NOT_FAIL);
-//        }
-//    }
 
     @Test
     public void testUnregisterPushNotifShouldNotCallPushServerWhenPushTokenIsNull() {
@@ -308,66 +273,4 @@ public class RestApiServiceImplTest {
         verify(this.webClient, never()).delete();
     }
 
-//    @Test
-//    public void testUnregisterPushNotifShouldNotCallPushServerWhenPushTokenIsEmpty() {
-//
-//        // Given
-//        String pushToken = "";
-//
-//        // When
-//        this.restApiServiceImpl.unregisterPushNotif(pushToken);
-//
-//        // Then
-//        verify(this.webClient, never()).delete();
-//    }
-//
-//    @Test
-//    public void testUnregisterPushNotifShouldCallPushServerWhenPushTokenIsNotEmpty() {
-//
-//        try {
-//            // Given
-//            String pushToken = "token";
-//
-//            // When
-//            this.restApiServiceImpl.unregisterPushNotif(pushToken);
-//
-//            // Then
-//            verify(this.webClient).delete();
-//
-//        } catch (Exception e) {
-//            fail("EEEEE = " + e);
-//        }
-//    }
-
-    //    @Test
-    //    public void testUnregisterPushNotifShouldCallPushServerThrownAnExceptionEvenIfCallFail() {
-    //
-    //        // Given
-    //        String pushToken = "token";
-    //
-    //        when(this.restTemplate.exchange(this.buildRegistertPushNotifURI(pushToken), HttpMethod.DELETE, null, Object.class))
-    //        .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
-    //
-    //
-    //        // When
-    //        this.restApiServiceImpl.unregisterPushNotif(pushToken);
-    //
-    //        // Then
-    //        verify(this.restTemplate).exchange(this.buildRegistertPushNotifURI(pushToken), HttpMethod.DELETE, null, Object.class);
-    //    }
-
-//    private URI buildRegistertPushNotifURI(String pushToken) {
-//
-//        Map<String, String> parameters = new HashMap<>();
-//        parameters.put("token", pushToken);
-//
-//        return UriComponentsBuilder.newInstance().scheme("http")
-//                .host(this.propertyLoader.getPushServerHost())
-//                .port(this.propertyLoader.getPushServerPort())
-//                .path(this.propertyLoader.getInternalPathPrefix())
-//                .path(this.propertyLoader.getPushApiVersion())
-//                .path(this.propertyLoader.getPushApiPath())
-//                .path(this.propertyLoader.getPushApiTokenPath())
-//                .build(parameters);
-//    }
 }
