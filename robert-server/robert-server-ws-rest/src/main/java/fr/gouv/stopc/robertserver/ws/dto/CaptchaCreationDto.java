@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Data
 @Builder
-public class CaptchaInternalCreationDto {
+public class CaptchaCreationDto {
     @JsonProperty("id")
     @NotNull
     private String captchaId;

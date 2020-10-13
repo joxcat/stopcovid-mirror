@@ -70,9 +70,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UnregisterControllerWsRestTest {
 
-    @Value("${controller.path.prefix}" + UriConstants.API_V1)
-    private String pathPrefixV1;
-
     @Value("${controller.path.prefix}" + UriConstants.API_V2)
     private String pathPrefixV2;
 
@@ -161,13 +158,6 @@ public class UnregisterControllerWsRestTest {
         verify(this.registrationService, never()).findById(ArgumentMatchers.any());
         verify(this.registrationService, never()).delete(ArgumentMatchers.any());
     }
-
-    /** Test the access for API V1, should not be used since API V2 */
-    @Test
-    public void testAccessV1() {
-        acceptOldEBIDValueEpochSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV1).path(UriConstants.UNREGISTER).build().encode().toUri());
-    }
-
     /** Test the access for API V2, should not be used since API V3 */
     @Test
     public void testAccessV2() {

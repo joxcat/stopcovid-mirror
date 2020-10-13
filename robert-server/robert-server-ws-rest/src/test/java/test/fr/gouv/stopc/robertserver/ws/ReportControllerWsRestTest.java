@@ -72,8 +72,6 @@ public class ReportControllerWsRestTest {
     @MockBean
     private IRestApiService restApiService;
 
-    @Value("${controller.path.prefix}" + UriConstants.API_V1)
-    private String pathPrefixV1;
 
     @Value("${controller.path.prefix}" + UriConstants.API_V2)
     private String pathPrefixV2;
@@ -240,12 +238,6 @@ public class ReportControllerWsRestTest {
         } catch (RobertServerException e) {
             fail(EXCEPTION_FAIL_MESSAGE);
         }
-    }
-
-    /** Test the access for API V1, should not be used since API V3 */
-    @Test
-    public void testAccessV1() {
-        reportContactHistorySucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV1).path(UriConstants.REPORT).build().encode().toUri());
     }
 
     /** Test the access for API V2, should not be used since API V3 */

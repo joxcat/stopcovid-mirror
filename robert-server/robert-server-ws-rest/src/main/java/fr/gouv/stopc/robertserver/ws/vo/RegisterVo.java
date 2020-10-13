@@ -20,6 +20,12 @@ public class RegisterVo {
   @NotNull
   @NotEmpty
   @ToString.Exclude
+  private String captchaId;
+
+  @JsonProperty(required = true)
+  @NotNull
+  @NotEmpty
+  @ToString.Exclude
   private String captcha;
 
   @JsonProperty(required = true)

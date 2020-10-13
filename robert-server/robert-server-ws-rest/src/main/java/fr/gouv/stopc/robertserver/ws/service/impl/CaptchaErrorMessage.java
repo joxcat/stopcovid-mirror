@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @Data
 @SuperBuilder
-public class CaptchaInternalErrorMessage  {
+public class CaptchaErrorMessage {
 
 	private HttpStatus httpStatus;
 

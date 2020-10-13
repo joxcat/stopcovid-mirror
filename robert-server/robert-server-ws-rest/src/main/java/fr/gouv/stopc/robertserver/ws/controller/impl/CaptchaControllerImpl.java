@@ -16,15 +16,15 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import fr.gouv.stopc.robertserver.ws.controller.ICaptchaController;
-import fr.gouv.stopc.robertserver.ws.dto.CaptchaInternalCreationDto;
+import fr.gouv.stopc.robertserver.ws.dto.CaptchaCreationDto;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
 import fr.gouv.stopc.robertserver.ws.utils.PropertyLoader;
-import fr.gouv.stopc.robertserver.ws.vo.CaptchaInternalCreationVo;
+import fr.gouv.stopc.robertserver.ws.vo.CaptchaCreationVo;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@ConditionalOnProperty("captcha.internal.gateway.enabled")
+@ConditionalOnProperty("captcha.gateway.enabled")
 public class CaptchaControllerImpl implements ICaptchaController {
 
     private final RestTemplate restTemplate;
@@ -38,21 +38,21 @@ public class CaptchaControllerImpl implements ICaptchaController {
     }
 
     @Override
-    public ResponseEntity<CaptchaInternalCreationDto> createCaptcha(
-            @Valid CaptchaInternalCreationVo captchaInternalCreationVo) throws RobertServerException {
+    public ResponseEntity<CaptchaCreationDto> createCaptcha(
+            @Valid CaptchaCreationVo captchaCreationVo) throws RobertServerException {
 
-        ResponseEntity<CaptchaInternalCreationDto> response = null;
+        ResponseEntity<CaptchaCreationDto> response = null;
         try {
             response = restTemplate.postForEntity(
                     UriComponentsBuilder.fromHttpUrl(
-                            this.propertyLoader.getCaptchaInternalHostname() + "/private/api/v1/captcha").build().toUri(),
-                    captchaInternalCreationVo,
-                    CaptchaInternalCreationDto.class);
+                            this.propertyLoader.getCaptchaHostname() + "/private/api/v1/captcha").build().toUri(),
+                    captchaCreationVo,
+                    CaptchaCreationDto.class);
             log.info("Captcha creation response: {}", response);
         } catch (RestClientException e) {
             log.error("Could not create captcha with type {} and locale {}; {}",
-                    captchaInternalCreationVo.getType(),
-                    captchaInternalCreationVo.getLocale(),
+                    captchaCreationVo.getType(),
+                    captchaCreationVo.getLocale(),
                     e.getMessage());
             return ResponseEntity.badRequest().build();
         }
@@ -76,7 +76,7 @@ public class CaptchaControllerImpl implements ICaptchaController {
 
         try {
             URI uri = UriComponentsBuilder.fromHttpUrl(
-                    this.propertyLoader.getCaptchaInternalHostname() + "/public/api/v1/captcha/{captchaId}." + (mediaType == "audio" ? "wav" : "png"))
+                    this.propertyLoader.getCaptchaHostname() + "/public/api/v1/captcha/{captchaId}." + (mediaType == "audio" ? "wav" : "png"))
                     .build(uriVariables);
 
             log.info("Getting captcha from URL: {}", uri);

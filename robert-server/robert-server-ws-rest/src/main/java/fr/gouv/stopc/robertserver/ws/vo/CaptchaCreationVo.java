@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @Data
 @Builder
-public class CaptchaInternalCreationVo {
+public class CaptchaCreationVo {
 
     @NotNull
     private String type;

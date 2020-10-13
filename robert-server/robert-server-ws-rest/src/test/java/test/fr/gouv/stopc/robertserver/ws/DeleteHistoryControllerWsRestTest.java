@@ -72,8 +72,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DeleteHistoryControllerWsRestTest {
 
-    @Value("${controller.path.prefix}" + UriConstants.API_V1)
-    private String pathPrefixV1;
 
     @Value("${controller.path.prefix}" + UriConstants.API_V2)
     private String pathPrefixV2;
@@ -172,13 +170,6 @@ public class DeleteHistoryControllerWsRestTest {
 
         // WHEN - THEN
         callWsAndAssertResponse(reg, this.requestBody, HttpStatus.OK, 2, 1);
-    }
-
-    /** Test the access for API V1, should not be used since API V3 */
-
-    @Test
-    public void testAccessV1() {
-        deleteHistoryWithExposedEpochsSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV1).path(UriConstants.DELETE_HISTORY).build().encode().toUri());
     }
 
     /** Test the access for API V2, should not be used since API V3 */

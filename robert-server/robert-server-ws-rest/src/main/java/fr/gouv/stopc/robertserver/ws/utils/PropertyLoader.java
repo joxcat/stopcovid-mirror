@@ -19,35 +19,16 @@ public class PropertyLoader {
      * @return the verification URL for the internal captcha service
      */
     @Value("${captcha.internal.verify.url}")
-    private String captchaInternalVerificationUrl;
+    private String captchaVerificationUrl;
 
     @Value("${captcha.internal.hostname}")
-    private String captchaInternalHostname;
+    private String captchaHostname;
 
     /**
      * @return the successful code from the verification by the internal captcha service
      */
     @Value("${captcha.internal.success.code}")
-    private String captchaInternalSuccessCode;
-
-    /**
-     * @return the verification URL for the captcha
-     */
-    @Value("${captcha.verify.url}")
-    private String captchaVerificationUrl;
-
-    /**
-     * @return the secret to be sent to the captcha server along with challenge response
-     */
-    @Value("${captcha.secret}")
-    private String captchaSecret;
-
-    /**
-     * @return the hostname of the site to check against the response from the captcha server
-     */
-    @Value("${captcha.hostname}")
-    private String captchaHostname;
-
+    private String captchaSuccessCode;
 
     @Value("${submission.code.server.host}")
     private String serverCodeHost;
