@@ -1,8 +1,8 @@
 //
 //  RBFiltering.swift
-//  StopCovid
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 05/06/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 05/06/2020 - for the TousAntiCovid project.
 //
 
 import Foundation

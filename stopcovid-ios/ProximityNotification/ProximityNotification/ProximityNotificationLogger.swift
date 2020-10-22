@@ -5,46 +5,50 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/06 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/06 - for the TousAntiCovid project
  */
 
 import Foundation
 import os.log
 
-enum ProximityNotificationLoggerLevel: Int {
+/// The logger level used in the logger.
+public enum ProximityNotificationLoggerLevel: Int {
     
-    case debug, info, warning, error, none
+    case debug, info, error, none
 }
 
 extension ProximityNotificationLoggerLevel: Comparable {
     
-    static func < (lhs: ProximityNotificationLoggerLevel, rhs: ProximityNotificationLoggerLevel) -> Bool {
+    public static func < (lhs: ProximityNotificationLoggerLevel, rhs: ProximityNotificationLoggerLevel) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
 }
 
 extension ProximityNotificationLoggerLevel: CustomStringConvertible {
     
-    var description: String {
+    /// The description to display the logger level.
+    public var description: String {
         switch self {
         case .debug: return "DEBUG"
         case .info: return "INFO"
-        case .warning: return "WARNING"
         case .error: return "ERROR"
         case .none: return ""
         }
     }
 }
 
-protocol ProximityNotificationLoggerProtocol {
+/// The logger protocol to build a custom logger.
+public protocol ProximityNotificationLoggerProtocol {
     
+    /// The minimum log level. The log level of a new log must be greater than it to be displayed.
     var minimumLogLevel: ProximityNotificationLoggerLevel { get set }
     
-    func log(logLevel: ProximityNotificationLoggerLevel,
-             _ message: @autoclosure () -> String,
-             file: String,
-             line: Int,
-             function: String)
+    /// Logs a new event with a message for a log level.
+    /// - Parameters:
+    ///   - logLevel: The log level of the log.
+    ///   - message: The message to log.
+    ///   - message: The log source.
+    func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: String)
 }
 
 class ProximityNotificationConsoleLogger: ProximityNotificationLoggerProtocol {
@@ -57,14 +61,14 @@ class ProximityNotificationConsoleLogger: ProximityNotificationLoggerProtocol {
     
     init() {}
     
-    func log(logLevel: ProximityNotificationLoggerLevel, _ message: () -> String, file: String, line: Int, function: String) {
+    func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: String) {
         guard logLevel != .none else { return }
         
         var logType: OSLogType = .default
         switch logLevel {
         case .debug:
             logType = .debug
-        case .info, .warning:
+        case .info:
             logType = .info
         case .error:
             logType = .error
@@ -80,16 +84,28 @@ class ProximityNotificationConsoleLogger: ProximityNotificationLoggerProtocol {
 }
 
 class ProximityNotificationLogger {
-        
+    
     private let logger: ProximityNotificationLoggerProtocol
-        
+    
     init(logger: ProximityNotificationLoggerProtocol) {
         self.logger = logger
     }
-
-    func log(logLevel: ProximityNotificationLoggerLevel, _ message: @autoclosure () -> String, file: String = #file, line: Int = #line, function: String = #function) {
+    
+    func debug(message: @autoclosure () -> String, source: String) {
+        log(logLevel: .debug, message: message(), source: source)
+    }
+    
+    func info(message: @autoclosure () -> String, source: String) {
+        log(logLevel: .info, message: message(), source: source)
+    }
+    
+    func error(message: @autoclosure () -> String, source: String) {
+        log(logLevel: .error, message: message(), source: source)
+    }
+    
+    private func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: String) {
         if logLevel >= logger.minimumLogLevel {
-            logger.log(logLevel: logLevel, message(), file: file, line: line, function: function)
+            logger.log(logLevel: logLevel, message: message(), source: source)
         }
     }
 }

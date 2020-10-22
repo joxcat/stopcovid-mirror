@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		97B698E72519FD6B002EF270 /* ProximityNotificationEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97B698E62519FD6B002EF270 /* ProximityNotificationEvent.swift */; };
 		AF114A6D248A695D00736059 /* TimestampedRSSIDataSet.csv in Resources */ = {isa = PBXBuildFile; fileRef = AF114A6C248A695D00736059 /* TimestampedRSSIDataSet.csv */; };
 		AF114A6F248E2EC700736059 /* ProximityFilterConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF114A6E248E2EC700736059 /* ProximityFilterConfiguration.swift */; };
 		AF114A71248E2F0E00736059 /* ProximityFilterOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF114A70248E2F0E00736059 /* ProximityFilterOutput.swift */; };
@@ -72,6 +73,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		97B698E62519FD6B002EF270 /* ProximityNotificationEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityNotificationEvent.swift; sourceTree = "<group>"; };
 		AF114A6C248A695D00736059 /* TimestampedRSSIDataSet.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TimestampedRSSIDataSet.csv; sourceTree = "<group>"; };
 		AF114A6E248E2EC700736059 /* ProximityFilterConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityFilterConfiguration.swift; sourceTree = "<group>"; };
 		AF114A70248E2F0E00736059 /* ProximityFilterOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityFilterOutput.swift; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 				AF848870246D8BD700117176 /* Cache.swift */,
 				AFB3938924630F8F003A7D58 /* ProximityInfo.swift */,
 				AFB3939C24630F90003A7D58 /* ProximityNotification.swift */,
+				97B698E62519FD6B002EF270 /* ProximityNotificationEvent.swift */,
 				AFB3938B24630F8F003A7D58 /* ProximityNotificationLogger.swift */,
 				AFB3938A24630F8F003A7D58 /* ProximityNotificationService.swift */,
 				AFB3939B24630F8F003A7D58 /* ProximityNotificationSettings.swift */,
@@ -316,6 +319,7 @@
 			files = (
 				AFB3939D24631533003A7D58 /* BluetoothCentralManager.swift in Sources */,
 				AFB3939F24631533003A7D58 /* BluetoothPeripheralManager.swift in Sources */,
+				97B698E72519FD6B002EF270 /* ProximityNotificationEvent.swift in Sources */,
 				AF401CBA247E65DB00CFDD4B /* RSSIClipper.swift in Sources */,
 				AFB393A124631533003A7D58 /* BluetoothProximityMetadata.swift in Sources */,
 				AFC9D3B3246B181A001B7F5B /* RiskComputer.swift in Sources */,

@@ -640,6 +640,7 @@ public class StatusControllerWsRestTest {
                 .permanentIdentifier(idA)
                 .atRisk(true)
                 .isNotified(false)
+                .latestRiskEpoch(currentEpoch - 10)
                 .lastStatusRequestEpoch(currentEpoch - 3).build();
 
         byte[][] reqContent = createEBIDTimeMACFor(idA, kA, currentEpoch);
@@ -674,6 +675,7 @@ public class StatusControllerWsRestTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().isAtRisk());
         assertNotNull(response.getBody().getTuples());
+        assertEquals(response.getBody().getRiskEpoch(), reg.getLatestRiskEpoch());
         assertTrue(reg.isNotified());
         assertTrue(currentEpoch - 3 < reg.getLastStatusRequestEpoch());
         verify(this.registrationService, times(2)).findById(idA);
@@ -867,8 +869,9 @@ public class StatusControllerWsRestTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
         assertEquals(true, response.getBody().isAtRisk());
+        assertEquals(currentEpoch - 8 , response.getBody().getRiskEpoch());
         assertNotNull(response.getBody().getTuples());
-        assertEquals(false, reg.isAtRisk());
+        assertEquals(true, reg.isAtRisk());
         assertEquals(true, reg.isNotified());
         verify(this.registrationService, times(2)).findById(idA);
         verify(this.registrationService, times(2)).saveRegistration(reg);
@@ -1048,7 +1051,7 @@ public class StatusControllerWsRestTest {
         assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
         assertEquals(true, response.getBody().isAtRisk());
         assertNotNull(response.getBody().getTuples());
-        assertEquals(false, reg.isAtRisk());
+        assertEquals(true, reg.isAtRisk());
         assertEquals(true, reg.isNotified());
         verify(this.registrationService, times(2)).findById(idA);
         verify(this.registrationService, times(2)).saveRegistration(reg);
@@ -1109,7 +1112,7 @@ public class StatusControllerWsRestTest {
         assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
         assertEquals(true, response.getBody().isAtRisk());
         assertNotNull(response.getBody().getTuples());
-        assertEquals(false, reg.isAtRisk());
+        assertEquals(true, reg.isAtRisk());
         assertEquals(true, reg.isNotified());
         verify(this.registrationService, times(2)).findById(idA);
         verify(this.registrationService, times(2)).saveRegistration(reg);
@@ -1185,7 +1188,7 @@ public class StatusControllerWsRestTest {
         assertEquals(currentEpoch, reg.getLastStatusRequestEpoch());
         assertEquals(true, response.getBody().isAtRisk());
         assertNotNull(response.getBody().getTuples());
-        assertEquals(false, reg.isAtRisk());
+        assertEquals(true, reg.isAtRisk());
         assertEquals(true, reg.isNotified());
         assertTrue(reg.getLastTimestampDrift() == Math.abs(timestampDelta) + 1 || reg.getLastTimestampDrift() == Math.abs(timestampDelta));
         verify(this.registrationService, times(2)).findById(idA);

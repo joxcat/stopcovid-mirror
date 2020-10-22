@@ -1,19 +1,19 @@
 xcassets:
   inputs:
-    - StopCovid/Resources/Assets/Images.xcassets
-    - StopCovid/Resources/Assets/Colors.xcassets
+    - TousAntiCovid/Resources/Assets/Images.xcassets
+    - TousAntiCovid/Resources/Assets/Colors.xcassets
   outputs:
     - templateName: swift4
-      output: StopCovid/Resources/Assets/Assets.swift
+      output: TousAntiCovid/Resources/Assets/Assets.swift
 ib:
   inputs:
-    - StopCovid/Application/UI
-    - StopCovid/Utils
+    - TousAntiCovid/Application/UI
+    - TousAntiCovid/Utils
   outputs:
     - templateName: scenes-swift4
-      output: StopCovid/Application/UI/StoryboardScenes.swift
+      output: TousAntiCovid/Application/UI/StoryboardScenes.swift
 fonts:
-  inputs: StopCovid/Resources/Fonts
+  inputs: TousAntiCovid/Resources/Fonts
   outputs:
     templateName: swift4
-    output: StopCovid/Resources/Fonts/Fonts.swift
+    output: TousAntiCovid/Resources/Fonts/Fonts.swift

@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/06 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/06 - for the TousAntiCovid project
  */
 
 import CoreBluetooth
@@ -52,7 +52,8 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
     }
     
     func start(proximityPayloadProvider: @escaping ProximityPayloadProvider) {
-        logger.log(logLevel: .debug, "start central manager")
+        logger.info(message: "start central manager",
+                    source: ProximityNotificationEvent.bluetoothCentralManagerStart.rawValue)
         self.proximityPayloadProvider = proximityPayloadProvider
         
         guard centralManager == nil else { return }
@@ -64,7 +65,8 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
     }
     
     func stop() {
-        logger.log(logLevel: .debug, "stop central manager")
+        logger.info(message: "stop central manager",
+                    source: ProximityNotificationEvent.bluetoothCentralManagerStop.rawValue)
         
         stopCentralManager()
         
@@ -85,7 +87,8 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
     }
     
     private func scanForPeripherals() {
-        logger.log(logLevel: .debug, "scan for peripherals")
+        logger.info(message: "scan for peripherals",
+                    source: ProximityNotificationEvent.bluetoothCentralManagerScanForPeripherals.rawValue)
         
         let options: [String: Any] = [CBCentralManagerScanOptionAllowDuplicatesKey: NSNumber(value: true)]
         centralManager?.scanForPeripherals(withServices: [serviceUUID], options: options)
@@ -93,12 +96,14 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
     
     private func connectIfNeeded(_ peripheral: CBPeripheral) {
         guard peripheral.state != .connected else {
-            logger.log(logLevel: .debug, "peripheral \(peripheral) already connected to central manager")
+            logger.info(message: "peripheral \(peripheral) already connected to central manager",
+                source: ProximityNotificationEvent.bluetoothCentralManagerPeripheralAlreadyConnected.rawValue)
             return
         }
         
         if peripheral.state != .connecting {
-            logger.log(logLevel: .debug, "central manager connecting to peripheral \(peripheral)")
+            logger.info(message: "central manager connecting to peripheral \(peripheral)",
+                source: ProximityNotificationEvent.bluetoothCentralManagerConnectingToPeripheral.rawValue)
             connectingPeripherals.insert(peripheral)
             centralManager?.connect(peripheral, options: nil)
             // Attempts to connect to a peripheral don’t time out, so manage it manually
@@ -116,7 +121,8 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
             
             self.dispatchQueue.async {
                 if peripheral.state != .connected {
-                    self.logger.log(logLevel: .debug, "central manager connection timeout to peripheral \(peripheral)")
+                    self.logger.error(message: "central manager connection timeout to peripheral \(peripheral)",
+                        source: ProximityNotificationEvent.bluetoothCentralManagerConnectionTimeoutToPeripheral.rawValue)
                     self.disconnectPeripheral(peripheral)
                 }
             }
@@ -130,16 +136,19 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
         peripheral.delegate = self
         if peripheral.services == nil {
             peripheral.discoverServices([serviceUUID])
-            logger.log(logLevel: .debug, "peripheral \(peripheral) discovering services")
+            logger.info(message: "peripheral \(peripheral) discovering services",
+                source: ProximityNotificationEvent.bluetoothCentralManagerStartDiscoveringPeripheralServices.rawValue)
         } else {
-            logger.log(logLevel: .debug, "peripheral \(peripheral) has already discovered services")
+            logger.info(message: "peripheral \(peripheral) has already discovered services",
+                source: ProximityNotificationEvent.bluetoothCentralManagerPeripheralServicesAlreadyDiscovered.rawValue)
             discoverCharacteristics(of: peripheral)
         }
     }
     
     private func discoverCharacteristics(of peripheral: CBPeripheral) {
         guard let service = peripheral.services?.first(where: { $0.uuid == serviceUUID }) else {
-            logger.log(logLevel: .debug, "service not found for peripheral \(peripheral)")
+            logger.error(message: "service not found for peripheral \(peripheral)",
+                source: ProximityNotificationEvent.bluetoothCentralManagerPeripheralServiceNotFound.rawValue)
             delegate?.bluetoothCentralManager(self, didNotFindServiceForPeripheralIdentifier: peripheral.identifier)
             disconnectPeripheral(peripheral)
             return
@@ -147,9 +156,11 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
         
         if service.characteristics == nil {
             peripheral.discoverCharacteristics([characteristicUUID], for: service)
-            logger.log(logLevel: .debug, "peripheral \(peripheral) discovering characteristics")
+            logger.info(message: "peripheral \(peripheral) discovering characteristics",
+                source: ProximityNotificationEvent.bluetoothCentralManagerStartDiscoveringServiceCharacteristics.rawValue)
         } else {
-            logger.log(logLevel: .debug, "peripheral \(peripheral) has already discovered characteristics")
+            logger.info(message: "peripheral \(peripheral) has already discovered characteristics",
+                source: ProximityNotificationEvent.bluetoothCentralManagerServiceCharacteristicsAlreadyDiscovered.rawValue)
             exchangeValue(for: peripheral, on: service)
         }
     }
@@ -157,26 +168,30 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
     private func exchangeValue(for peripheral: CBPeripheral, on service: CBService) {
         guard service.uuid == serviceUUID,
             let characteristic = service.characteristics?.first(where: { $0.uuid == characteristicUUID }) else {
-                logger.log(logLevel: .debug, "service and characteristic not found for peripheral \(peripheral)")
+                logger.error(message: "service and characteristic not found for peripheral \(peripheral)",
+                    source: ProximityNotificationEvent.bluetoothCentralManagerServiceCharacteristicNotFound.rawValue)
                 disconnectPeripheral(peripheral)
                 return
         }
         
         if peripheralsToWriteValue.contains(peripheral) {
             if let proximityPayload = proximityPayloadProvider?() {
-                logger.log(logLevel: .debug, "peripheral \(peripheral) write value")
+                logger.info(message: "peripheral \(peripheral) write value",
+                    source: ProximityNotificationEvent.bluetoothCentralManagerPeripheralWriteValue.rawValue)
                 let bluetoothProximityPayload = BluetoothProximityPayload(payload: proximityPayload,
                                                                           txPowerLevel: settings.txCompensationGain)
                 peripheral.writeValue(bluetoothProximityPayload.data, for: characteristic, type: .withResponse)
             }
         } else {
-            logger.log(logLevel: .debug, "peripheral \(peripheral) read value")
+            logger.info(message: "peripheral \(peripheral) read value",
+                source: ProximityNotificationEvent.bluetoothCentralManagerPeripheralReadValue.rawValue)
             peripheral.readValue(for: characteristic)
         }
     }
     
     private func cleanPeripheral(_ peripheral: CBPeripheral) {
-        logger.log(logLevel: .debug, "clean peripheral \(peripheral)")
+        logger.debug(message: "clean peripheral \(peripheral)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerCleanPeripheral.rawValue)
         
         peripheral.delegate = nil
         connectionTimeoutTimersForPeripheralIdentifiers[peripheral.identifier]?.invalidate()
@@ -186,7 +201,8 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
     }
     
     private func cleanPeripherals() {
-        logger.log(logLevel: .debug, "clean peripherals (\(connectingPeripherals.count))")
+        logger.debug(message: "clean peripherals (\(connectingPeripherals.count))",
+            source: ProximityNotificationEvent.bluetoothCentralManagerCleanAllPeripherals.rawValue)
         
         connectingPeripherals.forEach({ $0.delegate = nil })
         connectionTimeoutTimersForPeripheralIdentifiers.values.forEach({ $0.invalidate() })
@@ -196,10 +212,12 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
     }
     
     private func disconnectPeripheral(_ peripheral: CBPeripheral) {
-        logger.log(logLevel: .debug, "disconnect peripheral \(peripheral)")
+        logger.debug(message: "disconnect peripheral \(peripheral)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDisconnectPeripheral.rawValue)
         
         if peripheral.state == .connecting || peripheral.state == .connected {
-            logger.log(logLevel: .debug, "central manager cancelling connection to peripheral \(peripheral)")
+            logger.info(message: "central manager cancelling connection to peripheral \(peripheral)",
+                source: ProximityNotificationEvent.bluetoothCentralManagerCancellingConnectionToPeripheral.rawValue)
             centralManager?.cancelPeripheralConnection(peripheral)
             peripheral.delegate = nil
         } else {
@@ -215,7 +233,8 @@ class BluetoothCentralManager: NSObject, BluetoothCentralManagerProtocol {
 extension BluetoothCentralManager: CBCentralManagerDelegate {
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        logger.log(logLevel: .debug, "central manager did update state \(central.state.rawValue)")
+        logger.info(message: "central manager did update state \(central.state.rawValue)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidUpdateState.rawValue)
         
         disconnectPeripherals()
         stopCentralManager()
@@ -233,7 +252,8 @@ extension BluetoothCentralManager: CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, willRestoreState dict: [String: Any]) {
-        logger.log(logLevel: .debug, "central manager will restore state \(dict)")
+        logger.info(message: "central manager will restore state \(dict)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerWillRestoreState.rawValue)
         
         restoredPeripherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral]
     }
@@ -242,7 +262,8 @@ extension BluetoothCentralManager: CBCentralManagerDelegate {
                         didDiscover peripheral: CBPeripheral,
                         advertisementData: [String: Any],
                         rssi RSSI: NSNumber) {
-        logger.log(logLevel: .debug, "central manager did discover peripheral \(peripheral)")
+        logger.info(message: "central manager did discover peripheral \(peripheral)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidDiscoverPeripheral.rawValue)
         
         var bluetoothProximityPayload: BluetoothProximityPayload?
         if let advertisementDataServiceData = advertisementData[CBAdvertisementDataServiceDataKey] as? [CBUUID: Data],
@@ -271,7 +292,8 @@ extension BluetoothCentralManager: CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        logger.log(logLevel: .debug, "central manager did connect to peripheral \(peripheral)")
+        logger.info(message: "central manager did connect to peripheral \(peripheral)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidConnectToPeripheral.rawValue)
         
         // Invalidate the current timeout timer
         connectionTimeoutTimersForPeripheralIdentifiers[peripheral.identifier]?.invalidate()
@@ -281,13 +303,15 @@ extension BluetoothCentralManager: CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        logger.log(logLevel: .debug, "central manager did fail to connect to peripheral \(peripheral)")
+        logger.error(message: "central manager did fail to connect to peripheral \(peripheral)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidFailToConnectToPeripheral.rawValue)
         
         cleanPeripheral(peripheral)
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        logger.log(logLevel: .debug, "central manager did disconnect to peripheral \(peripheral)")
+        logger.info(message: "central manager did disconnect from peripheral \(peripheral)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidDisconnectFromPeripheral.rawValue)
         
         cleanPeripheral(peripheral)
     }
@@ -296,23 +320,27 @@ extension BluetoothCentralManager: CBCentralManagerDelegate {
 extension BluetoothCentralManager: CBPeripheralDelegate {
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        logger.log(logLevel: .debug, "peripheral \(peripheral) did discover services")
+        logger.info(message: "peripheral \(peripheral) did discover services",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidDiscoverPeripheralServices.rawValue)
         
         discoverCharacteristics(of: peripheral)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        logger.log(logLevel: .debug, "peripheral \(peripheral) did discover characteristics")
+        logger.info(message: "peripheral \(peripheral) did discover characteristics",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidDiscoverPeripheralCharacteristics.rawValue)
         
         exchangeValue(for: peripheral, on: service)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        logger.log(logLevel: .debug, "peripheral \(peripheral) did update value for characteristic")
+        logger.info(message: "peripheral \(peripheral) did update value for characteristic",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidUpdatePeripheralValueForCharacteristic.rawValue)
         
         if let readValue = characteristic.value,
             let bluetoothProximityPayload = BluetoothProximityPayload(data: readValue) {
-            logger.log(logLevel: .debug, "peripheral \(peripheral) did read characteristic")
+            logger.info(message: "peripheral \(peripheral) did read characteristic",
+                source: ProximityNotificationEvent.bluetoothCentralManagerDidReadPeripheralCharacteristic.rawValue)
             delegate?.bluetoothCentralManager(self,
                                               didReadCharacteristicForPeripheralIdentifier: peripheral.identifier,
                                               bluetoothProximityPayload: bluetoothProximityPayload)
@@ -322,13 +350,15 @@ extension BluetoothCentralManager: CBPeripheralDelegate {
     }
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-        logger.log(logLevel: .debug, "peripheral \(peripheral) did write value for characteristic")
-                
+        logger.info(message: "peripheral \(peripheral) did write value for characteristic",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidWriteValueToPeripheralForCharacteristic.rawValue)
+        
         disconnectPeripheral(peripheral)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
-        logger.log(logLevel: .debug, "peripheral \(peripheral) did modify services \(invalidatedServices)")
+        logger.info(message: "peripheral \(peripheral) did modify services \(invalidatedServices)",
+            source: ProximityNotificationEvent.bluetoothCentralManagerDidModifyServices.rawValue)
         
         if invalidatedServices.contains(where: { $0.uuid == serviceUUID }) {
             delegate?.bluetoothCentralManager(self, didNotFindServiceForPeripheralIdentifier: peripheral.identifier)

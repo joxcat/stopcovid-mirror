@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/06 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/06 - for the TousAntiCovid project
  */
 
 import Foundation
@@ -59,12 +59,15 @@ final public class ProximityNotificationService {
         return bluetoothProximityNotification.state
     }
     
-    /// Creates a proximity notification service with the specified settings and state change handler.
+    /// Creates a proximity notification service with the specified settings, a state change handler and a logger.
     /// - Parameters:
     ///   - settings: The proximity notification settings.
     ///   - stateChangedHandler: A handler called when proximity notification state has changed.
-    public init(settings: ProximityNotificationSettings, stateChangedHandler: @escaping StateChangedHandler) {
-        let logger = ProximityNotificationLogger(logger: ProximityNotificationConsoleLogger())
+    ///   - logger: The logger used in the service.
+    public init(settings: ProximityNotificationSettings,
+                stateChangedHandler: @escaping StateChangedHandler,
+                logger: ProximityNotificationLoggerProtocol) {
+        let logger = ProximityNotificationLogger(logger: logger)
         let dispatchQueue = DispatchQueue(label: UUID().uuidString)
         let centralManager = BluetoothCentralManager(settings: settings.bluetoothSettings,
                                                      dispatchQueue: dispatchQueue,
@@ -77,6 +80,15 @@ final public class ProximityNotificationService {
                                                                         dispatchQueue: dispatchQueue,
                                                                         centralManager: centralManager,
                                                                         peripheralManager: peripheralManager)
+    }
+    
+    /// Creates a proximity notification service with the specified settings, a state change handler and a console logger.
+    /// - Parameters:
+    ///   - settings: The proximity notification settings.
+    ///   - stateChangedHandler: A handler called when proximity notification state has changed.
+    public convenience init(settings: ProximityNotificationSettings,
+                            stateChangedHandler: @escaping StateChangedHandler) {
+        self.init(settings: settings, stateChangedHandler: stateChangedHandler, logger: ProximityNotificationConsoleLogger())
     }
     
     deinit {

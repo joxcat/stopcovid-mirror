@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  RBServerPushInfo.swift
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 08/04/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 08/04/2020 - for the TousAntiCovid project.
 //
 
 import Foundation

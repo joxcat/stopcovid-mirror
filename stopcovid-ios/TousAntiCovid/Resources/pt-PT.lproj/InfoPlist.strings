@@ -1,0 +1,13 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+//  InfoPlist.strings
+//  TousAntiCovid
+//
+//  Created by Lunabee Studio / Date - 29/05/2020 - for the TousAntiCovid project.
+//
+
+"NSBluetoothAlwaysUsageDescription" = "O TousAntiCovid precisa do Bluetooth para obter uma estimativa, com base em um modelo estatístico, da proximidade entre dois telefones.";
+"NSBluetoothPeripheralUsageDescription" = "O TousAntiCovid precisa do Bluetooth para obter uma estimativa, com base em um modelo estatístico, da proximidade entre dois telefones.";
+"NSCameraUsageDescription" = "O TousAntiCovid precisa acessar sua câmera para digitalizar o código QR.";

@@ -7,9 +7,10 @@ def projectPods
   pod 'PKHUD'
   pod 'SwiftGen'
   pod 'lottie-ios'
+  pod 'TagListView'
 end
 
-target 'StopCovid' do
+target 'TousAntiCovid' do
   projectPods
 end
 

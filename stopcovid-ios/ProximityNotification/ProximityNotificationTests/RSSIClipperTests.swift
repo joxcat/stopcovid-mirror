@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/06/03 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/06/03 - for the TousAntiCovid project
  */
 
 @testable import ProximityNotification

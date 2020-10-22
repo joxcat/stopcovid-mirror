@@ -34,4 +34,7 @@ public class PropertyLoader {
 
     @Value("${robert.scoring.batch-mode}")
     private String batchMode;
+
+    @Value("${robert.at-risk.notification.epoch.minimum-gap}")
+    private Integer atRiskNotificationEpochGap;
 }

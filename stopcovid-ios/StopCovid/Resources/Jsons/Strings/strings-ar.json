@@ -1,285 +1,0 @@
-{
-    "app.name": "StopCovid",
-    "onboarding.welcomeController.title": "مرحبًا",
-    "onboarding.welcomeController.mainMessage.title": "لنحمي أنفسنا ونحمي أقرباءنا ونحمي الآخرين",
-    "onboarding.welcomeController.mainMessage.subtitle": "مع تطبيق StopCovid، شارك في مكافحة الوباء عن طريق الحد من مخاطر انتقال العدوى.",
-    "onboarding.welcomeController.howDoesItWork": "أريد أن أشارك",
-    "onboarding.explanationsController.title": "الأمر في غاية البساطة!",
-    "onboarding.explanationsController.stepFollow.title": "أقوم بتفعيل التطبيق",
-    "onboarding.explanationsController.stepFollow.subtitle": "باستخدام تقنية Bluetooth الموجودة على هاتفك، يلتقط تطبيق StopCovid هواتف المستخدمين الآخرين الذين بقوا بجوارك.",
-    "onboarding.explanationsController.stepInform.title": "أبقى على اطلاع",
-    "onboarding.explanationsController.stepInform.subtitle": "يتم إعلامك في حال اقتربت من مستخدم تم اختباره إيجابيًا بمرض كوفيد-19.",
-    "onboarding.explanationsController.stepBeAware.title": "أحمي أقربائي والآخرين ",
-    "onboarding.explanationsController.stepBeAware.subtitle": "إذا خضعت لاختبار كوفيد-19 وكانت نتيجته إيجابية، يعطيك المختبر رمزًا يتوجب عليك مسحه آليًا أو إدخاله يدويًا لإخبار المستخدمين الذين صادفتهم، وذلك بسرية تامة.",
-    "onboarding.explanationsController.dataPrivacy": "المتابعة",
-    "onboarding.privacyController.title": "سرية المعلومات",
-    "onboarding.privacyController.accept": "القبول",
-    "onboarding.proximityController.title": "الكشف",
-    "onboarding.proximityController.mainMessage.title": "قبول \"قائمة الاتصال Bluetooth\"",
-    "onboarding.proximityController.mainMessage.subtitle": "StopCovid بحاجة لاستعمال تقنية Bluetooth الموجودة في هاتفك للعمل.\nلا يتم تبادل أو تسجيل أي بيانات لتحديد الموقع الجغرافي.",
-    "onboarding.proximityController.allowProximity": "القبول",
-    "onboarding.beAwareController.title": "الإشعار",
-    "onboarding.beAwareController.mainMessage.title": "تلقى إشعارًا في حال وجود خطر",
-    "onboarding.beAwareController.mainMessage.subtitle": "إذا كنت على مقربة من مستخدم تم اختباره إيجابيًا (مسافة مقدرة بأقل من متر واحد وخلال فترة 15 دقيقة على الأقل)، تتلقى إنذارًا.\n\nفي هذا الحالة، يفيدك StopCovid بتوصيات وزارة التضامن والصحة.",
-    "onboarding.beAwareController.allowNotifications": "قبول الإشعارات",
-    "onboarding.gesturesController.title": "لا تنسى!",
-    "onboarding.gesturesController.mainMessage.title": "الحركات الوقائية تدابير أساسية",
-    "onboarding.gesturesController.gesture1": "اغسل يديك بانتظام",
-    "onboarding.gesturesController.gesture2": "اسعل أو اعطس في مفصل مرفقك أو في محرمة ورقية",
-    "onboarding.gesturesController.gesture3": "استخدم محارم ذات الاستخدام الواحد ثم ارمها على الفور في سلة المهملات",
-    "onboarding.gesturesController.gesture4": "لا تصافح الآخرين للتحية أو تقبّلهم",
-    "onboarding.gesturesController.noted": "حسنًا 👍",
-    "onboarding.batteryController.title": "استعمال البطارية",
-    "onboarding.batteryController.mainMessage.title": "يحتاج StopCovid لتشغيل مستمر في الخلفية.",
-    "onboarding.batteryController.mainMessage.subtitle": "ليعمل StopCovid باستمرار في الخلفية، وافق على إيقاف تحسين عمل البطارية لتطبيق StopCovid وحسب. ",
-    "onboarding.batteryController.accept": "القبول",
-    "proximityController.tabBar.title": "الحماية",
-    "privacyController.tabBar.title": "سرية المعلومات",
-    "sharingController.tabBar.title": "مشاطرة المعلومات",
-    "sickController.title": "الإعلان عن نفسي",
-    "sickController.tabBar.title": "الإعلان عن نفسي",
-    "sickController.message.testedPositive.title": "هل خضعت لاختبار كوفيد-19 وكانت النتيجة إيجابية؟",
-    "sickController.message.testedPositive.subtitle": "تلقيت مع نتائج الفحص رمزًا أو حصلت على رمز من طبيبك: يرجى مسح الرمز آليًا أو إدخاله يدويًا ليتلقى الأشخاص الذين صادفتهم إنذارًا.\nاعتني بنفسك!",
-    "sickController.message.youHaveSymptoms.title": "تعتقد أن لديك أعراض",
-    "sickController.message.youHaveSymptoms.subtitle": "تريد أن تعرف أي سلوك تتبع؟\nهذا الاستبيان مخصص لتوجيهك.",
-    "sickController.button.flash": "امسح رمز QR",
-    "sickController.button.tap": "أدخل الرمز",
-    "sickController.button.myConditionInformation": "تعريفي بوضعي",
-    "sickController.button.myConditionInformation.url": 
-"https://orientation.covid19.etalab.gouv.fr/",
-    "sickController.button.callCenter": "إيجاد مركز الاتصال الذي أتبع له",
-    "sickController.button.recommendations": "قراءة التوصيات",
-    "sickController.button.recommendations.url": "https://mesconseilscovid.sante.gouv.fr/",
-    "sickController.message.cured.title": "إذا لم تكن مريضًا",
-    "sickController.message.cured.subtitle": "نتيجة اختبار كوفيد-19 الذي خضعت له سلبية. صرح بالنتيجة بالنقر على الخانة التالية:",
-    "sickController.button.cured": "أنا لست مريضًا",
-    "sickController.state.nothing.title": "لم تلتق بشخص تم اختباره إيجابياً",
-    "sickController.state.nothing.subtitle": "رغم ذلك، لا تنس الحركات الوقائية وتوصيات الصحة العامة",
-    "sickController.state.contact.title": "تعرضت في الأيام الأخيرة لشخص واحد على الأقل تم اختباره إيجابيًا",
-    "sickController.state.contact.subtitle": "راجع طبيبك وأخبره بأنك أشعرت بتعرضك لشخص معرض، واعزل نفسك.",
-    "sickController.state.date": "بتاريخ %@",
-    "sickController.state.deleteNotification": "حذف الإشعار",
-    "sickController.state.deleteNotification.alert.title": "هل تريد فعلًا حذف الإشعار؟",
-    "sharingController.title": "مشاطرة المعلومة",
-    "sharingController.mainMessage.title": "كلما ازداد عددنا باستعمال StopCovid كلما ازدادت حمايتنا",
-    "sharingController.mainMessage.subtitle": "نحن بحاجة لك: فتأثير هذا التطبيق لمكافحة مرض كوفيد-19 يعتمد عليك! نشكرك على مشاركة أقربائك.",
-    "sharingController.buttonAction": "أشارك التطبيق مع الغير",
-    "sharingController.appSharingMessage": "أنا أستعمل تطبيق StopCovid للمشاركة في المكافحة الجماعية ضد الوباء: لإعلام الآخرين وبقائي على اطلاع. بدورك حمّل التطبيق: https://bonjour.stopcovid.gouv.fr/",
-    "aboutController.title": "معلومات ذات صلة",
-    "aboutController.mainMessage.title": "بخصوص StopCovid",
-    "aboutController.mainMessage.subtitle": "هذا التطبيق من إنتاج فريق StopCovid تحت إشراف وزارة التضامن والصحة وأمانة الدولة المكلفة بالمسائل الرقمية.\nفريق StopCovid: المعهد الوطني للبحث في علوم الكمبيوتر والأتمتة (Inria)، الوكالة الوطنية لأمن نظم المعلومات (ANSSI)، Capgemini، Dassault Systèmes، المعهد الوطني للصحة والبحوث الطبية (Inserm)، Lunabee Studio، وزارة التضامن والصحة، Orange، وكالة الصحة العامة في فرنسا، Withings.",
-    "aboutController.webpage": "مزيد من المعلومات على موقع StopCovid",
-    "aboutController.webpageUrl": "https://bonjour.stopcovid.gouv.fr/stopcovid.html",
-    "aboutController.faq": "أسئلة وأجوبة",
-    "aboutController.faqUrl": "https://www.economie.gouv.fr/stopcovid-faq",
-    "aboutController.opinion": "أدلي برأيي",
-    "aboutController.opinionUrl": "https://voxusagers.numerique.gouv.fr/Demarches/2543?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=d209f7b2be0fca3de1df21eaeff49a97",
-    "aboutController.appVersion": "الإصدار %@ #%@",
-    "proximityController.title": "التقارب",
-    "proximityController.switch.title": "StopCovid",
-    "proximityController.mainMessage.subtitle": "تفعيل StopCovid يسمح بالبقاء على اطلاع وإعلام الآخرين بمخاطر نشر العدوى، وبالمشاركة بصورة فعالة في مكافحة مرض كوفيد-19.",
-    "proximityController.mainMessage.subtitle.off": "تفعيل StopCovid يسمح بالبقاء على اطلاع وإعلام الآخرين بمخاطر نشر العدوى، وبالمشاركة بصورة فعالة في مكافحة مرض كوفيد-19.\nيسعك في أي وقت تفعيل تطبيق StopCovid أو إيقافه.",
-    "proximityController.mainMessage.subtitle.on": "نشكرك على تفعيل تطبيق StopCovid. يمكنك مواصلة استعمال هاتفك بشكل عادي، لكن يرجى عدم إيقاف عمل Bluetooth!\nيسعك في أي وقت تفعيل تطبيق StopCovid أو إيقافه",
-    "proximityController.manageData": "إدارة بياناتي",
-    "proximityController.error.noBLE": "جهازك غير مزود بتقنية Bluetooth Low Energy، وهو بالتالي غير متوافق مع تطبيق StopCovid لسوء الحظ.",
-    "proximityController.error.noNotifications": "للتعرف على مخاطر التعرض لمرض كوفيد-19، يجب تفعيل الإشعارات في الإعدادات بالنقر على هذه الخانة 👉",
-    "proximityController.error.noBattery": "حتى يعمل تطبيق StopCovid بشكل سليم، يرجى الموافقة على تشغيله في الخلفية بالنقر على هذه الخانة 👉",
-    "proximityController.error.noBluetooth": "حتى يعمل تطبيق StopCovid بشكل سليم، يرجى الموافقة على تفعيل Bluetooth في الإعدادات بالنقر على هذه الخانة 👉",
-    "proximityController.error.noLocalisation": "حتى يعمل تطبيق StopCovid بشكل سليم، يرجى تفعيل الموقع (لتقنية Bluetooth) في الإعدادات بالنقر على هذه الخانة 👉",
-    "proximityController.error.noNotificationsOrBluetooth": "حتى يعمل تطبيق StopCovid بشكل سليم، يجب تفعيل Bluetooth والإشعارات في الإعدادات بالنقر على هذه الخانة 👉",
-    "proximityController.error.noNotificationsOrLocalisation": "حتى يعمل تطبيق StopCovid بشكل سليم، يجب تفعيل Bluetooth والإشعارات في الإعدادات بالنقر على هذه الخانة 👉",
-    "proximityController.error.noBluetoothOrLocalisation": "حتى يعمل تطبيق StopCovid بشكل سليم، يجب تفعيل الموقع (لتقنية Bluetooth) والإشعارات في الإعدادات بالنقر على هذه الخانة 👉",
-    "proximityController.error.noNotificationsOrBluetoothOrLocalisation": "حتى يعمل تطبيق StopCovid بشكل سليم، يجب تفعيل الموقع (لتقنية Bluetooth) والإشعارات في الإعدادات بالنقر على هذه الخانة 👉",
-    "proximityController.error.activateProximity": "تطبيق StopCovid لا يعمل. إضعط على هذا الشريط لتفعيله.",
-    "proximityController.switch.subtitle.activated": "يساهم StopCovid في حمايتك وحماية الآخرين",
-    "proximityController.switch.subtitle.deactivated": "لم تقم بعد بتفعيل تطبيق StopCovid",
-    "proximityService.error.scanError": "يستحيل تفعيل البحث عن Bluetooth Low Energy.",
-    "proximityService.error.captchaError": "يستحيل التحقق من أنك لست آلة.",
-    "informationController.title": "المعلومات",
-    "informationController.subtitle": "وزارة التضامن والصحة",
-    "informationController.mainMessage.atRisk.title": "لقد تعرضت لمستخدم تم اختباره إيجابيًا",
-    "informationController.mainMessage.atRisk.subtitle": "الموقف الذي يجب تبنيه:",
-    "informationController.mainMessage.nothing.title": "لم يجر إشعارك بأي تعرض لخطر",
-    "informationController.mainMessage.nothing.subtitle": "الموقف الذي يجب تبنيه:",
-    "informationController.step.isolate.atRisk.title": "%d. اعزل نفسك",
-    "informationController.step.isolate.atRisk.subtitle": "احرص على اتصالك بأقل عدد ممكن من الأشخاص. احترم بصرامة حركات الوقاية.",
-    "informationController.step.isolate.nothing.title": "%d. حركات الوقاية",
-    "informationController.step.isolate.nothing.subtitle": "احرص على احترام حركات الوقاية للحد من انتشار الفيروس",
-    "informationController.step.isolate.buttonTitle": "حركات الوقاية",
-    "informationController.step.beCareful.atRisk.title": "%d. تيقظ لظهور الأعراض",
-    "informationController.step.beCareful.atRisk.subtitle": "إذا ساورك أي شك، لا تترد بالقيام بالاستبيان التوجيهي أو بمراجعة طبيبك.",
-    "informationController.step.beCareful.nothing.title": "%d. تيقظ لظهور الأعراض",
-    "informationController.step.beCareful.nothing.subtitle": "إذا ساورك أي شك، راجع طبيبك خاصة إذا كنت تعتقد بوجود أعراض. ولا تتردد بالقيام بالاستبيان التوجيهي",
-    "informationController.step.beCareful.buttonTitle": "الاستبيان التوجيهي",
-    "informationController.step.appointment.title": "%d. اتصل بطبيبك عند الضرورة",
-    "informationController.step.appointment.subtitle": "راجع طبيبك الخاص عند الضرورة. إذا لم يكن لديك طبيب خاص، اتصل بالرقم التالي ليتم توجيهك إلى طبيب (الخدمة مجانية + المكالمة مجانية)",
-    "informationController.step.appointment.buttonTitle": "اتصل بالرقم 0 800 130 000",
-    "informationController.step.moreInfo.title": "%d. لمزيد من المعلومات",
-    "informationController.step.moreInfo.subtitle": "للحصول على توصيات مشخصة لصحتك وصحة أقربائك.",
-    "informationController.step.moreInfo.buttonTitle": "النصائح حول مرض كوفيد-19",
-    "informationController.step.moreInfo.url": "https://mesconseilscovid.sante.gouv.fr/",
-    "enterCodeController.title": "رمزك",
-    "enterCodeController.mainMessage.title": "يرجى إدخال الرمز الذي تلقيته مع نتائج الفحص.",
-    "enterCodeController.mainMessage.subtitle": "هذا الرمز عشوائي ولا يحتوي على أي معلومات شخصية، وهو صالح لمدة 60 دقيقة فقط.",
-    "enterCodeController.button.validate": "التأكيد",
-    "enterCodeController.textField.placeholder": "أدخل الرمز هنا",
-    "enterCodeController.noCodeEnteredAlert.message": "عليك إدخال الرمز للمضي قدمًا",
-    "scanCodeController.explanation": "قرّب هاتفك من رمز QR الوارد على نتائج المختبر (رمز مغفل لا يحتوي على أي معلومات شخصية)",
-    "common.about": "معلومات ذات صلة",
-    "common.delete": "الحذف",
-    "common.keep": "الاحتفاظ",
-    "common.restart": "إعادة التشغيل",
-    "common.confirm": "التأكيد",
-    "common.error.callImpossible": "لا يمكنك إجراء اتصال بهذا الجهاز",
-    "common.ok": "حسنًا",
-    "common.cancel": "الإلغاء",
-    "common.yes": "نعم",
-    "common.no": "لا",
-    "common.tryAgain": "حاول مجددًا",
-    "common.needCameraAccessToScan": "يحتاج التطبيق للوصول إلى آلة التصوير في هاتفك لمسح رمز QR.",
-    "common.needLocalisationAccessToScan": "يحتاج نظام Android للوصول إلى مكان تواجد هذا الجهاز. لن يستعمل StopCovid غير كشف الهواتف الموجودة في محيطه بواسطة Bluetooth، دون تحديد الموقع الجغرافي بتاتًا. اضغط على الإعدادات للإدلاء بقبولك",
-    "common.settings": "الإعدادات",
-    "common.permissionsNeeded": "رسالة مهمة",
-    "common.readMore": "اكتشف المزيد",
-    "common.close": "الإغلاق",
-    "common.today": "اليوم",
-    "common.yesterday": "البارحة",
-    "common.daysAgo": "منذ %d أيام",
-    "common.iDontKnow": "لا أدري",
-    "common.send": "الإرسال",
-    "common.dontSend": "عدم الإرسال",
-    "common.warning": "انتبه",
-    "common.error": "خطأ",
-    "common.error.internet": "تأكد من اتصالك بالانترنت وحاول مرة أخرى",
-    "common.error.server": "StopCovid ضحية نجاحه. نشكر الأعداد الكبيرة من المستخدمين الذين ثبتوا التطبيق! يرجى المحاولة بعد دقائق.",
-    "common.error.needRegister": "يجب عليك التسجيل للقيام بهذه العملية",
-    "accessibility.back.label": "الرجوع",
-    "accessibility.onboarding.explanations.step1": "أولًا",
-    "accessibility.onboarding.explanations.step2": "ثانيًا",
-    "accessibility.onboarding.explanations.step3": "ثالثًا",
-    "accessibility.hint.onboarding.back.label": "العودة وراءً",
-    "accessibility.hint.onboarding.bottomButton": "المتابعة",
-    "accessibility.hint.proximity.alert.touchToGoToSettings.ios": "استعمل هذا الزر للانتقال إلى التعديلات",
-    "accessibility.hint.sick.qrCode.enterCodeOnNextButton": "يتطلب هذا الأمر استعمال آلة التصوير. يسعك استعمال الزر التالي لإدخال الرمز يدويًا",
-    "accessibility.hint.proximity.buttonDescription": "زر تفعيل تطبيق StopCovid",
-    "accessibility.hint.proximity.buttonState.activated": "تم التفعيل!",
-    "accessibility.hint.proximity.buttonState.deactivated": "توقف التفعيل!",
-    "captchaController.mainMessage.title": "لأمان التطبيق، يرجى إثبات أنك إنسان",
-    "captchaController.mainMessage.subtitle": "من خلال الإجابة على هذه الأسئلة",
-    "captchaController.mainMessage.action": "اضغط على صورة",
-    "notification.proximityServiceRunning.title": "StopCovid قيد العمل حاليًا",
-    "notification.proximityServiceRunning.message": "نشكر مشاركتك في مكافحة انتشار مرض كوفيد-19!",
-    "notification.channel.title": "StopCovid قيد العمل حاليًا",
-    "notification.channel.atRisk.title": "خطر التعرض لمرض كوفيد-19",
-    "notification.atRisk.title": "خطر التعرض لمرض كوفيد-19",
-    "notification.atRisk.message": "في الأيام القليلة الماضية، صادفت شخصًا تم اختباره إيجابيًا بمرض كوفيد-19. إذا كنت قاصرًا، عليك مصارحة والديك أو أولياء أمرك. اضغط هنا لمعرفة ماذا تفعل.",
-    "manageDataController.title": "بياناتي",
-    "manageDataController.eraseLocalHistory.title": "بياناتي على هذا الهاتف",
-    "manageDataController.eraseLocalHistory.subtitle": "ستمحو هذه العملية جميع معلومات \"قائمة الاتصال Bluetooth\" المعثور عليها على هاتفك",
-    "manageDataController.eraseLocalHistory.button": "محوها عن هاتفي",
-    "manageDataController.eraseLocalHistory.success": "نجح محو البيانات",
-    "manageDataController.eraseLocalHistory.confirmationDialog.title": "التأكيد",
-    "manageDataController.eraseLocalHistory.confirmationDialog.message": "هل تؤكد أنك تريد محو كامل الجدول الزمني بخصوص \"قائمة الاتصال Bluetooth\" المعثور عليها حتى الآن؟ هذه الخطوة لا رجعة فيها. ",
-    "manageDataController.eraseRemoteContact.title": "بياناتي على الخادم",
-    "manageDataController.eraseRemoteContact.subtitle": "ستمحو هذه العملية تعريفات اتصالك الشخصية التي تبادلتها مع هواتف أخرى وتم تحميلها على الخادم",
-    "manageDataController.eraseRemoteContact.button": "محوها عن الخادم",
-    "manageDataController.eraseRemoteContact.success": "نجح محو البيانات",
-    "manageDataController.eraseRemoteContact.confirmationDialog.title": "التأكيد",
-    "manageDataController.eraseRemoteContact.confirmationDialog.message": "هذه الخطوة لا رجعة فيها. هل تؤكد أنك تريد محو تعريفات اتصالك المؤقتة من الخادم؟",
-    "manageDataController.eraseRemoteAlert.title": "إنذاراتي",
-    "manageDataController.eraseRemoteAlert.subtitle": "حين تصادف أشخاصًا تم اختبارهم إيجابيًا، تتلقى إنذارًا. انتبه: ستمحو هذه العملية جميع إنذاراتك.",
-    "manageDataController.eraseRemoteAlert.button": "محو إنذاراتي",
-    "manageDataController.eraseRemoteAlert.success": "نجح محو الإنذارات",
-    "manageDataController.eraseRemoteAlert.confirmationDialog.title": "انتبه",
-    "manageDataController.eraseRemoteAlert.confirmationDialog.message": "هذه الخطوة لا رجعة فيها. هل تؤكد أنك تريد محو جميع إنذاراتك؟",
-    "manageDataController.quitStopCovid.title": "مغادرة تطبيق StopCovid",
-    "manageDataController.quitStopCovid.subtitle": "يسعك في أي وقت التوقف عن استعمال تطبيق StopCovid ومحو جميع المعلومات الخاصة بك.",
-    "manageDataController.quitStopCovid.button": "إلغاء التسجيل",
-    "manageDataController.quitStopCovid.success": "جميع المعلومات تم محوها",
-    "manageDataController.quitStopCovid.confirmationDialog.title": "انتبه",
-    "manageDataController.quitStopCovid.confirmationDialog.message": "هذه الخطوة لا رجعة فيها. هل تؤكد أنك تريد مغادرة StopCovid؟",
-    "symptomsOriginController.title": "الأعراض",
-    "symptomsOriginController.explanation.title": "يرجى توضيح الأعراض الأولى التي ظهرت لديك",
-    "symptomsOriginController.explanation.subtitle": "هذا الأمر من شأنه تقييم مدة إصابتك ",
-    "symptomsOriginController.noSymptoms": "لا أشكو من أي أعراض",
-    "sendHistoryController.title": "إرسال الجدول الزمني",
-    "sendHistoryController.mainMessage.title": "لإنقاذ الأرواح، شارك في كفاح المواطنين ضد مرض كوفيد-19",
-    "sendHistoryController.mainMessage.subtitle": "من خلال مشاطرتك \"قائمة الاتصال Bluetooth\" بما فيها من معلومات خاصة مغفلة، يمكنك الإسهام في كسر سلاسل تنقل الوباء وإنقاذ الأرواح.\n\nبإرسالي هذه المعلومات، أوافق على أن يحتفظ تطبيق StopCovidبها على الخادم خلال فترة 14 يومًا.",
-    "sendHistoryController.dontSend.alert.message": "خيارك نهائي. هل تؤكد أنك لا تريد إرسال \"قائمة الاتصال Bluetooth\" الخاصة بك؟",
-    "callCenterController.title": "مراكز الاتصال",
-    "callCenterController.phoneNumbers": "أرقام الهاتف",
-    "callCenterController.header.title": "في حالة الطوارئ",
-    "callCenterController.header.subtitle": "اتصل بالرقم 15",
-    "callCenterController.header.emergenciesPhoneNumber": "15",
-    "onboarding.proximityController.allowProximity.warning": "انتبه: سيطلب نظام Android منك الوصول إلى مكان تواجد هذا الجهاز. لن يستعمل StopCovid غير كشف الهواتف الموجودة في محيطه بواسطة Bluetooth، دون تحديد الموقع الجغرافي بتاتًا",
-    "common.understand": "موافق",
-    "onboarding.gesturesController.gesture5": "تجنب لمس وجهك",
-    "onboarding.gesturesController.gesture6": "احتفظ بمسافة لا تقل عن متر 1 بينك وبين الآخرين",
-    "common.bravo": "مفعل",
-    "proximityController.button.activateProximity": "تفعيل StopCovid",
-    "proximityController.button.deactivateProximity": "توقيف عمل StopCovid",
-    "scanCodeController.camera.authorizationNeeded.title": "الموافقة ضرورية",
-    "scanCodeController.camera.authorizationNeeded.message": "لقد رفضت أن تأذن باستخدام آلة التصوير. لمسح رمز QR، يجب الإدلاء بموافقتك في تعديلات جهاز iPhone.",
-    "notification.channel.error.title": "هناك خطأ",
-    "notification.error.title": "يرجى إعادة تشغيل StopCovid",
-    "notification.error.message": "ظهر خطأ خلال استعمال StopCovid. يجب إعادة تشغيل التطبيق.",
-    "sickController.sick.title": "شكرًا",
-    "sickController.sick.mainMessage.title": "اعتني بنفسك!",
-    "sickController.sick.mainMessage.subtitle": "في ما يلي التوصيات الصحية\n\nراجع طبيبك الخاص إذا ساورك أي شك حول تطور المرض. إذا لم يكن لديك طبيب خاص، اتصل بالرقم التالي ليتم توجيهك إلى طبيب (الخدمة مجانية + المكالمة مجانية).\n\n إذا واجهتني صعوبات في التنفس، اتصل على الفور بالرقم 15 (أو بالرقم 114 للأصماء أو ضعاف السمع).",
-    "enterCodeController.alert.invalidCode.title": "الرمز غير صحيح",
-    "enterCodeController.alert.invalidCode.message": "الرمز المسجل غير صحيح. حاول مرة أخرى.",
-    "sendHistoryController.alert.invalidCode.title": "الرمز غير صحيح",
-    "sendHistoryController.alert.invalidCode.message": "الرمز المسجل غير صحيح. حاول مرة أخرى.",
-    "callCenter.phoneNumber": "0800130000",
-    "onboarding.noBleController.title": "رقم الهاتف غير مناسب",
-    "onboarding.noBleController.mainMessage.title": "تطبيق StopCovid لا يمكن تشغيله على هاتفك الذي لا يعمل كليًا بتقنية Bluetooth Low Energy",
-    "onboarding.noBleController.mainMessage.subtitle": "رغم ذلك، يمكنك مكافحة مرض كوفيد-19 من خلال مشاركة هذا التطبيق. فكلما توسع استعماله، ازدادت فعاليته.\nعرف أقرباءك وعلاقاتك بها!",
-    "onboarding.noBleController.accept": "مشاركة التطبيق",
-    "onboarding.noBleController.infos": "الهواتف الذكية المتوافقة",
-    "onboarding.noBleController.infosUrl": "https://app.stopcovid.gouv.fr/json/version-23/devices.html",
-    "common.error.unauthorized": "ليست لديك الموافقات المطلوبة لتنفيذ هذا الإجراء.",
-    "common.error.unknown": "هناك خطأ غير معرّف",
-    "common.error.proximityUnknown": "هناك خطأ Bluetooth غير معرّف.",
-    "common.error.robertUnknown": "هناك خطأ ROBERT غير معرّف.",
-    "common.error.robertNoEbidForEpoch": "يستحيل إيجاد تعريف بالتوقيت على هاتفك.",
-    "common.error.robertNoEbid": "يستحيل إيجاد تعريف.",
-    "common.error.keystoreNoKey": "لم يعثر على أي مفتاح على هاتفك.",
-    "common.error.decryptFail": "يستحيل فك تشفير المفتاح المسجل.",
-    "common.error.bleAdvertiser": "فشل إعلان Bluetooth. حاول مرة أخرى أو أعد تشغيل هاتفك.",
-    "common.error.bleScanner": "فشل المسح Bluetooth. حاول مرة أخرى أو أعد تشغيل هاتفك.",
-    "common.error.proximityNotification": "فشل إصدار إشعار Bluetooth. حاول مرة أخرى أو أعد تشغيل هاتفك.",
-    "proximityController.error.bluetoothOff": "عليك تفعيل تقنية Bluetooth ليعمل تطبيق StopCovid",
-    "onboarding.gesturesController.gesture7": "يجب ارتداء القناع حين لا يمكن احترام مسافة 1 متر",
-    "notification.channel.upgrade.title": "التحديث",
-    "notification.upgrade.title": "التحديث",
-    "notification.upgrade.message": "StopCovid بحاجة لك: يرجى تشغيل التطبيق، فمن الضروري تحديث StopCovid لضمان عملها السليم.",
-    "common.error.clockNotAligned.title": "يرجى استخدام الساعة التلقائية",
-    "common.error.clockNotAligned.message": "توقيت هاتفك ليس مضبوطًا. حفاظًا على سلامتك، لا يمكن لـStopCovid أن تعمل بشكل سليم مع توقيت خاطئ.",
-    "captchaController.title": "فحص المعلومات",
-    "captchaController.mainMessage.image.title": "يرجى في ما بعد إدخال ما تراه من نص في الصورة ",
-    "captchaController.mainMessage.image.subtitle": "هذا الإجراء يسمح بتأمين الوصول إلى StopCovid.",
-    "captchaController.mainMessage.audio.title": "يرجى في ما بعد إدخال ما تسمعه من ألفاظ",
-    "captchaController.mainMessage.audio.subtitle": "هذا الإجراء يسمح بتأمين الوصول إلى StopCovid.",
-    "captchaController.textField.image.placeholder": "أدخل النص البصري",
-    "captchaController.textField.audio.placeholder": "أدخل ما تسمعه",
-    "captchaController.button.title": "التأكيد",
-    "captchaController.alert.noAnswer.title": "انتبه",
-    "captchaController.alert.noAnswer.message": "من أجل التأكيد، يرجى إدخال الإجابة.",
-    "captchaController.generate.image": "عرض صورة أخرى",
-    "captchaController.generate.sound": "إصدار صوت آخر",
-    "captchaController.switchToImage": "استعمال النسخة البصرية",
-    "captchaController.switchToAudio": "استعمال النسخة السمعية",
-    "accessibility.hint.captcha.image": "صورة تمثل حروف التحقق",
-    "accessibility.hint.captcha.audio.button.play": "استماع حروف التحقق السمعية",
-    "accessibility.hint.captcha.audio.button.pause": "إيقاف قراءة حروف التحقق السمعية",
-    "captchaController.alert.invalidCode.title": "انتبه",
-	"captchaController.alert.invalidCode.message": "الرمز الذي تم إدخاله غير صالح.",
-	"proximityController.error.noBackgroundAppRefresh" : "التحديث في الخلفية مطلوب. إضغط على هذا الشريط لتفعيله.",
-	
-    "notification.error.connectivity": "توقف StopCovid لأنه يتطلب بلوتوث. لا تنس تنشيط StopCovid مرة أخرى عند توفر البلوتوث.",
-    "common.retry": "أعد المحاولة",
-    
-    "notification.proximityServiceNotRunning.title" : "StopCovid is not activated",
-    "notification.proximityServiceNotRunning.message" : "StopCovid is not activated for now, we recommend to activate it before meeting with other persons. And thank you for being a part of the fight against the spread of COVID-19!"
-
-}

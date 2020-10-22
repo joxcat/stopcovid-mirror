@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  RBServerRegisterBodyV3.swift
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 12/06/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 12/06/2020 - for the TousAntiCovid project.
 //
 
 import Foundation

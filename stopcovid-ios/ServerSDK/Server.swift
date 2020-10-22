@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  Server.swift
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 23/04/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 23/04/2020 - for the TousAntiCovid project.
 //
 
 import Foundation
@@ -29,6 +29,9 @@ public final class Server: NSObject, RBServer {
         let backgroundConfiguration: URLSessionConfiguration = URLSessionConfiguration.background(withIdentifier: "fr.gouv.stopcovid.ios.ServerSDK")
         backgroundConfiguration.timeoutIntervalForRequest = ServerConstant.timeout
         backgroundConfiguration.timeoutIntervalForResource = ServerConstant.timeout
+        backgroundConfiguration.waitsForConnectivity = true
+        backgroundConfiguration.sessionSendsLaunchEvents = true
+        backgroundConfiguration.shouldUseExtendedBackgroundIdleMode = true
         return URLSession(configuration: backgroundConfiguration, delegate: self, delegateQueue: .main)
     }()
     private var receivedData: [String: Data] = [:]
@@ -420,13 +423,17 @@ extension Server {
     private func processRequest(url: URL, method: Method, body: RBServerBody, completion: @escaping (_ result: Result<Data, Error>) -> ()) {
         do {
             let bodyData: Data = try body.toData()
-            let requestId: String = UUID().uuidString
+            let requestId: String = url.lastPathComponent
+            guard completions[requestId] == nil else {
+                completion(.failure(NSError.svLocalizedError(message: "A request for \"\(requestId)\" is already being treated", code: 0)))
+                return
+            }
             completions[requestId] = completion
             var request: URLRequest = URLRequest(url: url)
             request.httpMethod = method.rawValue
             request.setValue("application/json", forHTTPHeaderField: "Content-type")
             request.httpBody = bodyData
-            let task: URLSessionDataTask = session.dataTask(with: request)
+            let task: URLSessionDownloadTask = session.downloadTask(with: request)
             task.taskDescription = requestId
             task.resume()
         } catch {
@@ -436,24 +443,7 @@ extension Server {
     
 }
 
-extension Server: URLSessionDelegate, URLSessionDataDelegate {
-    
-    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        let requestId: String = dataTask.taskDescription ?? ""
-        guard let completion = completions[requestId] else { return }
-        DispatchQueue.main.async {
-            if dataTask.response?.svIsError == true {
-                let statusCode: Int = dataTask.response?.svStatusCode ?? 0
-                let message: String? = data.isEmpty ? "No logs received from the server" : String(data: data, encoding: .utf8)
-                completion(.failure(NSError.svLocalizedError(message: "Uknown error (\(statusCode)). (\(message ?? "N/A"))", code: statusCode)))
-                self.completions[requestId] = nil
-            } else {
-                var receivedData: Data = self.receivedData[requestId] ?? Data()
-                receivedData.append(data)
-                self.receivedData[requestId] = receivedData
-            }
-        }
-    }
+extension Server: URLSessionDelegate, URLSessionDownloadDelegate {
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let requestId: String = task.taskDescription ?? ""
@@ -472,6 +462,23 @@ extension Server: URLSessionDelegate, URLSessionDataDelegate {
                 }
             }
             self.completions[requestId] = nil
+        }
+    }
+    
+    public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        let requestId: String = downloadTask.taskDescription ?? ""
+        guard let completion = completions[requestId] else { return }
+        guard let data = try? Data(contentsOf: location) else { return }
+        try? FileManager.default.removeItem(at: location)
+        DispatchQueue.main.async {
+            if downloadTask.response?.svIsError == true {
+                let statusCode: Int = downloadTask.response?.svStatusCode ?? 0
+                let message: String? = data.isEmpty ? "No logs received from the server" : String(data: data, encoding: .utf8)
+                completion(.failure(NSError.svLocalizedError(message: "Uknown error (\(statusCode)). (\(message ?? "N/A"))", code: statusCode)))
+                self.completions[requestId] = nil
+            } else {
+                self.receivedData[requestId] = data
+            }
         }
     }
     

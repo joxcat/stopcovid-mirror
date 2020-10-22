@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  NSError+STExtension.swift
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 18/02/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 18/02/2020 - for the TousAntiCovid project.
 //
 
 import Foundation

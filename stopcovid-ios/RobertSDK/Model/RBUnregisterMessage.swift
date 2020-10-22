@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  RBUnregisterMessage.swift
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 29/04/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 29/04/2020 - for the TousAntiCovid project.
 //
 
 import UIKit

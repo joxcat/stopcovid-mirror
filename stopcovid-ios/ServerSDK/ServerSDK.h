@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  ServerSDK.h
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 01/06/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 01/06/2020 - for the TousAntiCovid project.
 //
 
 #import <Foundation/Foundation.h>

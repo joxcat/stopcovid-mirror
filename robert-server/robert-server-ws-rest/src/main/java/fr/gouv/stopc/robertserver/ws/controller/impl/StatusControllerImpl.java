@@ -180,8 +180,8 @@ public class StatusControllerImpl implements IStatusController {
 		// Step #3: Set UserNotified to true if at risk
 		// If was never notified and batch flagged a risk, notify
 		// and remember last exposed epoch as new starting point for subsequent risk notifications
+		// The status atRisk will be reinitialized by the batch
 		if (atRisk) {
-			record.setAtRisk(false);
 			record.setNotified(true);
 		}
 
@@ -190,6 +190,7 @@ public class StatusControllerImpl implements IStatusController {
 				.atRisk(atRisk)
 				.config(getClientConfig())
 				.tuples(Base64.encode(tuples))
+				.riskEpoch(record.getLatestRiskEpoch())
 				.build();
 
 		// Save changes to the record

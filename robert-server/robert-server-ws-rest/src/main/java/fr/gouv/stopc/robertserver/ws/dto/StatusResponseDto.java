@@ -2,14 +2,13 @@ package fr.gouv.stopc.robertserver.ws.dto;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,4 +27,6 @@ public class StatusResponseDto {
     private long lastExposureTimeframe;
 
     private String message;
+
+    private int riskEpoch;
 }

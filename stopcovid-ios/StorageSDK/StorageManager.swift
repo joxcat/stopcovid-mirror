@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  StorageManager.swift
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 27/04/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 27/04/2020 - for the TousAntiCovid project.
 //
 
 import UIKit
@@ -25,6 +25,7 @@ public final class StorageManager: RBStorage {
         case lastExposureTimeFrame
         case lastStatusRequestDate
         case lastStatusReceivedDate
+        case lastStatusErrorDate
         case lastRiskReceivedDate
         case isSick
         case positiveToSymptoms
@@ -222,6 +223,21 @@ public final class StorageManager: RBStorage {
         return Date(timeIntervalSince1970: timestamp)
     }
     
+    // MARK: - Status: last status error date -
+    public func saveLastStatusErrorDate(_ date: Date?) {
+        if let date = date {
+            keychain.set("\(date.timeIntervalSince1970)", forKey: KeychainKey.lastStatusErrorDate.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+        } else {
+            keychain.delete(KeychainKey.lastStatusErrorDate.rawValue)
+        }
+        notifyStatusDataChanged()
+    }
+    
+    public func lastStatusErrorDate() -> Date? {
+        guard let timestampString = keychain.get(KeychainKey.lastStatusErrorDate.rawValue), let timestamp = Double(timestampString) else { return nil }
+        return Date(timeIntervalSince1970: timestamp)
+    }
+    
     // MARK: - Status: last risk received date -
     public func saveLastRiskReceivedDate(_ date: Date?) {
         if let date = date {
@@ -284,6 +300,7 @@ public final class StorageManager: RBStorage {
             }
         }
         deleteDb(includingFile: includingDBKey)
+        notifyStatusDataChanged()
     }
     
     private func deleteDb(includingFile: Bool) {

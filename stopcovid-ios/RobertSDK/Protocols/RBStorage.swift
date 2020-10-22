@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  RBStorage.swift
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 27/04/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 27/04/2020 - for the TousAntiCovid project.
 //
 
 import Foundation
@@ -58,6 +58,10 @@ public protocol RBStorage {
     // MARK: - Status: last status received date -
     func saveLastStatusReceivedDate(_ date: Date?)
     func lastStatusReceivedDate() -> Date?
+    
+    // MARK: - Status: last status error date -
+    func saveLastStatusErrorDate(_ date: Date?)
+    func lastStatusErrorDate() -> Date?
     
     // MARK: - Status: last risk received date -
     func saveLastRiskReceivedDate(_ date: Date?)

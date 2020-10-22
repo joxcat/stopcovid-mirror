@@ -3,9 +3,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 //  RBManager.swift
-//  STOP-COVID
+//  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 27/04/2020 - for the STOP-COVID project.
+//  Created by Lunabee Studio / Date - 27/04/2020 - for the TousAntiCovid project.
 //
 
 import UIKit
@@ -51,6 +51,7 @@ public final class RBManager {
         get { storage.lastStatusReceivedDate() }
         set { storage.saveLastStatusReceivedDate(newValue) }
     }
+    public var lastStatusErrorDate: Date? { storage.lastStatusErrorDate() }
     public var lastRiskReceivedDate: Date? {
         get { storage.lastRiskReceivedDate() }
         set {
@@ -192,9 +193,13 @@ extension RBManager {
                         self.clearOldLocalProximities()
                         completion(nil)
                     } catch {
+                        self.storage.saveLastStatusErrorDate(Date())
                         completion(error)
                     }
                 case let .failure(error):
+                    if (error as NSError).code != NSError.lostConnectionCode {
+                        self.storage.saveLastStatusErrorDate(Date())
+                    }
                     completion(error)
                 }
             }
@@ -224,9 +229,13 @@ extension RBManager {
                         self.clearOldLocalProximities()
                         completion(nil)
                     } catch {
+                        self.storage.saveLastStatusErrorDate(Date())
                         completion(error)
                     }
                 case let .failure(error):
+                    if (error as NSError).code != NSError.lostConnectionCode {
+                        self.storage.saveLastStatusErrorDate(Date())
+                    }
                     completion(error)
                 }
             }
@@ -424,7 +433,8 @@ extension RBManager {
     }
     
     public func clearAtRiskAlert() {
-        storage.saveLastRiskReceivedDate(nil)
+        lastRiskReceivedDate = nil
+        lastStatusReceivedDate = nil
     }
     
     public func clearAllLocalData() {
@@ -451,7 +461,6 @@ extension RBManager {
             clearLocalEpochs()
             storage.save(epochs: epochs)
         }
-        lastStatusReceivedDate = Date()
     }
     
     private func processStatusResponse(_ response: RBStatusResponse) throws {
@@ -459,7 +468,9 @@ extension RBManager {
         lastExposureTimeFrame = response.lastExposureTimeFrame
         let now: Date = Date()
         storage.saveLastStatusReceivedDate(now)
-        if response.atRisk {
+        storage.saveLastStatusErrorDate(nil)
+        let isLastRiskDateOldEnough: Bool = now.timeIntervalSince1970 - (lastRiskReceivedDate?.timeIntervalSince1970 ?? 0.0) > 24.0 * 3600.0
+        if response.atRisk && isLastRiskDateOldEnough {
             lastRiskReceivedDate = now
         }
         if !epochs.isEmpty {

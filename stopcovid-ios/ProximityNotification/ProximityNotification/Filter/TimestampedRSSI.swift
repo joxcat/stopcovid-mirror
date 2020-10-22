@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/29 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/29 - for the TousAntiCovid project
  */
 
 import Foundation

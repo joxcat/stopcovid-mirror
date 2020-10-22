@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/06 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/06 - for the TousAntiCovid project
  */
 
 import CoreBluetooth
@@ -35,7 +35,8 @@ class BluetoothPeripheralManager: NSObject, BluetoothPeripheralManagerProtocol {
     }
     
     func start(proximityPayloadProvider: @escaping ProximityPayloadProvider) {
-        logger.log(logLevel: .debug, "start peripheral manager")
+        logger.info(message: "start peripheral manager",
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerStart.rawValue)
         self.proximityPayloadProvider = proximityPayloadProvider
         
         guard peripheralManager == nil else { return }
@@ -47,7 +48,8 @@ class BluetoothPeripheralManager: NSObject, BluetoothPeripheralManagerProtocol {
     }
     
     func stop() {
-        logger.log(logLevel: .debug, "stop peripheral manager")
+        logger.info(message: "stop peripheral manager",
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerStop.rawValue)
         
         stopPeripheralManager()
         peripheralManager?.delegate = nil
@@ -67,7 +69,8 @@ class BluetoothPeripheralManager: NSObject, BluetoothPeripheralManagerProtocol {
     }
     
     private func startAdvertising() {
-        logger.log(logLevel: .debug, "start advertising")
+        logger.info(message: "start advertising",
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerStartAdvertising.rawValue)
         
         let advertisementData = [CBAdvertisementDataServiceUUIDsKey: [serviceUUID]]
         peripheralManager?.startAdvertising(advertisementData)
@@ -77,7 +80,8 @@ class BluetoothPeripheralManager: NSObject, BluetoothPeripheralManagerProtocol {
 extension BluetoothPeripheralManager: CBPeripheralManagerDelegate {
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        logger.log(logLevel: .debug, "peripheral manager did update state \(peripheral.state.rawValue)")
+        logger.info(message: "peripheral manager did update state \(peripheral.state.rawValue)",
+            source: ProximityNotificationEvent.bluetoothPeripheralManagerDidUpdateState.rawValue)
         
         stopPeripheralManager()
         
@@ -97,11 +101,13 @@ extension BluetoothPeripheralManager: CBPeripheralManagerDelegate {
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String: Any]) {
-        logger.log(logLevel: .debug, "peripheral manager will restore state \(dict)")
+        logger.info(message: "peripheral manager will restore state \(dict)",
+            source: ProximityNotificationEvent.bluetoothPeripheralManagerWillRestoreState.rawValue)
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
-        logger.log(logLevel: .debug, "peripheral manager did add service")
+        logger.info(message: "peripheral manager did add service",
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerDidAddService.rawValue)
         
         guard error == nil else { return }
         
@@ -109,20 +115,24 @@ extension BluetoothPeripheralManager: CBPeripheralManagerDelegate {
     }
     
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
-        logger.log(logLevel: .debug, "peripheral manager did start advertising")
+        logger.info(message: "peripheral manager did start advertising",
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerDidStartAdvertising.rawValue)
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        logger.log(logLevel: .debug, "peripheral manager did receive read")
+        logger.info(message: "peripheral manager did receive read",
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerDidReceiveRead.rawValue)
         
         if let proximityPayload = proximityPayloadProvider?() {
             let bluetoothProximityPayload = BluetoothProximityPayload(payload: proximityPayload,
                                                                       txPowerLevel: settings.txCompensationGain)
             request.value = bluetoothProximityPayload.data
-            logger.log(logLevel: .debug, "peripheral manager did respond read with success")
+            logger.info(message: "peripheral manager did respond read with success",
+                        source: ProximityNotificationEvent.bluetoothPeripheralManagerDidRespondToReadWithSuccess.rawValue)
             peripheral.respond(to: request, withResult: .success)
         } else {
-            logger.log(logLevel: .debug, "peripheral manager did respond read with error")
+            logger.error(message: "peripheral manager did respond read with error",
+                         source: ProximityNotificationEvent.bluetoothPeripheralManagerDidRespondToReadWithError.rawValue)
             peripheral.respond(to: request, withResult: .unlikelyError)
         }
     }
