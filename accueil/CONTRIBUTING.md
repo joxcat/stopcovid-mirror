@@ -1,6 +1,6 @@
 # Introduction
 Ce projet permet de rendre public le processus de développement de
-l’application StopCovid. Il est par ailleurs ouvert à toute
+l’application TousAntiCovid. Il est par ailleurs ouvert à toute
 contribution pertinente visant à l’améliorer (débug, ajout de
 fonctionnalités, …). Dans ce contexte l'ensemble des composants de
 l'application seront rendus public pour répondre à l'impératif de
@@ -33,8 +33,8 @@ suivi de chaque sous-projet sous forme d'_issues_.
 # Description des sous-projets et de la façon dont ils interagissent
 Une description textuelle suit cette présentation des sous-projets
 sous forme de schéma résumé. Elle permet de faire le lien entre les
-sous-projets publiés sous gitlab et les composants de StopCovid.
-![alt text](../documentation/composants.png "Liens entre les composants de StopCovid et
+sous-projets publiés sous gitlab et les composants de TousAntiCovid.
+![alt text](../documentation/composants.png "Liens entre les composants de TousAntiCovid et
 les sous-projets sous gitlab")
 * ROBERT API Specs : définition des SPEC de l’API ROBERT entre
   l’application mobile et le backend. Définit les services :
@@ -51,7 +51,7 @@ les sous-projets sous gitlab")
 * Submission Code Server Client API spec : définition des SPEC de
   l’API côté serveur sous swagger pour le server de code/token. Permet d’émettre un
   code/token à destination d’un tiers médical. Permet de tester/brûler
-  un token depuis le backend StopCovid.
+  un token depuis le backend TousAntiCovid.
 * Submission-code-server : code de la l’API pour le serveur de code/token. 
 * stopcovid-robertsdk-android : code pour le protocole ROBERT sur l’App
   mobile Android. Intègre les composants de gestion de clefs, gestion des
@@ -72,7 +72,7 @@ les sous-projets sous gitlab")
 
 # Gouvernance et processus de décision
 La gouvernance est structurée comme suit :
-* Un _core group_ du projet StopCovid, réunissant les entités qui
+* Un _core group_ du projet TousAntiCovid, réunissant les entités qui
   contribuent au projet ; Ce groupe délègue la maintenance du projet
   au quotidien au _comité des mainteneurs_ ;
 * Une cellule sécurité, composée de membres de l’ANSSI, de

@@ -44,7 +44,7 @@ The report (in French) Analyse du contact tracing numérique by Bertrand Thirion
 
 ### Improve and validate contact tracing
 
-The implementation of the ROBERT protocol and the StopCovid application were based on numerous choices, made according to current knowledge. We provide an overview of these choices, based on probabilistic reasoning and on the physical data of the problem. We then discuss tests to be conducted to measure the effectiveness of the application, and the associated measures of success. We conclude with some suggestions for learning models to improve the use of this type of application.
+The implementation of the ROBERT protocol and the TousAntiCovid application were based on numerous choices, made according to current knowledge. We provide an overview of these choices, based on probabilistic reasoning and on the physical data of the problem. We then discuss tests to be conducted to measure the effectiveness of the application, and the associated measures of success. We conclude with some suggestions for learning models to improve the use of this type of application.
 
 The report (in French) Analyse du contact tracing numérique by Bertrand Thirion (Inria), Alain Barrat (CNRS), Chiara Poletto (INSERM), Alexandra Mailles (Santé Publique France), Moez Draief (Capgemini), Roxane Adle (Orange), Vittoria Colizza (INSERM) is here: [https://gitlab.inria.fr/stopcovid19/accueil/-/tree/master/documentation/WP4.3.pdf](https://gitlab.inria.fr/stopcovid19/accueil/-/tree/master/documentation/WP4.3.pdf).
 
