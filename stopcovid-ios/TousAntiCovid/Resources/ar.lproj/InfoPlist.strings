@@ -11,3 +11,4 @@
 "NSBluetoothAlwaysUsageDescription" = "يحتايحتاج TousAntiCovid إلى البلوتوث للحصول على تقدير ، بناءً على نموذج إحصائي ، للقرب بين هاتفين.";
 "NSBluetoothPeripheralUsageDescription" = "يحتاج TousAntiCovid إلى البلوتوث للحصول على تقدير ، بناءً على نموذج إحصائي ، للقرب بين هاتفين.";
 "NSCameraUsageDescription" = "يحتاج TousAntiCovid إلى الوصول إلى الكاميرا لمسح رمز الاستجابة السريعة ضوئيًا.";
+"NSPhotoLibraryAddUsageDescription"= "TousAntiCovid needs your authorization to add images to your photo library.";

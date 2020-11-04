@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Attestation Full Screen View Controller-->
+        <scene sceneID="Aiu-vm-HrJ">
+            <objects>
+                <viewController storyboardIdentifier="AttestationFullScreenViewController" id="Tb3-wn-z2R" customClass="AttestationFullScreenViewController" customModule="TAC_Multi_" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="MMq-8A-xqc">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="9cE-nr-bGd">
+                                <rect key="frame" x="16" y="237" width="382" height="422.5"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="PO6-NU-GqF">
+                                        <rect key="frame" x="0.0" y="0.0" width="382" height="382"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="PO6-NU-GqF" secondAttribute="height" multiplier="1:1" id="fdm-mm-dtz"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="tQE-UK-G4s">
+                                        <rect key="frame" x="0.0" y="402" width="382" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
+                            <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="1000" verticalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qQB-y1-Ry2">
+                                <rect key="frame" x="20" y="44" width="46" height="34"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="Close">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="closeButtonPressed:" destination="Tb3-wn-z2R" eventType="touchUpInside" id="KYf-I7-g2j"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="PCm-d5-sZa"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="9cE-nr-bGd" firstAttribute="centerX" secondItem="MMq-8A-xqc" secondAttribute="centerX" id="IEX-ne-y0i"/>
+                            <constraint firstItem="9cE-nr-bGd" firstAttribute="top" relation="greaterThanOrEqual" secondItem="qQB-y1-Ry2" secondAttribute="bottom" constant="8" id="KK7-Z4-QaK"/>
+                            <constraint firstItem="9cE-nr-bGd" firstAttribute="leading" secondItem="PCm-d5-sZa" secondAttribute="leading" constant="16" id="LfJ-kV-saz"/>
+                            <constraint firstItem="qQB-y1-Ry2" firstAttribute="top" secondItem="PCm-d5-sZa" secondAttribute="top" id="M9J-fA-LEg"/>
+                            <constraint firstItem="9cE-nr-bGd" firstAttribute="centerY" secondItem="MMq-8A-xqc" secondAttribute="centerY" id="cWu-m0-fpn"/>
+                            <constraint firstItem="PCm-d5-sZa" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="9cE-nr-bGd" secondAttribute="bottom" constant="8" id="gPa-qy-6Yu"/>
+                            <constraint firstItem="qQB-y1-Ry2" firstAttribute="leading" secondItem="PCm-d5-sZa" secondAttribute="leading" constant="20" id="tTZ-8n-Gz2"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="closeButton" destination="qQB-y1-Ry2" id="0Hj-On-beS"/>
+                        <outlet property="imageView" destination="PO6-NU-GqF" id="LpP-0N-2lW"/>
+                        <outlet property="label" destination="tQE-UK-G4s" id="ePJ-Le-RoT"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="0c0-av-joo" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="161" y="157"/>
+        </scene>
+    </scenes>
+</document>

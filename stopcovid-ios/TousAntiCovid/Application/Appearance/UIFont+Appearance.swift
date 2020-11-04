@@ -28,6 +28,10 @@ extension UIFont {
         FontFamily.SFProText.bold.font(size: size)!
     }
     
+    static func marianneMedium(size: CGFloat) -> UIFont {
+        FontFamily.Marianne.medium.font(size: size)!
+    }
+    
     static func marianneBold(size: CGFloat) -> UIFont {
         FontFamily.Marianne.bold.font(size: size)!
     }

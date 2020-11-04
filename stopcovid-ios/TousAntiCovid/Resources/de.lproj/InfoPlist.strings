@@ -11,3 +11,4 @@
 "NSBluetoothAlwaysUsageDescription" = "TousAntiCovid benötigt Bluetooth, um basierend auf einem statistischen Modell eine Schätzung der Nähe zwischen zwei Telefonen zu erhalten.";
 "NSBluetoothPeripheralUsageDescription" = "TousAntiCovid benötigt Bluetooth, um basierend auf einem statistischen Modell eine Schätzung der Nähe zwischen zwei Telefonen zu erhalten.";
 "NSCameraUsageDescription" = "TousAntiCovid muss auf Ihre Kamera zugreifen, um den QR-Code zu scannen.";
+"NSPhotoLibraryAddUsageDescription"= "TousAntiCovid needs your authorization to add images to your photo library.";

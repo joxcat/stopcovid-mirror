@@ -22,9 +22,20 @@ final class DeepLinkingManager {
     }
     
     func processUrl(_ url: URL) {
-        guard url.path.hasPrefix("/app/code") else { return }
+        if url.path.hasPrefix("/app/code") {
+            processCodeUrl(url)
+        } else if url.path.hasPrefix("/app/attestation") {
+            processAttestationUrl()
+        }
+    }
+    
+    func processCodeUrl(_ url: URL) {
         let code: String = url.path.replacingOccurrences(of: "/app/code/", with: "")
         NotificationCenter.default.post(name: .didEnterCodeFromDeeplink, object: code)
+    }
+    
+    func processAttestationUrl() {
+        NotificationCenter.default.post(name: .newAttestationFromDeeplink, object: nil)
     }
     
 }

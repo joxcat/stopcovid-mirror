@@ -23,7 +23,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     var isAppAlreadyInstalled: Bool = false
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
-
+        
     private var lastStatusTriggerEventTimestamp: TimeInterval = 0.0
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -32,12 +32,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         LocalizationsManager.shared.start()
         InfoCenterManager.shared.start()
         KeyFiguresManager.shared.start()
+        let storageManager: StorageManager = StorageManager()
+        AttestationsManager.shared.start(storageManager: storageManager)
         if #available(iOS 14.0, *) {
             WidgetManager.shared.start()
         }
         PrivacyManager.shared.start()
         OrientationManager.shared.start()
-
         if isOnboardingDone {
             BluetoothStateManager.shared.start()
         }
@@ -52,7 +53,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                                         NotificationsManager.shared.triggerDeviceTimeErrorNotification()
                                     }
                                }),
-                               storage: StorageManager(),
+                               storage: storageManager,
                                bluetooth: BluetoothManager(),
                                filter: FilteringManager(),
                                isAtRiskDidChangeHandler: { isAtRisk in
@@ -65,18 +66,27 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }, didReceiveProximityHandler: {
             self.triggerStatusRequestIfNeeded()
         }, didSaveProximity: { proximity in
-
         })
         ParametersManager.shared.start()
-
         isAppAlreadyInstalled = true
         rootCoordinator.start()
         initAppMaintenance()
         UIApplication.shared.registerForRemoteNotifications()
+        initAppShortcut()
+        if let shortcutItem = launchOptions?[UIApplication.LaunchOptionsKey.shortcutItem] as? UIApplicationShortcutItem, shortcutItem.type == Constant.ShortcutItem.newAttestation.rawValue {
+            DeepLinkingManager.shared.processAttestationUrl()
+        }
         return true
     }
     
+    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+        if shortcutItem.type == Constant.ShortcutItem.newAttestation.rawValue {
+            DeepLinkingManager.shared.processAttestationUrl()
+        }
+    }
+    
     func applicationDidBecomeActive(_ application: UIApplication) {
+        ParametersManager.shared.fetchConfig { _ in }
         UIApplication.shared.clearBadge()
     }
     
@@ -134,7 +144,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
         completionHandler()
     }
-    
+
     private func initAppearance() {
         UINavigationBar.appearance().tintColor = Asset.Colors.tint.color
     }
@@ -147,6 +157,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     
     private func initAppMaintenance() {
         MaintenanceManager.shared.start(coordinator: rootCoordinator)
+    }
+    
+    private func initAppShortcut() {
+        let shortcut: UIApplicationShortcutItem = UIApplicationShortcutItem(type: Constant.ShortcutItem.newAttestation.rawValue,
+                                                                            localizedTitle: "home.moreSection.curfewCertificate".localized,
+                                                                            localizedSubtitle: nil,
+                                                                            icon: UIApplicationShortcutIcon(type: .compose))
+        UIApplication.shared.shortcutItems = [shortcut]
     }
 
     func triggerStatusRequestIfNeeded(showNotifications: Bool = false, completion: ((_ error: Error?) -> ())? = nil) {
@@ -202,5 +220,4 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
-
 }

@@ -19,6 +19,7 @@ final class LinkButtonCell: CVTableViewCell {
         super.setup(with: row)
         setupUI()
         setupContent(row: row)
+        setupAccessibility(row: row)
     }
     
     private func setupUI() {
@@ -26,6 +27,11 @@ final class LinkButtonCell: CVTableViewCell {
         button?.tintColor = Appearance.Button.Tertiary.titleColor
         button?.titleLabel?.adjustsFontForContentSizeCategory = true
         button?.titleLabel?.font = Appearance.Button.linkFont
+    }
+    
+    private func setupAccessibility(row: CVRow) {
+        button?.accessibilityLabel = row.buttonTitle?.removingEmojis()
+        button?.accessibilityHint = nil
     }
     
     private func setupContent(row: CVRow) {

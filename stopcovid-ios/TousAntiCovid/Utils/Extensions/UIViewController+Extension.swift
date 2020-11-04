@@ -28,11 +28,11 @@ extension UIViewController {
         childController.didMove(toParent: self)
     }
     
-    func showAlert(title: String? = nil, message: String? = nil, okTitle: String, isOkDestructive: Bool = false, cancelTitle: String? = nil, handler: (() -> ())? = nil) {
+    func showAlert(title: String? = nil, message: String? = nil, okTitle: String, isOkDestructive: Bool = false, cancelTitle: String? = nil, handler: (() -> ())? = nil, cancelHandler: (() -> ())? = nil) {
         let alertController: UIAlertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertController.addAction(UIAlertAction(title: okTitle, style: isOkDestructive ? .destructive : .default, handler: { _ in handler?() }))
         if let cancelTitle = cancelTitle {
-            alertController.addAction(UIAlertAction(title: cancelTitle, style: .cancel))
+            alertController.addAction(UIAlertAction(title: cancelTitle, style: .cancel, handler: { _ in cancelHandler?() }))
         }
         present(alertController, animated: true, completion: nil)
     }
@@ -64,11 +64,12 @@ extension UIViewController {
         HUD.flash(success ? .success : .error, onView: self.view.window, delay: 0.8)
     }
     
-    func showTextFieldAlert(_ title: String? = nil, message: String? = nil, textFieldPlaceHolder: String? = nil, textFieldDefaultValue: String? = nil, completion: @escaping (_ newValue: String) -> Void) {
+    func showTextFieldAlert(_ title: String? = nil, message: String? = nil, textFieldPlaceHolder: String? = nil, textFieldDefaultValue: String? = nil, keyboardType: UIKeyboardType = UIKeyboardType.default, completion: @escaping (_ newValue: String) -> Void) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addTextField(configurationHandler: { textField in
             textField.text = textFieldDefaultValue
             textField.placeholder = textFieldPlaceHolder
+            textField.keyboardType = keyboardType
         })
         alert.addAction(UIAlertAction(title: "common.ok".localized, style: .default, handler: { (_) -> Void in
             let textField = alert.textFields![0] as UITextField
@@ -77,5 +78,4 @@ extension UIViewController {
         alert.addAction(UIAlertAction(title: "common.cancel".localized, style: UIAlertAction.Style.cancel, handler: nil))
         present(alert, animated: true, completion: nil)
     }
-    
 }

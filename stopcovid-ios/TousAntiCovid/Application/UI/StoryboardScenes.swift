@@ -12,6 +12,11 @@ import UIKit
 
 // swiftlint:disable explicit_type_interface identifier_name line_length type_body_length type_name
 internal enum StoryboardScene {
+  internal enum Attestation: StoryboardType {
+    internal static let storyboardName = "Attestation"
+
+    internal static let attestationFullScreenViewController = SceneType<TousAntiCovid.AttestationFullScreenViewController>(storyboard: Attestation.self, identifier: "AttestationFullScreenViewController")
+  }
   internal enum BottomButtonContainer: StoryboardType {
     internal static let storyboardName = "BottomButtonContainer"
 

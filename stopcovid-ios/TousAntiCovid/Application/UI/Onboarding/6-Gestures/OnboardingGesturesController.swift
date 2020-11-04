@@ -50,7 +50,10 @@ final class OnboardingGesturesController: OnboardingController {
                 Gesture(title: "onboarding.gesturesController.gesture5".localized, image: Asset.Images.visage.image),
                 Gesture(title: "onboarding.gesturesController.gesture6".localized, image: Asset.Images.distance.image),
                 Gesture(title: "onboarding.gesturesController.gesture4".localized, image: Asset.Images.airCheck.image),
-                Gesture(title: "onboarding.gesturesController.gesture7".localized, image: Asset.Images.mask.image)]
+                Gesture(title: "onboarding.gesturesController.gesture7".localized, image: Asset.Images.mask.image),
+                Gesture(title: "onboarding.gesturesController.gesture8".localized, image: Asset.Images.sixContacts.image),
+                Gesture(title: "onboarding.gesturesController.gesture9".localized, image: Asset.Images.airRecycling.image),
+                Gesture(title: "onboarding.gesturesController.gesture10".localized, image: Asset.Images.mobileApp.image)]
     }
 
 }

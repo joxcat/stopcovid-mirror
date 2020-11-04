@@ -25,7 +25,16 @@ final class SickBlockingCoordinator: WindowedCoordinator {
         self.childCoordinators = []
         start()
     }
-
+    
+    func createWindow(for controller: UIViewController) {
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.backgroundColor = .clear
+        window?.rootViewController = controller
+        window?.accessibilityViewIsModal = true
+        window?.alpha = 0.0
+        window?.makeKeyAndVisible()
+    }
+    
     private func start() {
         let controller: UIViewController = CVNavigationChildController.controller(SickController(didTouchAbout: { [weak self] in
             self?.didTouchAbout()

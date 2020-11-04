@@ -18,12 +18,12 @@ final class WidgetManager {
     static let shared: WidgetManager = WidgetManager()
     
     static let scheme: String = "tousanticovid"
-    
+
     static let activationDeeplink: URL = URL(string: "\(scheme)://\(UrlAction.activation.rawValue)")!
     static let moreInformationsDeeplink: URL = URL(string: "\(scheme)://\(UrlAction.moreInformations.rawValue)")!
     
     var isProximityActivationWaiting: Bool = false
-
+    
     enum UrlAction: String {
         case activation
         case moreInformations
@@ -145,7 +145,8 @@ final class WidgetManager {
     }
     
     func processUserActivity(_ userActivity: NSUserActivity) {
-        guard ["TousAntiCovidWidget"].contains(userActivity.activityType) && isOnboardingDone && !isSick else { return }
+        let widgetKinds: [String] = ["TousAntiCovidWidget"]
+        guard widgetKinds.contains(userActivity.activityType) && isOnboardingDone && !isSick else { return }
         guard !RBManager.shared.isAtRisk else { return }
         guard !RBManager.shared.isRegistered else { return }
         NotificationCenter.default.post(name: .widgetDidRequestRegister, object: nil)
@@ -159,6 +160,7 @@ final class WidgetManager {
             RBManager.shared.startProximityDetection()
         }
     }
+    
     #endif
     
     func start() {

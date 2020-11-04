@@ -19,10 +19,10 @@ struct Info: Codable {
     let timestamp: Int
     let tagIds: [String]?
     
-    var title: String { titleKey.infoCenterLocalized }
-    var description: String { descriptionKey.infoCenterLocalized }
-    var buttonLabel: String? { buttonLabelKey?.infoCenterLocalized }
-    var url: URL? { URL(string: urlKey?.infoCenterLocalized ?? "") }
+    var title: String { titleKey.infoCenterLocalized.trimmingCharacters(in: .whitespaces) }
+    var description: String { descriptionKey.infoCenterLocalized.trimmingCharacters(in: .whitespaces) }
+    var buttonLabel: String? { buttonLabelKey?.infoCenterLocalized.trimmingCharacters(in: .whitespaces) }
+    var url: URL? { URL(string: (urlKey?.infoCenterLocalized ?? "").trimmingCharacters(in: .whitespaces)) }
     var date: Date { Date(timeIntervalSince1970: Double(timestamp)) }
     var formattedDate: String {
         if Calendar.current.isDateInToday(date) {

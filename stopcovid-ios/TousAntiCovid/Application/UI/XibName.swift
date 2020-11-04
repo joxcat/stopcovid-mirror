@@ -46,5 +46,11 @@ enum XibName: String {
     case paragraphCell = "ParagraphCell"
     case imageCell = "ImageCell"
     case keyFigureCell = "KeyFigureCell"
+    case newPostalCodeCell = "NewPostalCodeCell"
+    case standardCardCell = "StandardCardCell"
+    case standardSwitchCell = "StandardSwitchCell"
+    case qrCodeCell = "QRCodeCell"
+    case dateCell = "DateCell"
+    case textWithoutStackCell = "TextWithoutStackCell"
     
 }

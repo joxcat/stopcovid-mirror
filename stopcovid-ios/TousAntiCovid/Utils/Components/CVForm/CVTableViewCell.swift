@@ -35,6 +35,10 @@ class CVTableViewCell: UITableViewCell {
         setupTheme(with: row)
         setupAccessibility()
     }
+
+    func capture() -> UIImage? {
+       return screenshot()
+    }
     
     private func setupTheme(with row: CVRow) {
         selectionStyle = row.selectionAction == nil ? .none : .default

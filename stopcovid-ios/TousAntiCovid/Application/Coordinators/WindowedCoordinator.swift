@@ -22,7 +22,7 @@ extension WindowedCoordinator {
     
     func createWindow(for controller: UIViewController) {
         window = UIWindow(frame: UIScreen.main.bounds)
-        window?.backgroundColor = .clear
+        window?.backgroundColor = .black
         window?.rootViewController = controller
         window?.accessibilityViewIsModal = true
         window?.alpha = 0.0

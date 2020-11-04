@@ -117,7 +117,7 @@ final class CaptchaViewController: CVTableViewController {
         }, valueChanged: { [weak self] value in
             guard let answer = value as? String else { return }
             self?.answer = answer
-        }, didValidateValue: { [weak self] value in
+        }, didValidateValue: { [weak self] value, _ in
             guard let answer = value as? String else { return }
             self?.answer = answer
             self?.didTouchConfirm()
@@ -209,9 +209,9 @@ final class CaptchaViewController: CVTableViewController {
         } else {
             showAlert(title: "captchaController.alert.noAnswer.title".localized,
                       message: "captchaController.alert.noAnswer.message".localized,
-                      okTitle: "common.ok".localized) { [weak self] in
-                self?.textField?.becomeFirstResponder()
-            }
+                      okTitle: "common.ok".localized, handler:  { [weak self] in
+                        self?.textField?.becomeFirstResponder()
+                      })
         }
     }
     

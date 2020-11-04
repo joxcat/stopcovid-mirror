@@ -88,7 +88,7 @@ final class EnterCodeController: CVTableViewController {
         }, valueChanged: { [weak self] value in
             guard let code = value as? String else { return }
             self?.code = code
-        }, didValidateValue: { [weak self] value in
+        }, didValidateValue: { [weak self] value, _ in
             guard let code = value as? String else { return }
             self?.code = code
             self?.didTouchValidate()

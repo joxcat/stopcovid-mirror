@@ -12,8 +12,14 @@ import UIKit
 
 enum Appearance {
     
+    static let tintColor: UIColor = Asset.Colors.tint.color
+    
     enum NavigationBar {
         static let titleFont: UIFont = .marianneExtraBold(size: 17.0)
+    }
+    
+    enum Switch {
+        static let onTint: UIColor = Asset.Colors.tint.color
     }
     
     enum TabBar {
@@ -40,6 +46,11 @@ enum Appearance {
         enum Tertiary {
             static var backgroundColor: UIColor { .clear }
             static var titleColor: UIColor { Asset.Colors.tint.color }
+        }
+        
+        enum Quaternary {
+            static var backgroundColor: UIColor { .clear }
+            static var titleColor: UIColor { Asset.Colors.secondaryButtonLabel.color }
         }
         
     }
@@ -104,6 +115,7 @@ enum Appearance {
                 }
             }
             static var captionTitleFont: UIFont { UIFontMetrics(forTextStyle: .caption2).scaledFont(for: .regular(size: 11.0)) }
+            static var captionTitleFont2: UIFont { UIFontMetrics(forTextStyle: .caption2).scaledFont(for: .marianneMedium(size: 12.0)) }
             static var headTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 25.0)) }
             static var headTitleFont2: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 50.0)) }
             static var titleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 17.0)) }
@@ -113,6 +125,13 @@ enum Appearance {
                     return .label
                 } else {
                     return .black
+                }
+            }
+            static var placeholderColor: UIColor {
+                if #available(iOS 13.0, *) {
+                    return .placeholderText
+                } else {
+                    return .lightGray
                 }
             }
             static var disabledColor: UIColor {
@@ -131,6 +150,10 @@ enum Appearance {
             static var headerTitleColor: UIColor { Asset.Colors.tint.color }
             static var valueTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .semibold(size: 12.0)) }
             static var valueFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 24.0)) }
+
+            static var errorColor: UIColor { Asset.Colors.error.color }
+            
+            static var footerFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .regular(size: 13.0)) }
         }
         
         enum Image {

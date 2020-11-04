@@ -16,8 +16,11 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
 
     static let shared: NotificationsManager = NotificationsManager()
 
+    @UserDefault(key: .showNewInfoNotification)
+    var showNewInfoNotification: Bool = true
+    
     @UserDefault(key: .lastNotificationTimestamp)
-    private var lastNotificationTimeStamp: Double  = 0.0
+    private var lastNotificationTimeStamp: Double = 0.0
 
     override init() {
         super.init()
@@ -82,11 +85,7 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         let trigger: UNTimeIntervalNotificationTrigger? = delay == 0 ? nil : UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
         let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.atRisk, content: content, trigger: trigger)
         requestAuthorization { _ in
-            UNUserNotificationCenter.current().add(request) { error in
-                if let error = error {
-                    print(error)
-                }
-            }
+            UNUserNotificationCenter.current().add(request) { _ in }
         }
     }
     
@@ -161,6 +160,8 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     
     func triggerInfoCenterNewsAvailableNotification() {
         guard !RBManager.shared.isSick else { return }
+        guard showNewInfoNotification else { return }
+        guard UIApplication.shared.applicationState != .active else { return }
         let content = UNMutableNotificationContent()
         content.title = "info.notification.newsAvailable.title".localized
         content.body = "info.notification.newsAvailable.body".localized
@@ -205,11 +206,7 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.ultimate, content: content, trigger: trigger)
         requestAuthorization { _ in
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [NotificationsContant.Identifier.ultimate])
-            UNUserNotificationCenter.current().add(request) { error in
-                if let error = error {
-                    print(error)
-                }
-            }
+            UNUserNotificationCenter.current().add(request)
         }
     }
     

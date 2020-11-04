@@ -299,6 +299,7 @@ public final class StorageManager: RBStorage {
                 keychain.delete($0.rawValue)
             }
         }
+        deleteAllAttestationFields()
         deleteDb(includingFile: includingDBKey)
         notifyStatusDataChanged()
     }
@@ -334,6 +335,86 @@ public final class StorageManager: RBStorage {
     
 }
 
+public extension StorageManager {
+    
+    func saveAttestation(_ attestation: Attestation) {
+        guard let realm = realm else { return }
+        let realmAttestation: RealmAttestation = RealmAttestation.from(attestation: attestation)
+        try! realm.write {
+            realm.add(realmAttestation, update: .all)
+        }
+        notifyAttestationDataChanged()
+    }
+    
+    func attestations() -> [Attestation] {
+        guard let realm = realm else { return [] }
+        return realm.objects(RealmAttestation.self).map { $0.toAttestation() }
+    }
+    
+    func deleteAttestationsData() {
+        guard let realm = realm else { return }
+        try! realm.write {
+            realm.delete(realm.objects(RealmAttestation.self))
+        }
+        notifyAttestationDataChanged()
+    }
+    
+    func deleteAttestation(_ attestation: Attestation) {
+        guard let realm = realm else { return }
+        if let attestation = realm.object(ofType: RealmAttestation.self, forPrimaryKey: attestation.id) {
+            try! realm.write {
+                realm.delete(attestation)
+            }
+        }
+        notifyAttestationDataChanged()
+    }
+    
+    func deleteExpiredAttestationsData(durationInHours: Double) {
+        guard let realm = realm else { return }
+        let now: Date = Date()
+        let expiredAttestations: [RealmAttestation] = [RealmAttestation](realm.objects(RealmAttestation.self)).filter { attestation in
+            (now.timeIntervalSince1970 - Double(attestation.timestamp)) >= durationInHours * 3600.0
+        }
+        try! realm.write {
+            realm.delete(expiredAttestations)
+        }
+        notifyAttestationDataChanged()
+    }
+    
+    func saveAttestationFieldValueForKey(_ key: String, value: String?) {
+        let keychainKey: String = "attestation-\(key)"
+        if let value = value {
+            keychain.set(value, forKey: keychainKey, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+        } else {
+            keychain.delete(keychainKey)
+        }
+    }
+    
+    func getAttestationFieldValues() -> [String: String] {
+        var fieldValues: [String: String] = [:]
+        keychain.allKeys.forEach { key in
+            if key.hasPrefix("SCattestation-") {
+                fieldValues[key.replacingOccurrences(of: "SCattestation-", with: "")] = keychain.get(key.replacingOccurrences(of: "SC", with: ""))
+            }
+        }
+        return fieldValues
+    }
+    
+    func getAttestationFieldValueForKey(_ key: String) -> String? {
+        let keychainKey: String = "attestation-\(key)"
+        return keychain.get(keychainKey)
+    }
+    
+    func deleteAllAttestationFields() {
+        keychain.allKeys.forEach { key in
+            if key.hasPrefix("SCattestation-") {
+                keychain.delete(key.replacingOccurrences(of: "SC", with: ""))
+            }
+        }
+    }
+    
+}
+
 private extension StorageManager {
     
     func notifyStatusDataChanged() {
@@ -342,6 +423,10 @@ private extension StorageManager {
     
     func notifyLocalProximityDataChanged() {
         NotificationCenter.default.post(name: .localProximityDataDidChange, object: nil)
+    }
+    
+    func notifyAttestationDataChanged() {
+        NotificationCenter.default.post(name: .attestationDataDidChange, object: nil)
     }
     
 }
@@ -378,11 +463,12 @@ private extension Realm {
     static private func configuration(key: Data) -> Realm.Configuration {
         let classes: [Object.Type] = [RealmEpoch.self,
                                       RealmLocalProximity.self,
+                                      RealmAttestation.self,
                                       Permission.self,
                                       PermissionRole.self,
                                       PermissionUser.self]
         let databaseUrl: URL = dbsDirectoryUrl().appendingPathComponent("db.realm")
-        let userConfig: Realm.Configuration = Realm.Configuration(fileURL: databaseUrl, encryptionKey: key, schemaVersion: 6, migrationBlock: { _, _ in }, objectTypes: classes)
+        let userConfig: Realm.Configuration = Realm.Configuration(fileURL: databaseUrl, encryptionKey: key, schemaVersion: 9, migrationBlock: { _, _ in }, objectTypes: classes)
         return userConfig
     }
     

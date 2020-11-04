@@ -25,7 +25,7 @@ struct CVRow {
         var titleHighlightColor: UIColor = Asset.Colors.tint.color
         var subtitleFont: (() -> UIFont) = { Appearance.Cell.Text.subtitleFont }
         var subtitleColor: UIColor = Appearance.Cell.Text.subtitleColor
-        var placeholderColor: UIColor = Appearance.Cell.Text.subtitleColor
+        var placeholderColor: UIColor = Appearance.Cell.Text.placeholderColor
         var accessoryTextFont: (() -> UIFont?)?
         var imageTintColor: UIColor?
         var imageSize: CGSize?
@@ -54,6 +54,14 @@ struct CVRow {
     var associatedValue: Any? = nil
     var textFieldKeyboardType: UIKeyboardType?
     var textFieldReturnKeyType: UIReturnKeyType?
+    var textFieldContentType: UITextContentType?
+    var textFieldCapitalizationType: UITextAutocapitalizationType?
+    var textFieldRegex: String?
+    var minimumDate: Date?
+    var maximumDate: Date?
+    var initialDate: Date?
+    var datePickerMode: UIDatePicker.Mode?
+    var selectionActionWithCell: ((_ cell: CVTableViewCell) -> ())?
     var selectionAction: (() -> ())?
     var secondarySelectionAction: (() -> ())?
     var tertiarySelectionAction: (() -> ())?
@@ -62,6 +70,15 @@ struct CVRow {
     var senarySelectionAction: (()-> ())?
     var willDisplay: ((_ cell: CVTableViewCell) -> ())?
     var valueChanged: ((_ value: Any?) -> ())?
-    var didValidateValue: ((_ value: Any?) -> ())?
+    var didValidateValue: ((_ value: Any?, _ cell: CVTableViewCell) -> ())?
+    var displayValueForValue: ((_ value: Any?) -> String?)?
+    
+    static func emptyFor(topInset: CGFloat, bottomInset: CGFloat, showSeparator: Bool = false) -> CVRow {
+        CVRow(xibName: .emptyCell,
+              theme: CVRow.Theme(topInset: topInset,
+                                 bottomInset: bottomInset,
+                                 separatorLeftInset: showSeparator ? 0.0 : nil,
+                                 separatorRightInset: showSeparator ? 0.0 : nil))
+    }
     
 }

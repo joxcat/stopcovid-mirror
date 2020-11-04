@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import PKHUD
 
 final class HomeCoordinator: WindowedCoordinator {
 
@@ -17,14 +18,12 @@ final class HomeCoordinator: WindowedCoordinator {
     var window: UIWindow!
     
     private weak var navigationController: UINavigationController?
-    private var didFinishLoadingController: (() -> ())?
     private var launchScreenWindow: UIWindow?
-    private var showLaunchScreen: Bool = false
+    private var showLaunchScreen: Bool = true
     
-    init(parent: Coordinator, didFinishLoadingController: (() -> ())?) {
+    init(parent: Coordinator) {
         self.parent = parent
         self.childCoordinators = []
-        self.didFinishLoadingController = didFinishLoadingController
         start()
         addObservers()
     }
@@ -41,13 +40,13 @@ final class HomeCoordinator: WindowedCoordinator {
         }, didTouchTestingSites: { [weak self] in
             self?.showTestingSites()
         }, didTouchDocument: { [weak self] in
-            self?.showDocument()
+            self?.showAttestations()
         }, didTouchManageData: { [weak self] in
             self?.showManageData()
         }, didTouchPrivacy: { [weak self] in
             self?.showPrivacy()
         }, didFinishLoad: { [weak self] in
-            self?.didFinishLoadingController?()
+            self?.didFinishLoadingController()
         }, didTouchHealth: { [weak self] in
             self?.showMyHealth()
         }, didTouchInfo: { [weak self] in
@@ -63,6 +62,15 @@ final class HomeCoordinator: WindowedCoordinator {
         let navigationController: UINavigationController = CVNavigationController(rootViewController: controller)
         self.navigationController = navigationController
         createWindow(for: navigationController)
+        if showLaunchScreen {
+            loadLaunchScreen()
+        }
+    }
+    
+    private func didFinishLoadingController() {
+        if showLaunchScreen {
+            hideLaunchScreen()
+        }
     }
     
     private func showAbout() {
@@ -75,17 +83,13 @@ final class HomeCoordinator: WindowedCoordinator {
         addChild(coordinator: privacyCoordinator)
     }
 
-    private func showDocument() {
-        openUrl(path: "home.moreSection.curfewCertificate.url".localized)
+    private func showAttestations() {
+        let attestationsCoordinator: AttestationsCoordinator = AttestationsCoordinator(presentingController: navigationController, parent: self)
+        addChild(coordinator: attestationsCoordinator)
     }
 
     private func showTestingSites() {
-        openUrl(path: "myHealthController.testingSites.url".localized)
-    }
-
-    private func openUrl(path: String) {
-        guard let url = URL(string: path) else { return }
-        url.openInSafari()
+        URL(string: "myHealthController.testingSites.url".localized)?.openInSafari()
     }
     
     private func showManageData() {
@@ -164,6 +168,7 @@ extension HomeCoordinator {
     
     private func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterCodeFromDeeplink(_:)), name: .didEnterCodeFromDeeplink, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(newAttestationFromDeeplink(_:)), name: .newAttestationFromDeeplink, object: nil)
     }
     
     private func removeObservers() {
@@ -177,6 +182,10 @@ extension HomeCoordinator {
         } else {
             showEnterCode(code: code)
         }
+    }
+    
+    @objc private func newAttestationFromDeeplink(_ notification: Notification) {
+        showAttestations()
     }
     
 }

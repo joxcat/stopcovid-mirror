@@ -293,22 +293,66 @@ final class HomeViewController: CVTableViewController {
                                                              textAlignment: .natural,
                                                              titleFont: { Appearance.Section.titleFont }))
         rows.append(infoSectionRow)
+
         if !KeyFiguresManager.shared.featuredKeyFigures.isEmpty {
             let keyFiguresRow: CVRow = CVRow(buttonTitle: "home.infoSection.seeAll".localized,
                                              xibName: .keyFiguresCell,
                                              theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
                                                                 topInset: 0.0,
-                                                                bottomInset: 8.0,
+                                                                bottomInset: Appearance.Cell.leftMargin,
                                                                 textAlignment: .natural),
                                              associatedValue: KeyFiguresManager.shared.featuredKeyFigures,
                                              selectionAction: { [weak self] in
-                                              self?.didTouchKeyFigures()
+                                                self?.didTouchKeyFigures()
                                              },
                                              willDisplay: { cell in
                                                 cell.selectionStyle = .none
                                                 cell.accessoryType = .none
                                              })
             rows.append(keyFiguresRow)
+        }
+        if KeyFiguresManager.shared.displayDepartmentLevel {
+            if KeyFiguresManager.shared.currentPostalCode == nil {
+                let newPostalCodeRow: CVRow = CVRow(title: "home.infoSection.newPostalCode".localized,
+                                                    subtitle: "home.infoSection.newPostalCode.subtitle".localized,
+                                                    image: Asset.Images.location.image,
+                                                    buttonTitle: "home.infoSection.newPostalCode.button".localized,
+                                                    xibName: .newPostalCodeCell,
+                                                    theme: CVRow.Theme(backgroundColor: Appearance.Button.Primary.backgroundColor,
+                                                                       topInset: 0.0,
+                                                                       bottomInset: Appearance.Cell.leftMargin,
+                                                                       textAlignment: .natural,
+                                                                       titleColor: Appearance.Button.Primary.titleColor,
+                                                                       subtitleColor: Appearance.Button.Primary.titleColor,
+                                                                       imageTintColor: Appearance.Button.Primary.titleColor),
+                                                    selectionAction: { [weak self] in
+                                                        self?.didTouchUpdateLocation()
+                                                    },
+                                                    willDisplay: { cell in
+                                                        cell.selectionStyle = .none
+                                                        cell.accessoryType = .none
+                                                    })
+                rows.append(newPostalCodeRow)
+            } else {
+                let updatePostalCodeRow: CVRow = CVRow(title: "home.infoSection.updatePostalCode".localized,
+                                                       image: Asset.Images.location.image,
+                                                       xibName: .standardCardCell,
+                                                       theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                                                           topInset: 0.0,
+                                                                           bottomInset: Appearance.Cell.leftMargin,
+                                                                           textAlignment: .natural,
+                                                                           titleFont: { Appearance.Cell.Text.standardFont },
+                                                                           titleColor: Appearance.Cell.Text.headerTitleColor,
+                                                                           imageTintColor: Appearance.Cell.Text.headerTitleColor),
+                                                       selectionAction: { [weak self] in
+                                                        self?.didTouchUpdateLocation()
+                                                       },
+                                                       willDisplay: { cell in
+                                                        cell.selectionStyle = .none
+                                                        cell.accessoryType = .none
+                                                       })
+                rows.append(updatePostalCodeRow)
+            }
         }
         if let info = InfoCenterManager.shared.info.sorted(by: { $0.timestamp > $1.timestamp }).first {
             let lastInfoRow: CVRow = CVRow(title: info.title,
@@ -331,6 +375,10 @@ final class HomeViewController: CVTableViewController {
             rows.append(lastInfoRow)
         }
         return rows
+    }
+    
+    private func didTouchUpdateLocation() {
+        KeyFiguresManager.shared.updateLocation(from: self)
     }
     
     private func declareSectionRows() -> [CVRow] {
@@ -662,7 +710,7 @@ extension HomeViewController: InfoCenterChangesObserver {
 extension HomeViewController: KeyFiguresChangesObserver {
 
     func keyFiguresDidUpdate() {
-        reloadUI()
+        reloadUI(animated: true)
     }
 
 }

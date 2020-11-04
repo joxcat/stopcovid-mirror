@@ -56,6 +56,14 @@ public final class ParametersManager: NSObject {
     public var pushDisplayOnSuccess: Bool { valueFor(name: "app.push.displayOnSuccess") as? Bool ?? false }
     public var pushDisplayAll: Bool { valueFor(name: "app.push.displayAll") as? Bool ?? false }
 
+    public var displayDepartmentLevel: Bool { valueFor(name: "app.keyfigures.displayDepartmentLevel") as? Bool ?? false }
+    
+    public var qrCodeDeletionHours: Double { valueFor(name: "app.qrCode.deletionHours") as? Double ?? 24.0}
+    public var qrCodeExpiredHours: Double { valueFor(name: "app.qrCode.expiredHours") as? Double ?? 1.0}
+    public var qrCodeFormattedString: String { valueFor(name: "app.qrCode.formattedString") as? String ?? "Cree le: <creationDate> a <creationHour>;\nNom: <lastname>;\nPrenom: <firstname>;\nNaissance: <dob> a <cityofbirth>;\nAdresse: <address> <zip> <city>;\nSortie: <datetime-day> a <datetime-hour>;\nMotif: <reason-code>" }
+    public var qrCodeFormattedStringDisplayed: String { valueFor(name: "app.qrCode.formattedStringDisplayed") as? String ?? "Créé le <creationDate> à <creationHour>\nNom : <lastname>;\nPrénom : <firstname>;\nNaissance : <dob> à <cityofbirth>\nAdresse : <address> <zip> <city>\nSortie : <datetime-day> à <datetime-hour>\nMotif: <reason-code>" }
+    public var qrCodeFooterString: String { valueFor(name: "app.qrCode.footerString") as? String ?? "<firstname> - <datetime-day>, <datetime-hour>\n<reason-shortlabel>" }
+    
     public var statusTimeInterval: Double {
         let randomStatusHour: Double = self.randomStatusHour ?? 0.0
         let interval: Double = (self.checkStatusFrequency ?? 0.0) * 3600.0 + (randomStatusHour == 0.0 ? 0.0 : Double.random(in: 0..<randomStatusHour * 3600.0))
@@ -114,6 +122,7 @@ public final class ParametersManager: NSObject {
         }
     }
     
+    // TODO: Fetch config using background url session.
     public func fetchConfig(_ completion: @escaping (_ result: Result<Double, Error>) -> ()) {
         let requestId: String = UUID().uuidString
         completions[requestId] = completion

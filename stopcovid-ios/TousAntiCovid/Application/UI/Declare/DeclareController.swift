@@ -75,11 +75,18 @@ final class DeclareController: CVTableViewController {
             rows.append(flashButtonRow)
             let tapButtonRow: CVRow = CVRow(title: "sickController.button.tap".localized,
                                             xibName: .buttonCell,
-                                            theme: CVRow.Theme(topInset: 20.0, bottomInset: 20.0, buttonStyle: .secondary),
+                                            theme: CVRow.Theme(topInset: 20.0, bottomInset: 0.0, buttonStyle: .secondary),
                                             selectionAction: { [weak self] in
                                                 self?.didTouchTapButton()
             })
             rows.append(tapButtonRow)
+            let codeNotReceivedButtonRow: CVRow = CVRow(title: "declareController.codeNotReceived.buttonTitle".localized,
+                                            xibName: .buttonCell,
+                                            theme: CVRow.Theme(topInset: 20.0, bottomInset: 20.0, buttonStyle: .quaternary),
+                                            selectionAction: { [weak self] in
+                                                self?.didTouchCodeNotReceivedButton()
+            })
+            rows.append(codeNotReceivedButtonRow)
         } else {
             let textRow: CVRow = CVRow(title: "declareController.notRegistered.mainMessage.title".localized,
                                        subtitle: "declareController.notRegistered.mainMessage.subtitle".localized,
@@ -122,15 +129,21 @@ final class DeclareController: CVTableViewController {
                 self.showAlert(title: "scanCodeController.camera.authorizationNeeded.title".localized,
                                message: "scanCodeController.camera.authorizationNeeded.message".localized,
                                okTitle: "common.settings".localized,
-                               cancelTitle: "common.cancel".localized) {
-                    UIApplication.shared.openSettings()
-                }
+                               cancelTitle: "common.cancel".localized, handler:  {
+                                UIApplication.shared.openSettings()
+                               })
             }
         }
     }
     
     @objc private func didTouchTapButton() {
         didTouchTap?()
+    }
+    
+    @objc private func didTouchCodeNotReceivedButton() {
+        showAlert(title: "declareController.codeNotReceived.alert.title".localized,
+                  message: "declareController.codeNotReceived.alert.message".localized,
+                  okTitle: "common.ok".localized)
     }
     
     @objc private func statusDataChanged() {

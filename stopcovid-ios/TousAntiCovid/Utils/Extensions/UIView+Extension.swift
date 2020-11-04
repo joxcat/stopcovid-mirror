@@ -32,4 +32,13 @@ extension UIView {
         }
     }
     
+    func screenshot() -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(frame.size, false, 0)
+        layer.render(in: UIGraphicsGetCurrentContext()!)
+        let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        guard let pngData = image?.pngData() else { return nil }
+        return UIImage(data: pngData)
+    }
+    
 }

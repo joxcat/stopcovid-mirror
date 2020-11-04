@@ -76,7 +76,7 @@ final class RootCoordinator: Coordinator {
         case .onboarding:
             coordinator = OnboardingCoordinator(parent: self) { [weak self] in self?.onboardingDidEnd() }
         case .main:
-            coordinator = HomeCoordinator(parent: self, didFinishLoadingController: {})
+            coordinator = HomeCoordinator(parent: self)
         case .off:
             coordinator = SickBlockingCoordinator(parent: self)
         default:

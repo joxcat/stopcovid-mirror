@@ -240,35 +240,10 @@ public final class Server: NSObject, RBServer {
                     self.deviceTimeNotAlignedToServerTimeDetected()
                     completion(.failure(NSError.deviceTime))
                 } else {
-                    let body: RBServerRegisterBodyV3 = RBServerRegisterBodyV3(captcha: captcha,
-                                                                              captchaId: captchaId,
-                                                                              clientPublicECDHKey: publicKey,
-                                                                              pushInfo: RBServerPushInfo(token: RBManager.shared.pushToken ?? "",
-                                                                                                         locale: Locale.current.identifier,
-                                                                                                         timezone: TimeZone.current.identifier))
-                    self.processRequest(url: self.baseUrl().appendingPathComponent("register"), method: .post, body: body) { result in
-                        switch result {
-                        case let .success(data):
-                            do {
-                                let response: RBServerRegisterResponse = try JSONDecoder().decode(RBServerRegisterResponse.self, from: data)
-                                
-                                let rootJson: [String: Any] = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] ?? [:]
-                                let config: [[String: Any]] = rootJson["config"] as? [[String: Any]] ?? []
-                                
-                                let transformedResponse: RBRegisterResponse = RBRegisterResponse(tuples: response.tuples,
-                                                                                                 timeStart: response.timeStart,
-                                                                                                 config: config)
-                                completion(.success(transformedResponse))
-                            } catch {
-                                completion(.failure(error))
-                            }
-                        case let .failure(error):
-                            completion(.failure(error))
-                        }
-                    }
+                    self.processRegisterV3(captcha: captcha, captchaId: captchaId, publicKey: publicKey, completion: completion)
                 }
             case let .failure(error):
-                completion(.failure(error))
+                self.processRegisterV3(captcha: captcha, captchaId: captchaId, publicKey: publicKey, completion: completion)
             }
         }
     }
@@ -387,6 +362,35 @@ public final class Server: NSObject, RBServer {
                 }
             case let .failure(error):
                 completion(error)
+            }
+        }
+    }
+    
+    private func processRegisterV3(captcha: String, captchaId: String, publicKey: String, completion: @escaping (_ result: Result<RBRegisterResponse, Error>) -> ()) {
+        let body: RBServerRegisterBodyV3 = RBServerRegisterBodyV3(captcha: captcha,
+                                                                  captchaId: captchaId,
+                                                                  clientPublicECDHKey: publicKey,
+                                                                  pushInfo: RBServerPushInfo(token: RBManager.shared.pushToken ?? "",
+                                                                                             locale: Locale.current.identifier,
+                                                                                             timezone: TimeZone.current.identifier))
+        self.processRequest(url: self.baseUrl().appendingPathComponent("register"), method: .post, body: body) { result in
+            switch result {
+            case let .success(data):
+                do {
+                    let response: RBServerRegisterResponse = try JSONDecoder().decode(RBServerRegisterResponse.self, from: data)
+                    
+                    let rootJson: [String: Any] = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] ?? [:]
+                    let config: [[String: Any]] = rootJson["config"] as? [[String: Any]] ?? []
+                    
+                    let transformedResponse: RBRegisterResponse = RBRegisterResponse(tuples: response.tuples,
+                                                                                     timeStart: response.timeStart,
+                                                                                     config: config)
+                    completion(.success(transformedResponse))
+                } catch {
+                    completion(.failure(error))
+                }
+            case let .failure(error):
+                completion(.failure(error))
             }
         }
     }

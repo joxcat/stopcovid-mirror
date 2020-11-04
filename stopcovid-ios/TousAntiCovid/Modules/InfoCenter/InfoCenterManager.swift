@@ -31,8 +31,7 @@ final class InfoCenterManager: NSObject {
     
     static let shared: InfoCenterManager = InfoCenterManager()
     
-    var info: [Info] = []
-    var tags: [InfoTag] = []
+    var info: [Info] { rawInfo.filter { !$0.title.isEmpty && !$0.description.isEmpty } }
     var labels: [String: String] = [:]
     
     @UserDefault(key: .infoCenterLastUpdatedAt)
@@ -41,6 +40,13 @@ final class InfoCenterManager: NSObject {
     var didReceiveNewInfo: Bool = false {
         didSet { notifyObservers() }
     }
+    
+    private var rawInfo: [Info] = []
+    private var tags: [InfoTag] = []
+    
+    @UserDefault(key: .infoCenterLastManualUpdateTimestamp)
+    private var infoCenterLastManualUpdateTimestamp: Int = 0
+    
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
     
@@ -60,8 +66,16 @@ final class InfoCenterManager: NSObject {
         tags.filter { ids.contains($0.id) }
     }
     
-    func fetchInfo() {
-        fetchAllFiles()
+    func fetchInfo(force: Bool = true) {
+        if force {
+            fetchAllFiles()
+        } else {
+            let elapstedTime: Int = Int(Date().timeIntervalSince1970) - infoCenterLastManualUpdateTimestamp
+            if elapstedTime >= InfoCenterConstant.manualUpdatesMinInterval {
+                infoCenterLastManualUpdateTimestamp = Int(Date().timeIntervalSince1970)
+                fetchAllFiles()
+            }
+        }
     }
     
     func refetchContent() {
@@ -153,7 +167,7 @@ extension InfoCenterManager {
         let dataTask: URLSessionDataTask = session.dataTask(with: InfoCenterConstant.infoCenterUrl) { data, response, error in
             guard let data = data else { return }
             do {
-                self.info = try JSONDecoder().decode([Info].self, from: data)
+                self.rawInfo = try JSONDecoder().decode([Info].self, from: data)
                 try data.write(to: self.localInfoCenterUrl())
                 DispatchQueue.main.async {
                     completion()
@@ -225,7 +239,7 @@ extension InfoCenterManager {
         let localUrl: URL = localInfoCenterUrl()
         guard FileManager.default.fileExists(atPath: localUrl.path) else { return }
         guard let data = try? Data(contentsOf: localUrl) else { return }
-        info = (try? JSONDecoder().decode([Info].self, from: data)) ?? []
+        rawInfo = (try? JSONDecoder().decode([Info].self, from: data)) ?? []
     }
     
     private func loadLocalLabels() {

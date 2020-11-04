@@ -11,7 +11,5 @@
 import Foundation
 
 enum KeyFiguresConstant {
-    
     static let jsonUrl: URL = URL(string: "https://app.stopcovid.gouv.fr/infos/key-figures.json")!
-    
 }

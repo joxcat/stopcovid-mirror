@@ -17,12 +17,14 @@ final class InfoCell: CVTableViewCell {
     @IBOutlet private var tagListView: TagListView!
     @IBOutlet private var button: UIButton!
     @IBOutlet private var containerView: UIView!
+    @IBOutlet private var sharingImageView: UIImageView!
+    @IBOutlet private var sharingButton: UIButton!
     
     override func setup(with row: CVRow) {
         super.setup(with: row)
         setupUI()
         setupContent(row: row)
-        setupAccessibility()
+        setupAccessibility(row: row)
     }
     
     private func setupUI() {
@@ -39,12 +41,20 @@ final class InfoCell: CVTableViewCell {
         tagListView.isUserInteractionEnabled = false
         tagListView.backgroundColor = .clear
         cvSubtitleLabel?.font = Appearance.Cell.Text.subtitleFont
-        button?.contentHorizontalAlignment = .left
         button?.tintColor = Appearance.Button.Tertiary.titleColor
         button?.titleLabel?.font = Appearance.Button.linkFont
         button?.titleLabel?.adjustsFontForContentSizeCategory = true
         containerView.layer.cornerRadius = 10.0
         containerView.layer.masksToBounds = true
+        sharingImageView.tintColor = Appearance.tintColor
+        sharingImageView.image = Asset.Images.shareIcon.image
+    }
+
+    override func capture() -> UIImage? {
+        sharingImageView.isHidden = true
+        let image: UIImage? = containerView.screenshot()
+        sharingImageView.isHidden = false
+        return image
     }
     
     private func setupContent(row: CVRow) {
@@ -60,33 +70,42 @@ final class InfoCell: CVTableViewCell {
         }
         button.accessibilityLabel = row.buttonTitle
         button.isHidden = row.buttonTitle?.isEmpty != false
-        guard let tags = row.associatedValue as? [InfoTag] else {
+        guard let info = row.associatedValue as? Info else {
             tagListView.isHidden = true
             return
         }
-        tagListView.isHidden = tags.isEmpty
+        tagListView.isHidden = info.tags.isEmpty
         tagListView.removeAllTags()
-        tags.forEach {
+        info.tags.forEach {
             let tag: TagView = tagListView.addTag($0.label)
             tag.backgroundColor = $0.color
         }
         tagListView.isAccessibilityElement = true
         tagListView.accessibilityTraits = .staticText
-        tagListView.accessibilityLabel = tags.map { $0.label }.joined(separator: ", ")
+        tagListView.accessibilityLabel = info.tags.map { $0.label }.joined(separator: ", ")
         tagListView.tagViews.forEach { $0.isAccessibilityElement = false }
         layoutSubviews()
     }
     
-    private func setupAccessibility() {
+    private func setupAccessibility(row: CVRow) {
+        guard let info = row.associatedValue as? Info else { return }
         accessibilityElements = [dateLabel,
                                  cvTitleLabel,
                                  tagListView,
                                  cvSubtitleLabel,
+                                 sharingButton,
                                  button].compactMap { $0 }
+        sharingButton.accessibilityLabel = "accessibility.hint.info.share".localized
+        let date: Date = Date(timeIntervalSince1970: Double(info.timestamp))
+        dateLabel.accessibilityLabel = date.accessibilityRelativelyFormattedDate()
     }
     
     @IBAction private func buttonPressed(_ sender: Any) {
         currentAssociatedRow?.secondarySelectionAction?()
+    }
+    
+    @IBAction private func didTouchSharingButton(_ sender: Any) {
+        currentAssociatedRow?.selectionActionWithCell?(self)
     }
     
 }

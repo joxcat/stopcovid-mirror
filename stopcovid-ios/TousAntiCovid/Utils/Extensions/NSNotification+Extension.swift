@@ -16,6 +16,7 @@ extension NSNotification.Name {
     static var changeAppState: NSNotification.Name { NSNotification.Name(rawValue: "changeAppState") }
     static var didTouchAtRiskNotification: NSNotification.Name = NSNotification.Name(rawValue: "didTouchAtRiskNotification")
     static var didEnterCodeFromDeeplink: NSNotification.Name = NSNotification.Name(rawValue: "didEnterCodeFromDeeplink")
+    static var newAttestationFromDeeplink: NSNotification.Name = NSNotification.Name(rawValue: "newAttestationFromDeeplink")
     static var widgetDidRequestRegister: NSNotification.Name = NSNotification.Name(rawValue: "widgetDidRequestRegister")
     
 }

@@ -22,7 +22,8 @@ internal enum FontFamily {
   internal enum Marianne {
     internal static let bold = FontConvertible(name: "Marianne-Bold", family: "Marianne", path: "Marianne-Bold.otf")
     internal static let extraBold = FontConvertible(name: "Marianne-ExtraBold", family: "Marianne", path: "Marianne-ExtraBold.otf")
-    internal static let all: [FontConvertible] = [bold, extraBold]
+    internal static let medium = FontConvertible(name: "Marianne-Medium", family: "Marianne", path: "Marianne-Medium.otf")
+    internal static let all: [FontConvertible] = [bold, extraBold, medium]
   }
   internal enum SFProText {
     internal static let bold = FontConvertible(name: "SFProText-Bold", family: "SF Pro Text", path: "SF-Pro-Text-Bold.otf")

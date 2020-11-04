@@ -1,9 +1,7 @@
 PODS:
   - KeychainSwift (19.0.0)
   - lottie-ios (3.1.8)
-  - NMSSH (2.3.1)
   - PKHUD (5.3.0)
-  - ReachabilitySwift (5.0.0)
   - Realm (5.3.4):
     - Realm/Headers (= 5.3.4)
   - Realm/Headers (5.3.4)
@@ -16,9 +14,7 @@ PODS:
 DEPENDENCIES:
   - KeychainSwift
   - lottie-ios
-  - NMSSH
   - PKHUD
-  - ReachabilitySwift
   - RealmSwift
   - SwCrypt
   - SwiftGen
@@ -28,9 +24,7 @@ SPEC REPOS:
   trunk:
     - KeychainSwift
     - lottie-ios
-    - NMSSH
     - PKHUD
-    - ReachabilitySwift
     - Realm
     - RealmSwift
     - SwCrypt
@@ -40,15 +34,13 @@ SPEC REPOS:
 SPEC CHECKSUMS:
   KeychainSwift: a06190cf933ad46b1e0abc3d77d29c06331715c7
   lottie-ios: 48fac6be217c76937e36e340e2d09cf7b10b7f5f
-  NMSSH: cd689ae535a1581a6dd9fd4600ff71247df510a6
   PKHUD: 98f3e4bc904b9c916f1c5bb6d765365b5357291b
-  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   Realm: 4dd457b6ed025041cf7efe05dae78c027ba842e0
   RealmSwift: 233af88fffe05ed7f9305eecef100d477c0c2c42
   SwCrypt: 0d1f951b8a993d6e107f4776ee0d72c1adafd1df
   SwiftGen: 3d5024a47ea79e408cded20763d7a17d18a4548c
   TagListView: a1c236d17960a0cf64156725a76ce6d73ebce2be
 
-PODFILE CHECKSUM: 4bffa24562c1bf0effb27887ed79f1efdacbf362
+PODFILE CHECKSUM: e0340aeb66997f4685a43b1d51d2aa3b3254a8ee
 
 COCOAPODS: 1.9.3

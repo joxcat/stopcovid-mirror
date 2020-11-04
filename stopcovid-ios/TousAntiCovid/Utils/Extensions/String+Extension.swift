@@ -32,7 +32,8 @@ extension String {
     
     var isUuidCode: Bool { self ~= "^[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}$" }
     var isShortCode: Bool { self ~= "^[A-Za-z0-9]{6}$" }
-    
+    var isPostalCode: Bool { self ~= "^[0-9]{5}$" }
+
     static func ~= (lhs: String, rhs: String) -> Bool {
         guard let regex = try? NSRegularExpression(pattern: rhs) else { return false }
         let range: NSRange = NSRange(location: 0, length: lhs.utf16.count)
@@ -78,6 +79,32 @@ extension String {
     func clearingSpecialCharacters() -> String {
         let pattern: String = "[^A-Za-z0-9]+"
         return replacingOccurrences(of: pattern, with: "", options: [.regularExpression])
+    }
+    
+    func formattingValueWithThousandsSeparatorIfPossible() -> String? {
+        if let numberValue = Int(self) {
+            return numberValue.formattedWithThousandsSeparator()
+        } else {
+            return self
+        }
+    }
+    
+    func accessibilityNumberFormattedString() -> String {
+        guard let intValue = Int(self) else { return self }
+        let numberValue: NSNumber = NSNumber(integerLiteral: intValue)
+        return NumberFormatter.localizedString(from: numberValue, number: .spellOut)
+    }
+    
+    func qrCode() -> UIImage? {
+        guard let data = data(using: .utf8) else { return nil }
+        if let filter = CIFilter(name: "CIQRCodeGenerator") {
+            filter.setValue(data, forKey: "inputMessage")
+            let transform: CGAffineTransform = CGAffineTransform(scaleX: 5, y: 5)
+            if let output = filter.outputImage?.transformed(by: transform) {
+                return UIImage(ciImage: output)
+            }
+        }
+        return nil
     }
     
 }

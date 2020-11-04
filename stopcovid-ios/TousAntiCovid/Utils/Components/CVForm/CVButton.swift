@@ -15,6 +15,8 @@ final class CVButton: UIButton {
     enum Style {
         case primary
         case secondary
+        case tertiary
+        case quaternary
     }
     
     var buttonStyle: Style = .primary { didSet { initUI() } }
@@ -33,12 +35,23 @@ final class CVButton: UIButton {
         titleLabel?.adjustsFontForContentSizeCategory = true
         adjustsImageSizeForAccessibilityContentSizeCategory = true
         layer.cornerRadius = Appearance.Button.cornerRadius
-        if buttonStyle == .primary {
+        updateButtonStyle()
+    }
+    
+    private func updateButtonStyle() {
+        switch buttonStyle {
+        case .primary:
             backgroundColor = Appearance.Button.Primary.backgroundColor
             setTitleColor(Appearance.Button.Primary.titleColor, for: .normal)
-        } else {
+        case .secondary:
             backgroundColor = Appearance.Button.Secondary.backgroundColor
             setTitleColor(Appearance.Button.Secondary.titleColor, for: .normal)
+        case .tertiary:
+            backgroundColor = Appearance.Button.Tertiary.backgroundColor
+            setTitleColor(Appearance.Button.Tertiary.titleColor, for: .normal)
+        case .quaternary:
+            backgroundColor = Appearance.Button.Quaternary.backgroundColor
+            setTitleColor(Appearance.Button.Quaternary.titleColor, for: .normal)
         }
     }
     

@@ -24,10 +24,15 @@ class CVTableViewController: UITableViewController {
     func reloadUI(animated: Bool = false, completion: (() -> ())? = nil) {
         rows = createRows()
         registerXibs()
-        if animated {
-            UIView.transition(with: tableView, duration: 0.2, options: [.transitionCrossDissolve], animations: {
-                self.tableView.reloadData()
-            }) { _ in
+        if #available(iOS 13.0, *) {
+            if animated {
+                UIView.transition(with: tableView, duration: 0.2, options: [.transitionCrossDissolve], animations: {
+                    self.tableView.reloadData()
+                }) { _ in
+                    completion?()
+                }
+            } else {
+                tableView.reloadData()
                 completion?()
             }
         } else {

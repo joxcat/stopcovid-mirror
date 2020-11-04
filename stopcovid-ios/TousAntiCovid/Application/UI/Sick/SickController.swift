@@ -300,36 +300,36 @@ final class SickController: CVTableViewController {
                   message: "manageDataController.quitStopCovid.confirmationDialog.message".localized,
                   okTitle: "common.yes".localized,
                   isOkDestructive: true,
-                  cancelTitle: "common.no".localized) {
-            switch ParametersManager.shared.apiVersion {
-            case .v3:
-                HUD.show(.progress)
-                RBManager.shared.unregisterV3 { [weak self] error, isErrorBlocking in
-                    HUD.hide()
-                    if error != nil && isErrorBlocking {
-                        self?.showAlert(title: "common.error".localized,
-                                        message: "common.error.server".localized,
-                                        okTitle: "common.ok".localized)
-                    } else {
-                        ParametersManager.shared.clearConfig()
-                        NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
+                  cancelTitle: "common.no".localized, handler:  {
+                    switch ParametersManager.shared.apiVersion {
+                    case .v3:
+                        HUD.show(.progress)
+                        RBManager.shared.unregisterV3 { [weak self] error, isErrorBlocking in
+                            HUD.hide()
+                            if error != nil && isErrorBlocking {
+                                self?.showAlert(title: "common.error".localized,
+                                                message: "common.error.server".localized,
+                                                okTitle: "common.ok".localized)
+                            } else {
+                                ParametersManager.shared.clearConfig()
+                                NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
+                            }
+                        }
+                    default:
+                        HUD.show(.progress)
+                        RBManager.shared.unregister { [weak self] error, isErrorBlocking in
+                            HUD.hide()
+                            if error != nil && isErrorBlocking {
+                                self?.showAlert(title: "common.error".localized,
+                                                message: "common.error.server".localized,
+                                                okTitle: "common.ok".localized)
+                            } else {
+                                ParametersManager.shared.clearConfig()
+                                NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
+                            }
+                        }
                     }
-                }
-            default:
-                HUD.show(.progress)
-                RBManager.shared.unregister { [weak self] error, isErrorBlocking in
-                    HUD.hide()
-                    if error != nil && isErrorBlocking {
-                        self?.showAlert(title: "common.error".localized,
-                                        message: "common.error.server".localized,
-                                        okTitle: "common.ok".localized)
-                    } else {
-                        ParametersManager.shared.clearConfig()
-                        NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
-                    }
-                }
-            }
-        }
+                  })
     }
 
 }

@@ -1,23 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="8PM-Xt-wlv" customClass="EmptyCell" customModule="StopCovid" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="104" id="8PM-Xt-wlv" customClass="EmptyCell" customModule="Proximity_France" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="104"/>
             <autoresizingMask key="autoresizingMask"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="8PM-Xt-wlv" id="Jyk-GG-2ie">
-                <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                <rect key="frame" x="0.0" y="0.0" width="414" height="104"/>
                 <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WpM-Eh-OVu">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="104"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="WpM-Eh-OVu" firstAttribute="leading" secondItem="Jyk-GG-2ie" secondAttribute="leading" id="62s-ro-wlT"/>
+                    <constraint firstAttribute="bottom" secondItem="WpM-Eh-OVu" secondAttribute="bottom" id="NMT-PH-Ydc"/>
+                    <constraint firstAttribute="trailing" secondItem="WpM-Eh-OVu" secondAttribute="trailing" id="eHO-j5-BS0"/>
+                    <constraint firstItem="WpM-Eh-OVu" firstAttribute="top" secondItem="Jyk-GG-2ie" secondAttribute="top" id="yYj-3I-6bc"/>
+                </constraints>
             </tableViewCellContentView>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-            <point key="canvasLocation" x="161" y="42"/>
+            <connections>
+                <outlet property="bottomConstraint" destination="NMT-PH-Ydc" id="2Wy-rb-7G7"/>
+                <outlet property="leadingConstraint" destination="62s-ro-wlT" id="NmK-5R-C32"/>
+                <outlet property="topConstraint" destination="yYj-3I-6bc" id="F4I-1C-eDe"/>
+                <outlet property="trailingConstraint" destination="eHO-j5-BS0" id="ngY-lH-YiU"/>
+            </connections>
+            <point key="canvasLocation" x="160.86956521739131" y="61.607142857142854"/>
         </tableViewCell>
     </objects>
 </document>

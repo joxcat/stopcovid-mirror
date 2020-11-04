@@ -29,6 +29,7 @@ final class InfoCenterController: CVTableViewController {
         updateTitle()
         reloadUI()
         addObservers()
+        InfoCenterManager.shared.fetchInfo(force: false)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -38,10 +39,10 @@ final class InfoCenterController: CVTableViewController {
     
     deinit {
         removeObservers()
+        deinitBlock()
     }
     
     private func initUI() {
-        tableView.contentInset.top = navigationChildController?.navigationBarHeight ?? 0.0
         tableView.tableHeaderView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 10.0))
         tableView.tableFooterView = UIView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 20.0))
         tableView.estimatedRowHeight = UITableView.automaticDimension
@@ -88,7 +89,10 @@ final class InfoCenterController: CVTableViewController {
                                      bottomInset: 10.0,
                                      textAlignment: .natural,
                                      titleFont: { Appearance.Cell.Text.headTitleFont }),
-                  associatedValue: info.tags,
+                  associatedValue: info,
+                  selectionActionWithCell: { [weak self] cell in
+                    self?.didTouchSharingFor(cell: cell, info: info)
+                  },
                   secondarySelectionAction: {
                     info.url?.openInSafari()
             })
@@ -103,6 +107,14 @@ final class InfoCenterController: CVTableViewController {
     
     private func makeNewInfoRead() {
         InfoCenterManager.shared.didReceiveNewInfo = false
+    }
+    
+    private func didTouchSharingFor(cell: CVTableViewCell, info: Info) {
+        let sharingText: String = String(format: "info.sharing.title".localized, info.title)
+        let activityItems: [Any?] = [sharingText]
+        let controller: UIActivityViewController = UIActivityViewController(activityItems: activityItems.compactMap { $0 }, applicationActivities: nil)
+        controller.excludedActivityTypes = [.saveToCameraRoll, .print]
+        present(controller, animated: true, completion: nil)
     }
 
 }

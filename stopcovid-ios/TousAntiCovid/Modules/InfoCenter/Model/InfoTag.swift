@@ -16,7 +16,7 @@ struct InfoTag: Codable {
     let labelKey: String
     let colorCode: String
     
-    var label: String { labelKey.infoCenterLocalized }
+    var label: String { labelKey.infoCenterLocalized.trimmingCharacters(in: .whitespaces) }
     var color: UIColor { UIColor(hexString: colorCode) }
     
 }

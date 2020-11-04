@@ -34,8 +34,34 @@ final class KeyFiguresManager: NSObject {
     var keyFigures: [KeyFigure] = []
     var featuredKeyFigures: [KeyFigure] { [KeyFigure](keyFigures.filter { $0.isFeatured }.prefix(3)) }
     
+    var displayDepartmentLevel: Bool {
+        return ParametersManager.shared.displayDepartmentLevel
+    }
+    
+    @UserDefault(key: .isDepartmentLevelActivated)
+    var isDepartmentLevelActivated: Bool = false {
+        didSet { notifyObservers() }
+    }
+    
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
+
+    @OptionalUserDefault(key: .currentPostalCode)
+    var currentPostalCode: String? {
+        didSet {
+            currentDepartmentName = departmentNameForPostalCode(currentPostalCode)
+            notifyObservers()
+        }
+    }
+    
+    @OptionalUserDefault(key: .currentDepartmentName)
+    var currentDepartmentName: String?
+    
+    var currentFormattedDepartmentNameAndPostalCode: String? {
+        guard isDepartmentLevelActivated else { return nil }
+        guard let departmentName = currentDepartmentName, let postalCode = currentPostalCode else { return nil }
+        return "\(departmentName) - \(postalCode)".uppercased()
+    }
     
     private var observers: [KeyFiguresObserverWrapper] = []
     
@@ -46,6 +72,61 @@ final class KeyFiguresManager: NSObject {
     
     func fetchKeyFigures() {
         fetchAllFiles()
+    }
+    
+    func isDepartmentSupportedForPostalCode(_ postalCode: String) -> Bool {
+        !keyFigures.compactMap { $0.departmentSpecificKeyFigureForPostalCode(postalCode) }.isEmpty
+    }
+    
+    func departmentNameForPostalCode(_ postalCode: String?) -> String? {
+        var departmentName: String?
+        for keyFigure in keyFigures {
+            if let departmentKeyFigure = keyFigure.departmentSpecificKeyFigureForPostalCode(postalCode) {
+                departmentName = departmentKeyFigure.label
+                break
+            }
+        }
+        return departmentName
+    }
+    
+    func updateLocation(from viewController: UIViewController) {
+        if currentPostalCode == nil {
+            defineNewPostalCode(from: viewController)
+        } else {
+            updatePostalCode(from: viewController)
+        }
+    }
+    
+    private func updatePostalCode(from viewController: UIViewController) {
+        let alertController: UIAlertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        alertController.addAction(UIAlertAction(title: "home.infoSection.updatePostalCode.alert.newPostalCode".localized, style: .default, handler: { [weak self] _ in
+            self?.defineNewPostalCode(from: viewController)
+        }))
+        alertController.addAction(UIAlertAction(title: "home.infoSection.updatePostalCode.alert.deletePostalCode".localized, style: .destructive, handler: { _ in
+            KeyFiguresManager.shared.currentPostalCode = nil
+        }))
+        alertController.addAction(UIAlertAction(title: "common.cancel".localized, style: .cancel))
+        viewController.present(alertController, animated: true, completion: nil)
+    }
+
+    private func defineNewPostalCode(from viewController: UIViewController, defaultValue: String? = nil) {
+        viewController.showTextFieldAlert("home.infoSection.newPostalCode.alert.title".localized, message: "home.infoSection.newPostalCode.alert.subtitle".localized, textFieldPlaceHolder: "home.infoSection.newPostalCode.alert.placeholder".localized, textFieldDefaultValue: defaultValue, keyboardType: UIKeyboardType.numberPad) { [weak self] textFieldValue in
+            guard textFieldValue.isPostalCode else {
+                viewController.showAlert(title: "home.infoSection.newPostalCode.alert.wrongPostalCode".localized, okTitle: "common.ok".localized, handler:  { [weak self] in
+                    self?.defineNewPostalCode(from: viewController, defaultValue: textFieldValue)
+                })
+                return
+            }
+            guard KeyFiguresManager.shared.isDepartmentSupportedForPostalCode(textFieldValue) else {
+                viewController.showAlert(title: "home.infoSection.newPostalCode.alert.unknownPostalCode".localized, okTitle: "common.ok".localized, handler:  { [weak self] in
+                    self?.defineNewPostalCode(from: viewController, defaultValue: textFieldValue)
+                })
+                return
+
+            }
+            KeyFiguresManager.shared.currentPostalCode = textFieldValue
+            viewController.showFlash()
+        }
     }
     
     private func addObserver() {

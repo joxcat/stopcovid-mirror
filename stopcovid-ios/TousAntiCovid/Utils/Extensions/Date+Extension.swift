@@ -19,6 +19,18 @@ extension Date {
         return formatter.string(from: self)
     }
     
+    func shortDateFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        return formatter.string(from: self).uppercased()
+    }
+    
+    func shortTimeFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: self).uppercased()
+    }
+    
     func dayMonthFormatted() -> String {
         let formatter: DateFormatter = DateFormatter()
         formatter.setLocalizedDateFormatFromTemplate("dMMMM")
@@ -54,6 +66,12 @@ extension Date {
     func dateByAddingDays(_ days: Int) -> Date {
         addingTimeInterval(Double(days) * 24.0 * 3600.0)
     }
+    
+    func dateByAddingYears(_ years: Int) -> Date {
+        var dateComponent: DateComponents = DateComponents()
+        dateComponent.year = years
+        return Calendar.current.date(byAdding: dateComponent, to: self)!
+    }
 
     func fullDateFormatted() -> String {
         let formatter: DateFormatter = DateFormatter()
@@ -74,17 +92,33 @@ extension Date {
     }
     
     #if !WIDGET
-    func relativelyFormatted() -> String {
+    func relativelyFormatted(prefixStringKey: String = "myHealthController.notification.update") -> String {
         if Calendar.current.isDateInToday(self) {
             let lastPart: String = String(format: "\("common.today".localized), %@", timeFormatted())
-            return String(format: "myHealthController.notification.update".localized, lastPart)
+            return String(format: prefixStringKey.localized, lastPart)
         } else if Calendar.current.isDateInYesterday(self) {
             let lastPart: String = String(format: "\("common.yesterday".localized), %@", timeFormatted())
-            return String(format: "myHealthController.notification.update".localized, lastPart)
+            return String(format: prefixStringKey.localized, lastPart)
         } else {
-            return String(format: "\("myHealthController.notification.update".localized), %@", dayMonthFormatted(), timeFormatted())
+            return String(format: "\(prefixStringKey.localized), %@", dayMonthFormatted(), timeFormatted())
         }
     }
+    
+    func accessibilityRelativelyFormattedDate(prefixStringKey: String = "myHealthController.notification.update") -> String {
+        let hourComponents: DateComponents = Calendar.current.dateComponents([.hour, .minute], from: self)
+        let accessibilityHour: String = DateComponentsFormatter.localizedString(from: hourComponents, unitsStyle: .spellOut) ?? ""
+        if Calendar.current.isDateInToday(self) {
+            let lastPart: String = String(format: "\("common.today".localized), %@", accessibilityHour)
+            return String(format: prefixStringKey.localized, lastPart)
+        } else if Calendar.current.isDateInYesterday(self) {
+            let lastPart: String = String(format: "\("common.yesterday".localized), %@", accessibilityHour)
+            return String(format: prefixStringKey.localized, lastPart)
+        } else {
+            let accessibilityDate: String = DateFormatter.localizedString(from: self, dateStyle: .medium, timeStyle: .none)
+            return String(format: "\(prefixStringKey.localized), %@", accessibilityDate, accessibilityHour)
+        }
+    }
+    
     
     func relativelyFormattedForWidget() -> String {
         String(format: "\("myHealthController.notification.update".localized), %@", dayMonthFormatted(), timeFormatted())

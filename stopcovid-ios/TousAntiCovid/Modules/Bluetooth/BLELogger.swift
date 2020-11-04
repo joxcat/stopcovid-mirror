@@ -12,8 +12,9 @@ import Foundation
 import ProximityNotification
 
 final class BLELogger: ProximityNotificationLoggerProtocol {
-
+    
     var minimumLogLevel: ProximityNotificationLoggerLevel = .error
-
-    func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: String) {}
+    
+    func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: String) {
+    }
 }

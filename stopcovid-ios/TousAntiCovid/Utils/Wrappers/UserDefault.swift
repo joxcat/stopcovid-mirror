@@ -40,17 +40,22 @@ extension UserDefault {
     enum Key: String {
         case isAppAlreadyInstalled = "isAppAlreadyInstalled_v2"
         case isOnboardingDone = "isOnboardingDone_v2"
+        case currentPostalCode
+        case currentDepartmentName
         case lastStringsUpdateDate
         case lastStringsLanguageCode
         case lastInitialStringsBuildNumber
         case lastMaintenanceUpdateDate
-        case lastReceivedApnsTimestamps
         case infoCenterLastUpdatedAt
+        case infoCenterLastManualUpdateTimestamp
         case infoCenterDidReceiveNewInfo
         case lastInfoLanguageCode
         case keyFiguresLastUpdatedAt
+        case lastInitialAttestationFormBuildNumber
+        case saveAttestationFieldsData
+        case isDepartmentLevelActivated
         
         case lastNotificationTimestamp
-    }
-
+        case showNewInfoNotification
+    }    
 }
