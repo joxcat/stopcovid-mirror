@@ -19,6 +19,7 @@ final class HomeViewController: CVTableViewController {
     var canActivateProximity: Bool { areNotificationsAuthorized == true && BluetoothStateManager.shared.isAuthorized && BluetoothStateManager.shared.isActivated }
     private let showCaptchaChallenge: (_ captcha: Captcha, _ didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), _ didCancelCaptcha: @escaping () -> ()) -> ()
     private let didTouchTestingSites: () -> ()
+    private let didTouchCovidAdvices: () -> ()
     private let didTouchDocument: () -> ()
     private let didTouchManageData: () -> ()
     private let didTouchPrivacy: () -> ()
@@ -29,6 +30,8 @@ final class HomeViewController: CVTableViewController {
     private var didTouchInfo: () -> ()
     private var didTouchKeyFigures: () -> ()
     private var didTouchDeclare: () -> ()
+    private var didTouchCovidInfo: () -> ()
+    private var didTouchUsefulLinks: () -> ()
     private let deinitBlock: () -> ()
     
     private var popRecognizer: InteractivePopGestureRecognizer?
@@ -40,10 +43,11 @@ final class HomeViewController: CVTableViewController {
     private var areNotificationsAuthorized: Bool?
     private weak var stateCell: StateAnimationCell?
     private var isWaitingForNeededInfo: Bool = true
-    
+
     init(didTouchAbout: @escaping () -> (),
          showCaptchaChallenge: @escaping (_ captcha: Captcha, _ didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), _ didCancelCaptcha: @escaping () -> ()) -> (),
          didTouchTestingSites: @escaping () -> (),
+         didTouchCovidAdvices: @escaping () -> (),
          didTouchDocument: @escaping () -> (),
          didTouchManageData: @escaping () -> (),
          didTouchPrivacy: @escaping () -> (),
@@ -53,8 +57,11 @@ final class HomeViewController: CVTableViewController {
          didTouchInfo: @escaping () -> (),
          didTouchKeyFigures: @escaping () -> (),
          didTouchDeclare: @escaping () -> (),
+         didTouchCovidInfo: @escaping () -> (),
+         didTouchUsefulLinks: @escaping () -> (),
          deinitBlock: @escaping () -> ()) {
         self.didTouchTestingSites = didTouchTestingSites
+        self.didTouchCovidAdvices = didTouchCovidAdvices
         self.didTouchDocument = didTouchDocument
         self.didTouchAbout = didTouchAbout
         self.didTouchManageData = didTouchManageData
@@ -66,6 +73,8 @@ final class HomeViewController: CVTableViewController {
         self.didTouchInfo = didTouchInfo
         self.didTouchKeyFigures = didTouchKeyFigures
         self.didTouchDeclare = didTouchDeclare
+        self.didTouchCovidInfo = didTouchCovidInfo
+        self.didTouchUsefulLinks = didTouchUsefulLinks
         self.deinitBlock = deinitBlock
         super.init(style: .plain)
     }
@@ -211,11 +220,12 @@ final class HomeViewController: CVTableViewController {
         })
         rows.append(stateRow)
         rows.append(activationButtonRow(isRegistered: RBManager.shared.isRegistered))
-        if RBManager.shared.lastStatusReceivedDate != nil {
+        if RBManager.shared.lastStatusReceivedDate != nil || RBManager.shared.isSick {
             rows.append(contentsOf: healthSectionRows(isAtRisk: RBManager.shared.isAtRisk))
         }
         rows.append(contentsOf: infoSectionRows())
-        if RBManager.shared.isRegistered {
+        rows.append(contentsOf: attestationSectionRows())
+        if RBManager.shared.isRegistered && !RBManager.shared.isSick {
             rows.append(contentsOf: declareSectionRows())
         }
         rows.append(contentsOf: sharingSectionRows())
@@ -256,24 +266,35 @@ final class HomeViewController: CVTableViewController {
         var rows: [CVRow] = []
         let healthSectionRow: CVRow = CVRow(title: "home.healthSection.title".localized,
                                              xibName: .textCell,
-                                             theme: CVRow.Theme(topInset: 20.0,
+                                             theme: CVRow.Theme(topInset: 30.0,
                                                                 bottomInset: 10.0,
                                                                 textAlignment: .natural,
                                                                 titleFont: { Appearance.Section.titleFont }))
         rows.append(healthSectionRow)
         let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
         let notificationDateString: String = notificationDate?.relativelyFormatted() ?? "N/A"
-        let contactStatusRow: CVRow = CVRow(title: isAtRisk ? "home.healthSection.contact.cellTitle".localized : "home.healthSection.noContact.cellTitle".localized,
-                                            subtitle: isAtRisk ? "home.healthSection.contact.cellSubtitle".localized : "home.healthSection.noContact.cellSubtitle".localized,
-                                            accessoryText: notificationDateString,
+        
+        let header: String? = RBManager.shared.isSick ? nil : notificationDateString
+        let standardtitle: String = isAtRisk ? "home.healthSection.contact.cellTitle".localized : "home.healthSection.noContact.cellTitle".localized
+        let standardSubtitle: String = isAtRisk ? "home.healthSection.contact.cellSubtitle".localized : "home.healthSection.noContact.cellSubtitle".localized
+        
+        let title: String = RBManager.shared.isSick ? "home.healthSection.isSick.standaloneTitle".localized : standardtitle
+        let subtitle: String? = RBManager.shared.isSick ? nil : standardSubtitle
+        
+        let startColor: UIColor = RBManager.shared.isSick ? Asset.Colors.gradientStartBlue.color : (isAtRisk ? Asset.Colors.gradientStartRed.color : Asset.Colors.gradientStartGreen.color)
+        let endColor: UIColor = RBManager.shared.isSick ? Asset.Colors.gradientEndBlue.color : (isAtRisk ? Asset.Colors.gradientEndRed.color : Asset.Colors.gradientEndGreen.color)
+        
+        let contactStatusRow: CVRow = CVRow(title: title,
+                                            subtitle: subtitle,
+                                            accessoryText: header,
                                             image: Asset.Images.healthCard.image,
                                             xibName: .contactStatusCell,
                                             theme: CVRow.Theme(topInset: 0.0,
-                                                               bottomInset: 0.0,
+                                                               bottomInset: RBManager.shared.isSick ? 0.0 : Appearance.Cell.leftMargin,
                                                                textAlignment: .natural,
                                                                titleColor: .white,
                                                                subtitleColor: .white),
-                                            associatedValue: isAtRisk,
+                                            associatedValue: (startColor, endColor),
                                             selectionAction: { [weak self] in
                                                 self?.didTouchHealth()
                                             }, willDisplay: { cell in
@@ -281,6 +302,19 @@ final class HomeViewController: CVTableViewController {
                                                 cell.accessoryType = .none
                                             })
         rows.append(contactStatusRow)
+        if !RBManager.shared.isSick {
+            let menuEntries: [GroupedMenuEntry] = [GroupedMenuEntry(image: Asset.Images.search.image,
+                                                                    title: "home.moreSection.testingSites".localized,
+                                                                    actionBlock: { [weak self] in
+                                                                        self?.didTouchTestingSites()
+                                                                    }),
+                                                   GroupedMenuEntry(image: Asset.Images.bubble.image,
+                                                                    title: "home.healthSection.menu.covidAdvices".localized,
+                                                                    actionBlock: { [weak self] in
+                                                                        self?.didTouchCovidAdvices()
+                                                                    })]
+            rows.append(contentsOf: menuRowsForEntries(menuEntries))
+        }
         return rows
     }
     
@@ -288,7 +322,7 @@ final class HomeViewController: CVTableViewController {
         var rows: [CVRow] = []
         let infoSectionRow: CVRow = CVRow(title: "home.infoSection.title".localized,
                                           xibName: .textCell,
-                                          theme: CVRow.Theme(topInset: 20.0,
+                                          theme: CVRow.Theme(topInset: 30.0,
                                                              bottomInset: 10.0,
                                                              textAlignment: .natural,
                                                              titleFont: { Appearance.Section.titleFont }))
@@ -362,7 +396,7 @@ final class HomeViewController: CVTableViewController {
                                            xibName: .lastInfoCell,
                                            theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
                                                               topInset: 0.0,
-                                                              bottomInset: 0.0,
+                                                              bottomInset: Appearance.Cell.leftMargin,
                                                               textAlignment: .natural),
                                            associatedValue: InfoCenterManager.shared.didReceiveNewInfo,
                                            selectionAction: { [weak self] in
@@ -374,6 +408,55 @@ final class HomeViewController: CVTableViewController {
                                            })
             rows.append(lastInfoRow)
         }
+        var row: CVRow = standardCardRow(title: "home.moreSection.covidInfo".localized,
+                                         image: Asset.Images.web.image,
+                                         actionBlock: { [weak self] in
+            self?.didTouchCovidInfo()
+        })
+        row.theme.imageSize = CGSize(width: 24.0, height: 24.0)
+        rows.append(row)
+        
+        return rows
+    }
+    
+    private func attestationSectionRows() -> [CVRow] {
+        var rows: [CVRow] = []
+        let attestationSectionRow: CVRow = CVRow(title: "home.attestationSection.title".localized,
+                                             xibName: .textCell,
+                                             theme: CVRow.Theme(topInset: 30.0,
+                                                                bottomInset: 10.0,
+                                                                textAlignment: .natural,
+                                                                titleFont: { Appearance.Section.titleFont }))
+        rows.append(attestationSectionRow)
+        
+        let attestationsCount: Int = AttestationsManager.shared.attestations.filter { !$0.isExpired }.count
+        let subtitle: String
+        switch attestationsCount {
+        case 0:
+            subtitle = "home.attestationSection.cell.subtitle.noAttestations".localized
+        case 1:
+            subtitle = "home.attestationSection.cell.subtitle.oneAttestation".localized
+        default:
+            subtitle = String(format: "home.attestationSection.cell.subtitle.multipleAttestations".localized, attestationsCount)
+        }
+        
+        let attestationRow: CVRow = CVRow(title: "home.attestationSection.cell.title".localized,
+                                          subtitle: subtitle,
+                                          image: Asset.Images.attestationCard.image,
+                                          xibName: .attestationCell,
+                                          theme: CVRow.Theme(backgroundColor: Appearance.tintColor,
+                                                             topInset: 0.0,
+                                                             bottomInset: 0.0,
+                                                             textAlignment: .natural,
+                                                             titleColor: Appearance.Button.Primary.titleColor,
+                                                             subtitleColor: Appearance.Button.Primary.titleColor),
+                                          selectionAction: { [weak self] in
+                                            self?.didTouchDocument()
+                                          }, willDisplay: { cell in
+                                            cell.selectionStyle = .none
+                                            cell.accessoryType = .none
+                                          })
+        rows.append(attestationRow)
         return rows
     }
     
@@ -385,7 +468,7 @@ final class HomeViewController: CVTableViewController {
         var rows: [CVRow] = []
         let declareSectionRow: CVRow = CVRow(title: "home.declareSection.title".localized,
                                              xibName: .textCell,
-                                             theme: CVRow.Theme(topInset: 20.0,
+                                             theme: CVRow.Theme(topInset: 30.0,
                                                                 bottomInset: 10.0,
                                                                 textAlignment: .natural,
                                                                 titleFont: { Appearance.Section.titleFont }))
@@ -412,7 +495,7 @@ final class HomeViewController: CVTableViewController {
         var rows: [CVRow] = []
         let sharingSectionRow: CVRow = CVRow(title: "home.sharingSection.title".localized,
                                              xibName: .textCell,
-                                             theme: CVRow.Theme(topInset: 20.0,
+                                             theme: CVRow.Theme(topInset: 30.0,
                                                                 bottomInset: 10.0,
                                                                 textAlignment: .natural,
                                                                 titleFont: { Appearance.Section.titleFont }))
@@ -439,36 +522,75 @@ final class HomeViewController: CVTableViewController {
         var rows: [CVRow] = []
         let moreSectionRow: CVRow = CVRow(title: "home.moreSection.title".localized,
                                           xibName: .textCell,
-                                          theme: CVRow.Theme(topInset: 20.0,
+                                          theme: CVRow.Theme(topInset: 30.0,
                                                              bottomInset: 10.0,
                                                              textAlignment: .natural,
                                                              titleFont: { Appearance.Section.titleFont }))
         rows.append(moreSectionRow)
-        let menuRow: CVRow = CVRow(xibName: .menuCell,
-                                   theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
-                                                      topInset: 0.0,
-                                                      bottomInset: 0.0,
-                                                      textAlignment: .natural,
-                                                      titleFont: { Appearance.Cell.Text.standardFont },
-                                                      titleColor: Asset.Colors.tint.color,
-                                                      imageTintColor: Appearance.Cell.Image.tintColor),
-                                   selectionAction: { [weak self] in
-                                    self?.didTouchTestingSites()
-                                   }, secondarySelectionAction: { [weak self] in
-                                    self?.didTouchDocument()
-                                   }, tertiarySelectionAction: { [weak self] in
-                                    self?.didTouchManageData()
-                                   }, quaternarySelectionAction: { [weak self] in
-                                    self?.didTouchPrivacy()
-                                   }, quinarySelectionAction: { [weak self] in
-                                    self?.didTouchAbout()
-                                    
-                                   }, willDisplay: { cell in
-                                    cell.selectionStyle = .none
-                                    cell.accessoryType = .none
-                                   })
-        rows.append(menuRow)
+        
+        let menuEntries: [GroupedMenuEntry] = [GroupedMenuEntry(image: Asset.Images.usefulLinks.image,
+                                                                title: "home.moreSection.usefulLinks".localized,
+                                                                actionBlock: { [weak self] in
+                                                                    self?.didTouchUsefulLinks()
+                                                                }),
+                                               GroupedMenuEntry(image: Asset.Images.manageData.image,
+                                                                title: "home.moreSection.manageData".localized,
+                                                                actionBlock: { [weak self] in
+                                                                    self?.didTouchManageData()
+                                                                }),
+                                               GroupedMenuEntry(image: Asset.Images.privacy.image,
+                                                                title: "home.moreSection.privacy".localized,
+                                                                actionBlock: { [weak self] in
+                                                                    self?.didTouchPrivacy()
+                                                                }),
+                                               GroupedMenuEntry(image: Asset.Images.about.image,
+                                                                title: "home.moreSection.aboutStopCovid".localized,
+                                                                actionBlock: { [weak self] in
+                                                                    self?.didTouchAbout()
+                                                                })]
+        rows.append(contentsOf: menuRowsForEntries(menuEntries))
         return rows
+    }
+    
+    private func menuRowsForEntries(_ entries: [GroupedMenuEntry]) -> [CVRow] {
+        let rows: [CVRow] = entries.map {
+            var row: CVRow = standardCardRow(title: $0.title, image: $0.image, actionBlock: $0.actionBlock)
+            row.theme.imageSize = CGSize(width: 24.0, height: 24.0)
+            if $0 == entries.first {
+                row.theme.maskedCorners = .top
+                row.theme.separatorLeftInset = 2 * Appearance.Cell.leftMargin
+                row.theme.separatorRightInset = Appearance.Cell.leftMargin
+            } else if $0 == entries.last {
+                row.theme.maskedCorners = .bottom
+            } else {
+                row.theme.maskedCorners = .none
+                row.theme.separatorLeftInset = 2 * Appearance.Cell.leftMargin
+                row.theme.separatorRightInset = Appearance.Cell.leftMargin
+            }
+            return row
+        }
+        return rows
+    }
+    
+    private func standardCardRow(title: String, image: UIImage, actionBlock: @escaping () -> ()) -> CVRow {
+        let row: CVRow = CVRow(title: title,
+                               image: image,
+                               xibName: .standardCardCell,
+                               theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                                   topInset: 0.0,
+                                                   bottomInset: 0.0,
+                                                   textAlignment: .natural,
+                                                   titleFont: { Appearance.Cell.Text.standardFont },
+                                                   titleColor: Appearance.Cell.Text.headerTitleColor,
+                                                   imageTintColor: Appearance.Cell.Text.headerTitleColor),
+                               selectionAction: {
+                                actionBlock()
+                               },
+                               willDisplay: { cell in
+                                cell.selectionStyle = .none
+                                cell.accessoryType = .none
+                               })
+        return row
     }
     
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -488,6 +610,7 @@ final class HomeViewController: CVTableViewController {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.backgroundColor = Appearance.Controller.cardTableViewBackgroundColor
         tableView.showsVerticalScrollIndicator = false
+        tableView.canCancelContentTouches = true
         navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
@@ -516,9 +639,11 @@ final class HomeViewController: CVTableViewController {
         BluetoothStateManager.shared.addObserver(self)
         InfoCenterManager.shared.addObserver(self)
         KeyFiguresManager.shared.addObserver(self)
+        AttestationsManager.shared.addObserver(self)
         NotificationCenter.default.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(statusDataChanged), name: .statusDataDidChange, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(widgetDidRequestRegister), name: .widgetDidRequestRegister, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didTouchProximityReactivationNotification), name: .didTouchProximityReactivationNotification, object: nil)
     }
     
     private func removeObservers() {
@@ -533,6 +658,7 @@ final class HomeViewController: CVTableViewController {
         guard !isChangingState else { return }
         isChangingState = true
         if isOn {
+            cancelReactivationReminder()
             if RBManager.shared.isRegistered {
                 if RBManager.shared.currentEpoch == nil {
                     processStatusV3()
@@ -553,6 +679,7 @@ final class HomeViewController: CVTableViewController {
             RBManager.shared.isProximityActivated = false
             RBManager.shared.stopProximityDetection()
             isChangingState = false
+                showDeactivationReminderActionSheet()
         }
     }
     
@@ -567,7 +694,7 @@ final class HomeViewController: CVTableViewController {
                 }, { [weak self] in
                     self?.isChangingState = false
                 })
-            case let .failure(error):
+            case .failure:
                 self.showAlert(title: "common.error".localized,
                                message: "common.error.server".localized,
                                okTitle: "common.retry".localized,
@@ -595,6 +722,7 @@ final class HomeViewController: CVTableViewController {
                                    okTitle: "common.ok".localized)
                 }
             } else {
+                NotificationsManager.shared.scheduleUltimateNotification(minHour: ParametersManager.shared.minHourContactNotif, maxHour: ParametersManager.shared.maxHourContactNotif)
                 self.processRegistrationDone()
             }
         }
@@ -624,7 +752,7 @@ final class HomeViewController: CVTableViewController {
                                     self?.didChangeSwitchValue(isOn: true)
                     })
                 }
-            } else {
+             } else {
                 self.processRegistrationDone()
             }
             completion()
@@ -662,10 +790,41 @@ final class HomeViewController: CVTableViewController {
         didChangeSwitchValue(isOn: true)
     }
     
+    @objc private func didTouchProximityReactivationNotification() {
+        dismiss(animated: true) {
+            self.didChangeSwitchValue(isOn: true)
+        }
+    }
+    
     private func setInteractiveRecognizer() {
         guard let navigationController = navigationController else { return }
         popRecognizer = InteractivePopGestureRecognizer(controller: navigationController)
         navigationController.interactivePopGestureRecognizer?.delegate = popRecognizer
+    }
+    
+    private func showDeactivationReminderActionSheet() {
+        let alertController: UIAlertController = UIAlertController(title: "home.deactivate.actionSheet.title".localized,
+                                                                   message: "home.deactivate.actionSheet.subtitle".localized,
+                                                                   preferredStyle: .actionSheet)
+        ParametersManager.shared.proximityReactivationReminderHours.forEach { hours in
+            let hoursString: String = hours == 1 ? "home.deactivate.actionSheet.hours.singular" : "home.deactivate.actionSheet.hours.plural"
+            alertController.addAction(UIAlertAction(title: String(format: hoursString.localized, Int(hours)), style: .default) { [weak self] _ in
+                let hoursToUse: Double = Double(hours)
+                 self?.triggerReactivationReminder(hours: hoursToUse)
+            })
+        }
+        alertController.addAction(UIAlertAction(title: "home.deactivate.actionSheet.noReminder".localized, style: .cancel) { [weak self] _ in
+            self?.cancelReactivationReminder()
+        })
+        present(alertController, animated: true)
+    }
+    
+    private func triggerReactivationReminder(hours: Double) {
+        NotificationsManager.shared.scheduleProximityReactivationNotification(hours: hours)
+    }
+    
+    private func cancelReactivationReminder() {
+        NotificationsManager.shared.cancelProximityReactivationNotification()
     }
 
 }
@@ -713,4 +872,12 @@ extension HomeViewController: KeyFiguresChangesObserver {
         reloadUI(animated: true)
     }
 
+}
+
+extension HomeViewController: AttestationsChangesObserver {
+    
+    func attestationsDidUpdate() {
+        reloadUI(animated: true)
+    }
+    
 }

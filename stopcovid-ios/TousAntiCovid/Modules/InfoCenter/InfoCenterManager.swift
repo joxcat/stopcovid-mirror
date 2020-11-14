@@ -44,9 +44,6 @@ final class InfoCenterManager: NSObject {
     private var rawInfo: [Info] = []
     private var tags: [InfoTag] = []
     
-    @UserDefault(key: .infoCenterLastManualUpdateTimestamp)
-    private var infoCenterLastManualUpdateTimestamp: Int = 0
-    
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
     
@@ -66,15 +63,12 @@ final class InfoCenterManager: NSObject {
         tags.filter { ids.contains($0.id) }
     }
     
-    func fetchInfo(force: Bool = true) {
+    func fetchInfo(force: Bool = false) {
         if force {
-            fetchAllFiles()
+            lastUpdatedAt = 0
+            fetchAllFiles(force: true)
         } else {
-            let elapstedTime: Int = Int(Date().timeIntervalSince1970) - infoCenterLastManualUpdateTimestamp
-            if elapstedTime >= InfoCenterConstant.manualUpdatesMinInterval {
-                infoCenterLastManualUpdateTimestamp = Int(Date().timeIntervalSince1970)
-                fetchAllFiles()
-            }
+            fetchAllFiles()
         }
     }
     
@@ -100,13 +94,15 @@ extension InfoCenterManager {
         URL(string: "\(InfoCenterConstant.baseUrl)/info-labels-\(languageCode).json")!
     }
     
-    private func fetchAllFiles() {
+    private func fetchAllFiles(force: Bool = false) {
         let isInitialFetch: Bool = lastUpdatedAt == 0
-        fetchLastUpdatedAtFile { areUpdatesAvailable, languageChanged in
+        fetchLastUpdatedAtFile { areUpdatesAvailable, languageChanged, lastUpdatedAt, informAboutNews in
             guard areUpdatesAvailable || languageChanged else { return }
             self.fetchTagsFile {
                 self.fetchInfoCenterFile {
                     self.fetchLabelsFile(languageCode: Locale.currentLanguageCode) {
+                        self.lastUpdatedAt = lastUpdatedAt
+                        guard !force && informAboutNews else { return }
                         DispatchQueue.main.async {
                             self.didReceiveNewInfo = true
                             if self.isOnboardingDone && areUpdatesAvailable && !isInitialFetch {
@@ -122,21 +118,22 @@ extension InfoCenterManager {
         }
     }
     
-    private func fetchLastUpdatedAtFile(_ completion: @escaping (_ areUpdatesAvailable: Bool, _ languageChanged: Bool) -> ()) {
+    private func fetchLastUpdatedAtFile(_ completion: @escaping (_ areUpdatesAvailable: Bool, _ languageChanged: Bool, _ lastUpdatedAt: Int, _ informAboutNews: Bool) -> ()) {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
         let dataTask: URLSessionDataTask = session.dataTask(with: InfoCenterConstant.lastUpdatedAtUrl) { data, response, error in
             guard let data = data else { return }
             do {
                 let lastUpdatedAtJson: InfoLastUpdatedAt = try JSONDecoder().decode(InfoLastUpdatedAt.self, from: data)
-                let areUpdatesAvailable: Bool = self.lastUpdatedAt < lastUpdatedAtJson.lastUpdatedAt
+                let areJsonUpdatesAvailable: Bool = self.lastUpdatedAt < lastUpdatedAtJson.lastUpdatedAt
+                let lastUpdateWasMoreThan5MinsAgo: Bool = Date().timeIntervalSince1970 - Double(self.lastUpdatedAt) > 5.0 * 60.0
+                let areUpdatesAvailable: Bool = areJsonUpdatesAvailable || lastUpdateWasMoreThan5MinsAgo
                 let languageChanged: Bool = self.lastInfoLanguageCode != Locale.currentLanguageCode
-                self.lastUpdatedAt = lastUpdatedAtJson.lastUpdatedAt
                 DispatchQueue.main.async {
-                    completion(areUpdatesAvailable, languageChanged)
+                    completion(areUpdatesAvailable, languageChanged, lastUpdatedAtJson.lastUpdatedAt, areJsonUpdatesAvailable)
                 }
             } catch {
                 DispatchQueue.main.async {
-                    completion(false, false)
+                    completion(false, false, 0, false)
                 }
             }
         }

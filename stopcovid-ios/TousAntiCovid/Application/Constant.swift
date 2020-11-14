@@ -16,6 +16,7 @@ enum Constant {
     static let defaultLanguageCode: String = "en"
     static let maxPushDatesCount: Int = 100
     static let secondsBeforeStatusRetry: Double = 60.0
+    static let proximityReactivationHours: [Int] = [1, 2, 4, 8, 12]
     
     #if targetEnvironment(simulator)
     static let isSimulator: Bool = true
@@ -36,12 +37,14 @@ enum Constant {
     enum Server {
         
         static var baseUrl: URL { URL(string: "https://api.stopcovid.gouv.fr/api/\(ParametersManager.shared.apiVersion.rawValue)")! }
+
         static let publicKey: Data = Data(base64Encoded: "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEAc9IDt6qJq453SwyWPB94JaLB2VfTAcL43YVtMr3HhDCd22gKaQXIbX1d+tNhfvaKM51sxeaXziPjntUzbTNiw==")!
         static var certificate: Data { Bundle.main.fileDataFor(fileName: "api.stopcovid.gouv.fr", ofType: "pem") ?? Data() }
         static var resourcesCertificate: Data { Bundle.main.fileDataFor(fileName: "app.stopcovid.gouv.fr", ofType: "pem") ?? Data() }
         static let jsonVersion: Int = 25
         static let baseJsonUrl: String = "https://app.stopcovid.gouv.fr/json/version-\(jsonVersion)"
         static let configUrl: URL = URL(string: "\(baseJsonUrl)/config.json")!
+
     }
     
 }

@@ -66,6 +66,8 @@
                 <outlet property="containerView" destination="faZ-Oj-qsR" id="2BS-bW-I2K"/>
                 <outlet property="cvImageView" destination="tWP-6P-BRL" id="nJy-wR-w9s"/>
                 <outlet property="cvTitleLabel" destination="EWG-kA-o2l" id="NWJ-LQ-kkv"/>
+                <outlet property="imageHeightConstraint" destination="Ief-ro-Vq0" id="Yqt-0A-FRx"/>
+                <outlet property="imageWidthConstraint" destination="H4e-Vq-Lc7" id="G0W-sb-hu0"/>
                 <outlet property="leadingConstraint" destination="my4-No-q6a" id="dlV-ZI-6VV"/>
                 <outlet property="topConstraint" destination="9WR-Xo-meM" id="1B5-IX-0Uw"/>
                 <outlet property="trailingConstraint" destination="LrM-nr-AY1" id="cDx-Sf-5Z5"/>

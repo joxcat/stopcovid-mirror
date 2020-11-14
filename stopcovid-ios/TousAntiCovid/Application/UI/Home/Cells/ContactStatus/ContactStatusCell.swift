@@ -31,9 +31,9 @@ final class ContactStatusCell: CVTableViewCell {
     }
     
     private func setupContent(row: CVRow) {
-        guard let atRisk = row.associatedValue as? Bool else { return }
-        gradientView.startColor = atRisk ? Asset.Colors.gradientStartRed.color : Asset.Colors.gradientStartGreen.color
-        gradientView.endColor = atRisk ? Asset.Colors.gradientEndRed.color : Asset.Colors.gradientEndGreen.color
+        guard let gradientColors = row.associatedValue as? (startColor: UIColor, endColor: UIColor) else { return }
+        gradientView.startColor = gradientColors.startColor
+        gradientView.endColor = gradientColors.endColor
     }
     
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {

@@ -72,7 +72,9 @@ final class SendHistoryController: CVTableViewController {
     
     private func sendButtonPressed() {
         HUD.show(.progress)
-        RBManager.shared.report(code: symptomsParams.code, symptomsOrigin: symptomsParams.date) { error in
+        RBManager.shared.report(code: symptomsParams.code,
+                                symptomsOrigin: symptomsParams.symptomsDate,
+                                positiveTestDate: symptomsParams.positiveTestDate) { error in
             HUD.hide()
             if let error = error {
                 if (error as NSError).code == -1 {
@@ -89,23 +91,17 @@ final class SendHistoryController: CVTableViewController {
                 }
                 self.bottomButtonContainerController?.unlockButtons()
             } else {
-                switch ParametersManager.shared.apiVersion {
-                case .v3:
-                    RBManager.shared.unregisterV3 { error, _ in
-                        ParametersManager.shared.clearConfig()
-                        RBManager.shared.isSick = true
-                        NotificationsManager.shared.removeAllPendingNotifications()
-                        self.dismissBlock()
-                    }
-                default:
-                    RBManager.shared.unregister { error, _ in
-                        ParametersManager.shared.clearConfig()
-                        RBManager.shared.isSick = true
-                        self.dismissBlock()
-                    }
-                }
+                self.showSuccessAlert()
             }
         }
+    }
+    
+    private func showSuccessAlert() {
+        showAlert(title: "sendHistoryController.successAlert.title".localized,
+                  message: "sendHistoryController.successAlert.message".localized,
+                  okTitle: "sendHistoryController.successAlert.button.learnMore".localized, handler: {
+            NotificationCenter.default.post(name: .dismissAllAndShowRecommandations, object: nil)
+        })
     }
     
 }

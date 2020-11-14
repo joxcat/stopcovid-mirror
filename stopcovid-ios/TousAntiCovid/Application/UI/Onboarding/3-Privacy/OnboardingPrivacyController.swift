@@ -72,11 +72,13 @@ final class OnboardingPrivacyController: OnboardingController {
                                          bottomInset: 15.0,
                                          textAlignment: .natural,
                                          titleFont: { Appearance.Cell.Text.standardFont },
+                                         titleColor: Appearance.tintColor,
                                          separatorLeftInset: Appearance.Cell.leftMargin),
                       selectionAction: {
                         URL(string: link.url)?.openInSafari()
                       }, willDisplay: { cell in
                         cell.cvTitleLabel?.accessibilityTraits = .button
+                        cell.accessoryType = .none
                 })
             } ?? []
             return [sectionRow] + linkRows

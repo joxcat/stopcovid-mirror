@@ -31,8 +31,29 @@ final class PrivacyManager: RemoteFileSyncManager {
     static let shared: PrivacyManager = PrivacyManager()
     var privacySections: [PrivacySection] = []
     
+    @UserDefault(key: .lastInitialPrivacyBuildNumber)
+    private var lastInitialPrivacyBuildNumber: String? = nil
+    
+    @UserDefault(key: .lastPrivacyUpdateDate)
+    private var lastUpdateDate: Date = .distantPast
+    
     private var observers: [PrivacyObserverWrapper] = []
     
+    override func canUpdateData() -> Bool {
+        let now: Date = Date()
+        let lastFetchIsTooOld: Bool = now.timeIntervalSince1970 - lastUpdateDate.timeIntervalSince1970 >= RemoteFileConstant.minDurationBetweenUpdatesInSeconds
+        let languageChanged: Bool = lastLanguageCode != Locale.currentLanguageCode
+        return lastFetchIsTooOld || languageChanged
+    }
+    
+    override func saveUpdatedAt() {
+        self.lastUpdateDate = Date()
+    }
+    
+    override func lastBuildNumber() -> String? { lastInitialPrivacyBuildNumber }
+    override func saveLastBuildNumber(_ buildNumber: String) {
+        lastInitialPrivacyBuildNumber = buildNumber
+    }
     
     override func workingDirectoryName() -> String { "Privacy" }
     

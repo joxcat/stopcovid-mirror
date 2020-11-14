@@ -1,0 +1,22 @@
+[
+	{
+        "section": "Info Coronavirus",
+        "description": "Site web du gouvernement \"Informations Coronavirus\".",
+        "links": [
+	        {
+                "label": "En savoir plus",
+                "url": "https://www.gouvernement.fr/info-coronavirus"
+            }
+        ]
+    },
+    {
+        "section": "Ameli.fr",
+        "description": "Vous vous êtes déclaré positif dans l'application ? Vous allez être contacté par l’Assurance Maladie.",
+        "links": [
+	        {
+                "label": "En savoir plus",
+                "url": "https://www.ameli.fr/assure/covid-19/tester-alerter-proteger-comprendre-la-strategie-pour-stopper-lepidemie/contact-tracing-arreter-les-chaines-de-transmission"
+            }
+        ]
+    }
+]

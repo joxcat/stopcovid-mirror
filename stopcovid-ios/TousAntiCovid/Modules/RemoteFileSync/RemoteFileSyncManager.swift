@@ -12,17 +12,9 @@ import UIKit
 import ServerSDK
 
 class RemoteFileSyncManager: NSObject {
-
-    var remoteUrl: URL?
     
-    @UserDefault(key: .lastStringsUpdateDate)
-    private var lastUpdateDate: Date = .distantPast
-    
-    @UserDefault(key: .lastStringsLanguageCode)
-    private var lastLanguageCode: String? = nil
-    
-    @UserDefault(key: .lastInitialStringsBuildNumber)
-    private var lastInitialStringsBuildNumber: String? = nil
+    @UserDefault(key: .lastRemoteFileLanguageCode)
+    var lastLanguageCode: String? = nil
     
     func start() {
         writeInitialFileIfNeeded()
@@ -47,12 +39,17 @@ class RemoteFileSyncManager: NSObject {
         return directoryUrl
     }
     
+    func canUpdateData() -> Bool { fatalError("Must be overriden") }
+    func saveUpdatedAt() { fatalError("Must be overriden") }
+    func lastBuildNumber() -> String? { fatalError("Must be overriden") }
+    func saveLastBuildNumber(_ buildNumber: String) { fatalError("Must be overriden") }
+    
     private func addObserver() {
         NotificationCenter.default.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     @objc private func appDidBecomeActive() {
-        guard !RemoteFileConstant.useOnlyLocalStrings && canUpdateStrings() else { return }
+        guard !RemoteFileConstant.useOnlyLocalStrings && canUpdateData() else { return }
         fetchLastFile(languageCode: Locale.currentLanguageCode)
     }
     
@@ -65,7 +62,7 @@ class RemoteFileSyncManager: NSObject {
                 let localUrl: URL = self.localFileUrl(for: languageCode)
                 if self.processReceivedData(data) {
                     try data.write(to: localUrl)
-                    self.lastUpdateDate = Date()
+                    self.saveUpdatedAt()
                 } else {
                     self.loadLocalFile()
                 }
@@ -95,19 +92,12 @@ class RemoteFileSyncManager: NSObject {
         let fileUrl: URL = initialFileUrl(for: Locale.currentLanguageCode)
         let destinationFileUrl: URL = createWorkingDirectoryIfNeeded().appendingPathComponent(fileUrl.lastPathComponent)
         let currentBuildNumber: String = UIApplication.shared.buildNumber
-        let isNewAppVersion: Bool = lastInitialStringsBuildNumber != currentBuildNumber
+        let isNewAppVersion: Bool = lastBuildNumber() != currentBuildNumber
         if !FileManager.default.fileExists(atPath: destinationFileUrl.path) || RemoteFileConstant.useOnlyLocalStrings || isNewAppVersion {
             try? FileManager.default.removeItem(at: destinationFileUrl)
             try? FileManager.default.copyItem(at: fileUrl, to: destinationFileUrl)
-            lastInitialStringsBuildNumber = currentBuildNumber
+            saveLastBuildNumber(currentBuildNumber)
         }
-    }
-    
-    private func canUpdateStrings() -> Bool {
-        let now: Date = Date()
-        let lastFetchIsTooOld: Bool = now.timeIntervalSince1970 - lastUpdateDate.timeIntervalSince1970 >= RemoteFileConstant.minDurationBetweenUpdatesInSeconds
-        let languageChanged: Bool = lastLanguageCode != Locale.currentLanguageCode
-        return lastFetchIsTooOld || languageChanged
     }
     
 }

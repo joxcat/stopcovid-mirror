@@ -16,15 +16,17 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
 
     static let shared: NotificationsManager = NotificationsManager()
 
+    var waitingToReactivateProximity: Bool = false
+    
     @UserDefault(key: .showNewInfoNotification)
     var showNewInfoNotification: Bool = true
     
     @UserDefault(key: .lastNotificationTimestamp)
     private var lastNotificationTimeStamp: Double = 0.0
-
-    override init() {
-        super.init()
+    
+    func start() {
         UNUserNotificationCenter.current().delegate = self
+        addObservers()
     }
 
     func areNotificationsAuthorized(completion: ((_ authorized: Bool) -> ())? = nil) {
@@ -36,12 +38,14 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     func requestAuthorization(completion: ((_ granted: Bool) -> ())? = nil) {
-        UIApplication.shared.registerForRemoteNotifications()
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound], completionHandler: { (granted, _) in
-            DispatchQueue.main.async {
-                completion?(granted)
-            }
-        })
+        DispatchQueue.main.async {
+            UIApplication.shared.registerForRemoteNotifications()
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound], completionHandler: { (granted, _) in
+                DispatchQueue.main.async {
+                    completion?(granted)
+                }
+            })
+        }
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
@@ -50,11 +54,28 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         UIApplication.shared.clearBadge()
+        if response.notification.request.identifier == NotificationsContant.Identifier.proximityReactivation {
+            if UIApplication.shared.applicationState == .active {
+                NotificationCenter.default.post(name: .didTouchProximityReactivationNotification, object: nil)
+            } else {
+                waitingToReactivateProximity = true
+            }
+        }
         completionHandler()
     }
     
+    private func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(appDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+    }
+    
+    @objc private func appDidBecomeActive() {
+        if waitingToReactivateProximity {
+            waitingToReactivateProximity = false
+            NotificationCenter.default.post(name: .didTouchProximityReactivationNotification, object: nil)
+        }
+    }
+    
     func scheduleAtRiskNotification(minHour: Int?, maxHour: Int?) {
-        guard !RBManager.shared.isSick else { return }
         let content = UNMutableNotificationContent()
         content.title = "notification.atRisk.title".localized
         content.body = "notification.atRisk.message".localized
@@ -85,12 +106,11 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         let trigger: UNTimeIntervalNotificationTrigger? = delay == 0 ? nil : UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
         let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.atRisk, content: content, trigger: trigger)
         requestAuthorization { _ in
-            UNUserNotificationCenter.current().add(request) { _ in }
+            UNUserNotificationCenter.current().add(request) { error in }
         }
     }
     
     func triggerRestartNotification() {
-        guard !RBManager.shared.isSick else { return }
         checkIfNotificationIsAlreadySentOrStillVisible(for: NotificationsContant.Identifier.error) { alreadySentOrStillVisible in
             guard !alreadySentOrStillVisible else { return }
             let content = UNMutableNotificationContent()
@@ -105,7 +125,6 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     }
     
     func triggerGenericNotification(title: String, body: String) {
-        guard !RBManager.shared.isSick else { return }
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = "(" + Date().fullDateFormatted() + ") " + body
@@ -118,7 +137,6 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
 
     
     func triggerDeviceTimeErrorNotification() {
-        guard !RBManager.shared.isSick else { return }
         checkIfNotificationIsAlreadySentOrStillVisible(for: NotificationsContant.Identifier.deviceTimeError) { alreadySentOrStillVisible in
             guard !alreadySentOrStillVisible else { return }
             let content = UNMutableNotificationContent()
@@ -133,7 +151,6 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     func triggerProximityServiceRunningNotification(minHoursBetweenNotif: Int) {
-        guard !RBManager.shared.isSick else { return }
         guard shouldShowNotification(minHoursBetweenNotif) else { return }
         let content = UNMutableNotificationContent()
         content.title = "notification.proximityServiceRunning.title".localized
@@ -146,7 +163,6 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     }
 
     func triggerProximityServiceNotRunningNotification(minHoursBetweenNotif: Int) {
-        guard !RBManager.shared.isSick else { return }
         guard shouldShowNotification(minHoursBetweenNotif) else { return }
         let content = UNMutableNotificationContent()
         content.title = "notification.proximityServiceNotRunning.title".localized
@@ -159,7 +175,6 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     }
     
     func triggerInfoCenterNewsAvailableNotification() {
-        guard !RBManager.shared.isSick else { return }
         guard showNewInfoNotification else { return }
         guard UIApplication.shared.applicationState != .active else { return }
         let content = UNMutableNotificationContent()
@@ -173,10 +188,9 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
     }
     
     func scheduleUltimateNotification(minHour: Int?, maxHour: Int?) {
-        guard !RBManager.shared.isSick else { return }
         let content = UNMutableNotificationContent()
-        content.title = "notification.error.title".localized
-        content.body = "notification.error.message".localized
+        content.title = "notification.ultimateStatus.title".localized
+        content.body = "notification.ultimateStatus.message".localized
         content.sound = .default
         content.badge = 1
         let now: Date = Date()
@@ -206,12 +220,34 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.ultimate, content: content, trigger: trigger)
         requestAuthorization { _ in
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [NotificationsContant.Identifier.ultimate])
-            UNUserNotificationCenter.current().add(request)
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [NotificationsContant.Identifier.ultimate])
+            UNUserNotificationCenter.current().add(request) { error in }
         }
+    }
+    
+    func scheduleProximityReactivationNotification(hours: Double) {
+        let content = UNMutableNotificationContent()
+        content.title = "notification.reactivationReminder.title".localized
+        content.body = "notification.reactivationReminder.body".localized
+        content.sound = .default
+        content.badge = 1
+        let trigger: UNTimeIntervalNotificationTrigger? = UNTimeIntervalNotificationTrigger(timeInterval: hours * 3600.0, repeats: false)
+        let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.proximityReactivation, content: content, trigger: trigger)
+        requestAuthorization { _ in
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [NotificationsContant.Identifier.proximityReactivation])
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [NotificationsContant.Identifier.proximityReactivation])
+            UNUserNotificationCenter.current().add(request) { error in }
+        }
+    }
+    
+    func cancelProximityReactivationNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [NotificationsContant.Identifier.proximityReactivation])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [NotificationsContant.Identifier.proximityReactivation])
     }
     
     func removeAllPendingNotifications() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }
 
     private func shouldShowNotification(_ minHoursBetweenNotif: Int) -> Bool {

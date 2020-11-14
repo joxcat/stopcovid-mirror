@@ -43,11 +43,14 @@ extension UserDefault {
         case currentPostalCode
         case currentDepartmentName
         case lastStringsUpdateDate
-        case lastStringsLanguageCode
+        case lastPrivacyUpdateDate
+        case lastLinksUpdateDate
+        case lastRemoteFileLanguageCode
         case lastInitialStringsBuildNumber
+        case lastInitialPrivacyBuildNumber
+        case lastInitialLinksBuildNumber
         case lastMaintenanceUpdateDate
         case infoCenterLastUpdatedAt
-        case infoCenterLastManualUpdateTimestamp
         case infoCenterDidReceiveNewInfo
         case lastInfoLanguageCode
         case keyFiguresLastUpdatedAt
@@ -57,5 +60,6 @@ extension UserDefault {
         
         case lastNotificationTimestamp
         case showNewInfoNotification
-    }    
+    }
+    
 }

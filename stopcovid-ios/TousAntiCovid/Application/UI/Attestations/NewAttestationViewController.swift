@@ -148,7 +148,7 @@ final class NewAttestationViewController: CVTableViewController {
             }
             guard let qrCodeDisplayableString = AttestationsManager.shared.generateQRCodeDisplayableString(for: self.fieldValues) else {
                 self.showGenerationErrorAlert()
-                return
+                 return
             }
             guard let qrCodeFooter = AttestationsManager.shared.generateQRCodeFooter(for: self.fieldValues) else {
                 self.showGenerationErrorAlert()

@@ -18,6 +18,4 @@ enum InfoCenterConstant {
     static let infoCenterUrl: URL = URL(string: "\(baseUrl)/info-center.json")!
     static let lastUpdatedAtUrl: URL = URL(string: "\(baseUrl)/info-center-lastupdate.json")!
     
-    static let manualUpdatesMinInterval: Int = 5 * 60 // 5 mins.
-    
 }

@@ -14,9 +14,10 @@ extension NSNotification.Name {
     
     static var selectTab: NSNotification.Name { NSNotification.Name(rawValue: "selectTab") }
     static var changeAppState: NSNotification.Name { NSNotification.Name(rawValue: "changeAppState") }
-    static var didTouchAtRiskNotification: NSNotification.Name = NSNotification.Name(rawValue: "didTouchAtRiskNotification")
+    static var didTouchProximityReactivationNotification: NSNotification.Name = NSNotification.Name(rawValue: "didTouchProximityReactivationNotification")
     static var didEnterCodeFromDeeplink: NSNotification.Name = NSNotification.Name(rawValue: "didEnterCodeFromDeeplink")
     static var newAttestationFromDeeplink: NSNotification.Name = NSNotification.Name(rawValue: "newAttestationFromDeeplink")
     static var widgetDidRequestRegister: NSNotification.Name = NSNotification.Name(rawValue: "widgetDidRequestRegister")
+    static var dismissAllAndShowRecommandations: NSNotification.Name = NSNotification.Name(rawValue: "dismissAllAndShowRecommandations")
     
 }

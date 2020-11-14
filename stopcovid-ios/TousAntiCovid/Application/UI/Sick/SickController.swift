@@ -16,12 +16,14 @@ import ServerSDK
 
 final class SickController: CVTableViewController {
     
-    var didTouchAbout: (() -> ())?
-    var didTouchReadMore: (() -> ())?
+    private let didTouchAbout: () -> ()
+    private let didTouchReadMore: () -> ()
+    private let didTouchCautionMeasures: () -> ()
     
-    init(didTouchAbout: (() -> ())?, didTouchReadMore: (() -> ())?) {
+    init(didTouchAbout: @escaping () -> (), didTouchReadMore: @escaping () -> (), didTouchCautionMeasures: @escaping () -> ()) {
         self.didTouchAbout = didTouchAbout
         self.didTouchReadMore = didTouchReadMore
+        self.didTouchCautionMeasures = didTouchCautionMeasures
         super.init(style: .plain)
     }
     
@@ -44,10 +46,7 @@ final class SickController: CVTableViewController {
     }
     
     private func updateTitle() {
-        title = RBManager.shared.isSick ? "sickController.sick.title".localized : "myHealthController.title".localized
-        if RBManager.shared.isSick {
-            navigationChildController?.updateTitle(title)
-        }
+        title = RBManager.shared.isSick ? "myHealthController.sick.title".localized : "myHealthController.title".localized
     }
     
     override func createRows() -> [CVRow] {
@@ -108,23 +107,23 @@ final class SickController: CVTableViewController {
     }
     
     private func sickRows() -> [CVRow] {
-        let titleRow: CVRow = CVRow.titleRow(title: title) { [weak self] cell in
-            self?.navigationChildController?.updateLabel(titleLabel: cell.cvTitleLabel, containerView: cell)
-        }
+        var rows: [CVRow] = []
         let imageRow: CVRow = CVRow(image: Asset.Images.sick.image,
                                     xibName: .onboardingImageCell,
                                     theme: CVRow.Theme(topInset: 20.0))
+        rows.append(imageRow)
         let declarationTextRow: CVRow = CVRow(title: "sickController.sick.mainMessage.title".localized,
                                               subtitle: "sickController.sick.mainMessage.subtitle".localized,
                                               xibName: .textCell,
                                               theme: CVRow.Theme(topInset: 40.0, bottomInset: 40.0))
-        
+        rows.append(declarationTextRow)
         let recommendationsButton: CVRow = CVRow(title: "sickController.button.recommendations".localized,
                                         xibName: .buttonCell,
                                         theme: CVRow.Theme(topInset: 10.0, bottomInset: 10.0, buttonStyle: .primary),
                                         selectionAction: {
             URL(string: "sickController.button.recommendations.url".localized)?.openInSafari()
         })
+        rows.append(recommendationsButton)
         let phoneButton: CVRow = CVRow(title: "informationController.step.appointment.buttonTitle".localized,
                                             xibName: .buttonCell,
                                             theme: CVRow.Theme(topInset: 10.0, bottomInset: 10.0, buttonStyle: .primary),
@@ -132,26 +131,22 @@ final class SickController: CVTableViewController {
             guard let self = self else { return }
             "callCenter.phoneNumber".localized.callPhoneNumber(from: self)
         })
-        let unregisterButton: CVRow = CVRow(title: "manageDataController.quitStopCovid.button".localized,
+        rows.append(phoneButton)
+        let measuresButton: CVRow = CVRow(title: "sickController.button.cautionMeasures".localized,
                                             xibName: .buttonCell,
-                                            theme: CVRow.Theme(topInset: 10.0, bottomInset: 10.0, buttonStyle: .secondary),
+                                            theme: CVRow.Theme(topInset: 10.0, bottomInset: 10.0, buttonStyle: .primary),
                                             selectionAction: { [weak self] in
-            self?.unregisterButtonPressed()
+                                                self?.didTouchCautionMeasures()
         })
-        return [titleRow, imageRow, declarationTextRow, recommendationsButton, phoneButton, unregisterButton]
+        rows.append(measuresButton)
+        return rows
     }
     
     private func baseRows() -> [CVRow] {
         var rows: [CVRow] = []
-        if RBManager.shared.isSick {
-            let titleRow: CVRow = CVRow.titleRow(title: title) { [weak self] cell in
-                self?.navigationChildController?.updateLabel(titleLabel: cell.cvTitleLabel, containerView: cell)
-            }
-            rows.append(titleRow)
-        }
         let imageRow: CVRow = CVRow(image: Asset.Images.diagnosis.image,
                                     xibName: .imageCell,
-                                    theme: CVRow.Theme(topInset: RBManager.shared.isSick ? 0.0 : 20.0,
+                                    theme: CVRow.Theme(topInset: 20.0,
                                                        imageRatio: 375.0 / 233.0))
         rows.append(imageRow)
         return rows
@@ -227,12 +222,7 @@ final class SickController: CVTableViewController {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.backgroundColor = Appearance.Controller.cardTableViewBackgroundColor
         tableView.showsVerticalScrollIndicator = false
-        if RBManager.shared.isSick {
-            navigationController?.setNavigationBarHidden(true, animated: false)
-            navigationChildController?.updateRightBarButtonItem(UIBarButtonItem(title: "common.about".localized, style: .plain, target: self, action: #selector(didTouchAboutButton)))
-        } else {
-            navigationItem.leftBarButtonItem = UIBarButtonItem(title: "common.close".localized, style: .plain, target: self, action: #selector(didTouchCloseButton))
-        }
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "common.close".localized, style: .plain, target: self, action: #selector(didTouchCloseButton))
     }
     
     @objc private func didTouchCloseButton() {
@@ -250,7 +240,7 @@ final class SickController: CVTableViewController {
     }
     
     @objc private func didTouchAboutButton() {
-        didTouchAbout?()
+        didTouchAbout()
     }
     
     @objc private func statusDataChanged() {
@@ -265,7 +255,7 @@ final class SickController: CVTableViewController {
     private func didTouchMoreButton() {
         let alertController: UIAlertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alertController.addAction(UIAlertAction(title: "myHealthController.alert.atitudeToAdopt".localized, style: .default, handler: { [weak self] _ in
-            self?.didTouchReadMore?()
+            self?.didTouchReadMore()
         }))
         alertController.addAction(UIAlertAction(title: "sickController.state.deleteNotification".localized, style: .destructive, handler: { [weak self] _ in
             self?.showNotificationDeletionAlert()
@@ -275,7 +265,7 @@ final class SickController: CVTableViewController {
     }
     
     private func didTouchReadMoreButton() {
-        didTouchReadMore?()
+        didTouchReadMore()
     }
     
     private func showNotificationDeletionAlert() {

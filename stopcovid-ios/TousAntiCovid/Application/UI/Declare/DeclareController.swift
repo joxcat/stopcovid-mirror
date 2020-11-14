@@ -34,9 +34,7 @@ final class DeclareController: CVTableViewController {
         updateTitle()
         initUI()
         reloadUI()
-        if !RBManager.shared.isSick {
-            addObservers()
-        }
+        addObservers()
     }
     
     deinit {
@@ -64,9 +62,16 @@ final class DeclareController: CVTableViewController {
                                                           topInset: 0.0,
                                                           bottomInset: 0.0))
             rows.append(textRow)
+            let codeNotReceivedButtonRow: CVRow = CVRow(title: "declareController.codeNotReceived.buttonTitle".localized,
+                                            xibName: .buttonCell,
+                                            theme: CVRow.Theme(topInset: 0.0, bottomInset: 0.0, buttonStyle: .quaternary),
+                                            selectionAction: { [weak self] in
+                                                self?.didTouchCodeNotReceivedButton()
+            })
+            rows.append(codeNotReceivedButtonRow)
             let flashButtonRow: CVRow = CVRow(title: "sickController.button.flash".localized,
                                               xibName: .buttonCell,
-                                              theme: CVRow.Theme(topInset: 20.0, bottomInset: 0.0),
+                                              theme: CVRow.Theme(topInset: 0.0, bottomInset: 0.0),
                                               selectionAction: { [weak self] in
                                                 self?.didTouchFlashButton()
             }, willDisplay: { cell in
@@ -80,13 +85,6 @@ final class DeclareController: CVTableViewController {
                                                 self?.didTouchTapButton()
             })
             rows.append(tapButtonRow)
-            let codeNotReceivedButtonRow: CVRow = CVRow(title: "declareController.codeNotReceived.buttonTitle".localized,
-                                            xibName: .buttonCell,
-                                            theme: CVRow.Theme(topInset: 20.0, bottomInset: 20.0, buttonStyle: .quaternary),
-                                            selectionAction: { [weak self] in
-                                                self?.didTouchCodeNotReceivedButton()
-            })
-            rows.append(codeNotReceivedButtonRow)
         } else {
             let textRow: CVRow = CVRow(title: "declareController.notRegistered.mainMessage.title".localized,
                                        subtitle: "declareController.notRegistered.mainMessage.subtitle".localized,

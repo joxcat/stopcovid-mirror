@@ -150,7 +150,7 @@ final class ManageDataController: CVTableViewController {
                   cancelTitle: "common.no".localized, handler:  { [weak self] in
                     AttestationsManager.shared.clearAllData()
                     self?.showFlash()
-                  })
+                })
     }
     
     private func eraseLocalHistoryButtonPressed() {

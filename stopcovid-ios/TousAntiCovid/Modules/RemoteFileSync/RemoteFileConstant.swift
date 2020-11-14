@@ -9,7 +9,7 @@
 //
 
 
-import UIKit
+import Foundation
 
 enum RemoteFileConstant {
 

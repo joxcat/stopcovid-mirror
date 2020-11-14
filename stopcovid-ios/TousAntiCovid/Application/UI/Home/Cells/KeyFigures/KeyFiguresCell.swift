@@ -75,15 +75,15 @@ final class KeyFiguresCell: CVTableViewCell {
     }
     
     private func configureStackViews() {
-        valuesParentStackView.threshold = .accessibilityMedium
+        valuesParentStackView.threshold = UIStackView.thresholdCategorySize
         valuesParentStackView.thresholdAxis = valuesParentStackView.axis
         valuesParentStackView.thresholdAlignment = valuesParentStackView.alignment
-        valuesParentStackView.thresholdSpacing = 20.0
-        primaryValuesContainerStackView.threshold = .accessibilityMedium
+        valuesParentStackView.thresholdSpacing = 30.0
+        primaryValuesContainerStackView.threshold = UIStackView.thresholdCategorySize
         primaryValuesContainerStackView.thresholdAxis = .vertical
         primaryValuesContainerStackView.thresholdAlignment = .leading
-        primaryValuesContainerStackView.thresholdSpacing = primaryValuesContainerStackView.spacing
-        secondaryValuesContainerStackView.threshold = .accessibilityMedium
+        primaryValuesContainerStackView.thresholdSpacing = 10.0
+        secondaryValuesContainerStackView.threshold = UIStackView.thresholdCategorySize
         secondaryValuesContainerStackView.thresholdAxis = .vertical
         secondaryValuesContainerStackView.thresholdAlignment = .leading
         secondaryValuesContainerStackView.thresholdSpacing = secondaryValuesContainerStackView.spacing

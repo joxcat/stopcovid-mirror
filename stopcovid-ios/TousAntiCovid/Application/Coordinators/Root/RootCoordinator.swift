@@ -16,7 +16,6 @@ final class RootCoordinator: Coordinator {
     enum State {
         case onboarding
         case main
-        case off
         case unknown
     }
 
@@ -43,15 +42,11 @@ final class RootCoordinator: Coordinator {
         if #available(iOS 14.0, *) {
             WidgetManager.shared.isOnboardingDone = isOnboardingDone
         }
-        if RBManager.shared.isSick {
-            switchTo(state: .off)
-        } else {
-            switchTo(state: currentNotBlockingState())
-        }
+        switchTo(state: currentState())
         addObservers()
     }
     
-    private func currentNotBlockingState() -> State {
+    private func currentState() -> State {
         isOnboardingDone ? .main : .onboarding
     }
 
@@ -77,8 +72,6 @@ final class RootCoordinator: Coordinator {
             coordinator = OnboardingCoordinator(parent: self) { [weak self] in self?.onboardingDidEnd() }
         case .main:
             coordinator = HomeCoordinator(parent: self)
-        case .off:
-            coordinator = SickBlockingCoordinator(parent: self)
         default:
             return nil
         }
@@ -88,7 +81,7 @@ final class RootCoordinator: Coordinator {
 
     private func onboardingDidEnd() {
         isOnboardingDone = true
-        switchTo(state: currentNotBlockingState())
+        switchTo(state: currentState())
     }
 
 }
@@ -124,14 +117,9 @@ extension RootCoordinator {
     }
     
     @objc private func statusDataChanged() {
-        if RBManager.shared.isSick {
-            guard state != .off else { return }
-            switchTo(state: .off)
-        } else {
-            let state: State = currentNotBlockingState()
-            guard self.state != state else { return }
-            switchTo(state: state)
-        }
+        let state: State = currentState()
+        guard self.state != state else { return }
+        switchTo(state: state)
     }
     
     @objc private func changeAppStateNotification(_ notification: Notification) {

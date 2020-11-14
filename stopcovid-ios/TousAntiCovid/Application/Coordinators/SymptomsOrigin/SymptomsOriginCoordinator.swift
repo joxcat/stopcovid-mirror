@@ -25,9 +25,19 @@ final class SymptomsOriginCoordinator: Coordinator {
     
     private func start(symptomsParams: SymptomsDeclarationParams) {
         navigationController?.pushViewController(SymptomsOriginController(symptomsParams: symptomsParams, didChooseDateBlock: { [weak self] symptomsParams in
-            self?.showSendHistory(symptomsParams: symptomsParams)
+            if symptomsParams.symptomsDate == nil {
+                self?.showPositiveTestDate(symptomsParams: symptomsParams)
+            } else {
+                self?.showSendHistory(symptomsParams: symptomsParams)
+            }
         }, deinitBlock: { [weak self] in
             self?.didDeinit()
+        }), animated: true)
+    }
+    
+    private func showPositiveTestDate(symptomsParams: SymptomsDeclarationParams) {
+        navigationController?.pushViewController(PositiveTestController(symptomsParams: symptomsParams, didChooseDateBlock: { [weak self] symptomsParams in
+            self?.showSendHistory(symptomsParams: symptomsParams)
         }), animated: true)
     }
     

@@ -38,12 +38,19 @@ public final class ParametersManager: NSObject {
         guard let span = valueFor(name: "app.preSymptomsSpan") as? Double else { return nil }
         return Int(span)
     }
+    var positiveSampleSpan: Int? {
+        guard let span = valueFor(name: "app.positiveSampleSpan") as? Double else { return nil }
+        return Int(span)
+    }
 
     public var minHoursBetweenVisibleNotif: Int {
         guard let hour = valueFor(name: "app.push.minHoursBetweenVisibleNotifications") as? Double else { return 24 }
         return Int(hour)
     }
-
+    public var proximityReactivationReminderHours: [Double] {
+        valueFor(name: "app.proximityReactivation.reminderHours") as? [Double] ?? [1.0, 2.0, 4.0, 8.0, 12.0]
+        
+    }
     private var minStatusRetryDuration: Double? {
         guard let hour = valueFor(name: "app.minStatusRetryDuration") as? Double else { return nil }
         return Double(hour)
@@ -60,7 +67,7 @@ public final class ParametersManager: NSObject {
     
     public var qrCodeDeletionHours: Double { valueFor(name: "app.qrCode.deletionHours") as? Double ?? 24.0}
     public var qrCodeExpiredHours: Double { valueFor(name: "app.qrCode.expiredHours") as? Double ?? 1.0}
-    public var qrCodeFormattedString: String { valueFor(name: "app.qrCode.formattedString") as? String ?? "Cree le: <creationDate> a <creationHour>;\nNom: <lastname>;\nPrenom: <firstname>;\nNaissance: <dob> a <cityofbirth>;\nAdresse: <address> <zip> <city>;\nSortie: <datetime-day> a <datetime-hour>;\nMotif: <reason-code>" }
+    public var qrCodeFormattedString: String { valueFor(name: "app.qrCode.formattedString") as? String ?? "Cree le: <creationDate> a <creationHour>;\nNom: <lastname>;\nPrenom: <firstname>;\nNaissance: <dob> a <cityofbirth>;\nAdresse: <address> <zip> <city>;\nSortie: <datetime-day> a <datetime-hour>;\nMotifs: <reason-code>" }
     public var qrCodeFormattedStringDisplayed: String { valueFor(name: "app.qrCode.formattedStringDisplayed") as? String ?? "Créé le <creationDate> à <creationHour>\nNom : <lastname>;\nPrénom : <firstname>;\nNaissance : <dob> à <cityofbirth>\nAdresse : <address> <zip> <city>\nSortie : <datetime-day> à <datetime-hour>\nMotif: <reason-code>" }
     public var qrCodeFooterString: String { valueFor(name: "app.qrCode.footerString") as? String ?? "<firstname> - <datetime-day>, <datetime-hour>\n<reason-shortlabel>" }
     
@@ -122,7 +129,6 @@ public final class ParametersManager: NSObject {
         }
     }
     
-    // TODO: Fetch config using background url session.
     public func fetchConfig(_ completion: @escaping (_ result: Result<Double, Error>) -> ()) {
         let requestId: String = UUID().uuidString
         completions[requestId] = completion
@@ -149,6 +155,7 @@ public final class ParametersManager: NSObject {
     private func distributeUpdatedConfig() {
         RBManager.shared.proximitiesRetentionDurationInDays = dataRetentionPeriod
         RBManager.shared.preSymptomsSpan = preSymptomsSpan
+        RBManager.shared.positiveSampleSpan = positiveSampleSpan
         if RBManager.shared.isProximityActivated {
             RBManager.shared.stopProximityDetection()
             RBManager.shared.startProximityDetection()

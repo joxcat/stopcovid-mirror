@@ -14,6 +14,7 @@ import Foundation
 struct SymptomsDeclarationParams {
 
     let code: String
-    var date: Date?
+    var symptomsDate: Date?
+    var positiveTestDate: Date?
     
 }

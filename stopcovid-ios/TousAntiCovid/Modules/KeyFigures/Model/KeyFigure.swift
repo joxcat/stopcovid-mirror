@@ -66,7 +66,12 @@ struct KeyFigure: Codable {
     var currentTrend: Trend { trend ?? .same }
     
     var formattedDate: String {
-        Date(timeIntervalSince1970: Double(lastUpdate)).relativelyFormatted(prefixStringKey: "keyFigures.update")
+        switch category {
+        case .health:
+            return Date(timeIntervalSince1970: Double(lastUpdate)).relativelyFormattedDay(prefixStringKey: "keyFigures.update")
+        case .app:
+            return Date(timeIntervalSince1970: Double(lastUpdate)).relativelyFormatted(prefixStringKey: "keyFigures.update")
+        }
     }
     
     var currentDepartmentSpecificKeyFigure: KeyFigureDepartment? {

@@ -116,7 +116,7 @@ final class SymptomsOriginController: CVTableViewController {
     }
     
     private func didSelectOrigin(date: Date?) {
-        symptomsParams.date = date
+        symptomsParams.symptomsDate = date
         didChooseDateBlock(symptomsParams)
     }
     

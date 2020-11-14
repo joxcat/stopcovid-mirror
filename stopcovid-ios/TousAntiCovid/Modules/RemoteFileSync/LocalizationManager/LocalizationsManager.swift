@@ -31,7 +31,29 @@ final class LocalizationsManager: RemoteFileSyncManager {
     static let shared: LocalizationsManager = LocalizationsManager()
     var strings: [String: String] = [:]
     
+    @UserDefault(key: .lastInitialStringsBuildNumber)
+    private var lastInitialStringsBuildNumber: String? = nil
+    
+    @UserDefault(key: .lastStringsUpdateDate)
+    private var lastUpdateDate: Date = .distantPast
+    
     private var observers: [LocalizationsObserverWrapper] = []
+    
+    override func canUpdateData() -> Bool {
+        let now: Date = Date()
+        let lastFetchIsTooOld: Bool = now.timeIntervalSince1970 - lastUpdateDate.timeIntervalSince1970 >= RemoteFileConstant.minDurationBetweenUpdatesInSeconds
+        let languageChanged: Bool = lastLanguageCode != Locale.currentLanguageCode
+        return lastFetchIsTooOld || languageChanged
+    }
+    
+    override func saveUpdatedAt() {
+        self.lastUpdateDate = Date()
+    }
+    
+    override func lastBuildNumber() -> String? { lastInitialStringsBuildNumber }
+    override func saveLastBuildNumber(_ buildNumber: String) {
+        lastInitialStringsBuildNumber = buildNumber
+    }
     
     override func workingDirectoryName() -> String { "Strings" }
     

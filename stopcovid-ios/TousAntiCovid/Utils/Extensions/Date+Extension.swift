@@ -104,6 +104,18 @@ extension Date {
         }
     }
     
+    func relativelyFormattedDay(prefixStringKey: String = "myHealthController.notification.update") -> String {
+        if Calendar.current.isDateInToday(self) {
+            let lastPart: String = String(format: "\("common.today".localized)")
+            return String(format: prefixStringKey.localized, lastPart)
+        } else if Calendar.current.isDateInYesterday(self) {
+            let lastPart: String = String(format: "\("common.yesterday".localized)")
+            return String(format: prefixStringKey.localized, lastPart)
+        } else {
+            return String(format: "\(prefixStringKey.localized)", dayMonthFormatted())
+        }
+    }
+    
     func accessibilityRelativelyFormattedDate(prefixStringKey: String = "myHealthController.notification.update") -> String {
         let hourComponents: DateComponents = Calendar.current.dateComponents([.hour, .minute], from: self)
         let accessibilityHour: String = DateComponentsFormatter.localizedString(from: hourComponents, unitsStyle: .spellOut) ?? ""

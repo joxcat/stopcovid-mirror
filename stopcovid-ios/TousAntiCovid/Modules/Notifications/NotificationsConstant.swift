@@ -18,6 +18,7 @@ enum NotificationsContant {
         static let error: String = "errorNotification"
         static let deviceTimeError: String = "deviceTimeErrorNotification"
         static let ultimate: String = "ultimateNotification"
+        static let proximityReactivation: String = "proximityReactivationNotification"
     }
     
 }

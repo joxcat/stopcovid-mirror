@@ -30,6 +30,8 @@ final class SickCoordinator: Coordinator {
             self?.showAbout()
         }, didTouchReadMore: { [weak self] in
             self?.showInformation()
+        }, didTouchCautionMeasures: { [weak self] in
+            self?.showGestures()
         }))
         self.navigationController = navigationController
         presentingController?.present(navigationController, animated: true)
@@ -43,6 +45,11 @@ final class SickCoordinator: Coordinator {
     private func showInformation() {
         let informationCoordinator: InformationCoordinator = InformationCoordinator(presentingController: navigationController, parent: self)
         addChild(coordinator: informationCoordinator)
+    }
+    
+    private func showGestures() {
+        let gesturesCoordinator: GesturesCoordinator = GesturesCoordinator(presentingController: navigationController, parent: self)
+        addChild(coordinator: gesturesCoordinator)
     }
     
 }

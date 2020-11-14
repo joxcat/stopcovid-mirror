@@ -2,11 +2,11 @@
   "config": [
 	{
       "name": "lastUpdate",
-      "value": "28 October 2020"
+      "value": "3 november 2020"
     },
     {
       "name": "version",
-      "value": 3
+      "value": 5
     },
     {
       "name": "app.apiVersion",
@@ -25,6 +25,10 @@
       "value": false
     },
     {
+      "name": "app.proximityReactivation.reminderHours",
+      "value": [1.0, 2.0, 4.0, 8.0, 12.0]
+    },
+    {
       "name": "app.push.minHoursBetweenVisibleNotifications",
       "value": 13.0
     },
@@ -34,15 +38,15 @@
     },
     {
       "name": "app.qrCode.expiredHours",
-      "value": 1.0
+      "value": 8.0
     },
     {
       "name": "app.qrCode.formattedString",
-      "value": "Cree le: <creationDate> a <creationHour>;\nNom: <lastname>;\nPrenom: <firstname>;\nNaissance: <dob> a <cityofbirth>;\nAdresse: <address> <zip> <city>;\nSortie: <datetime-day> a <datetime-hour>;\nMotif: <reason-code>"
+      "value": "Cree le: <creationDate> a <creationHour>;\nNom: <lastname>;\nPrenom: <firstname>;\nNaissance: <dob> a <cityofbirth>;\nAdresse: <address> <zip> <city>;\nSortie: <datetime-day> a <datetime-hour>;\nMotifs: <reason-code>"
     },
     {
       "name": "app.qrCode.formattedStringDisplayed",
-      "value": "Créé le <creationDate> à <creationHour>\nNom : <lastname>\nPrénom : <firstname>\nNaissance : <dob> à <cityofbirth>\nAdresse : <address> <zip> <city>\nSortie : <datetime-day> à <datetime-hour>\nMotif: <reason-code>"
+      "value": "Créé le <creationDate> à <creationHour>\nNom : <lastname>\nPrénom : <firstname>\nNaissance : <dob> à <cityofbirth>\nAdresse : <address> <zip> <city>\nSortie : <datetime-day> à <datetime-hour>\nCode motif: <reason-code>"
     },
     {
       "name": "app.qrCode.footerString",
@@ -57,6 +61,14 @@
       "value": 14
     },
     {
+      "name": "app.preSymptomsSpan",
+      "value": 2
+    },
+    {
+      "name": "app.positiveSampleSpan",
+      "value": 7
+    },
+    {
       "name": "app.quarantinePeriod",
       "value": 14
     },
@@ -66,11 +78,7 @@
     },
     {
       "name": "app.minStatusRetryDuration",
-      "value": 3.0
-    },
-    {
-      "name": "app.preSymptomsSpan",
-      "value": 2
+      "value": 0.6
     },
     {
       "name": "app.appAvailability",

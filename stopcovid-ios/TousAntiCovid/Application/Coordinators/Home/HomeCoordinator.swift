@@ -10,6 +10,7 @@
 
 import UIKit
 import PKHUD
+import RobertSDK
 
 final class HomeCoordinator: WindowedCoordinator {
 
@@ -39,6 +40,8 @@ final class HomeCoordinator: WindowedCoordinator {
             self?.showCaptchaChallenge(captcha: captcha, didEnterCaptcha: didEnterCaptcha, didCancelCaptcha: didCancelCaptcha)
         }, didTouchTestingSites: { [weak self] in
             self?.showTestingSites()
+        }, didTouchCovidAdvices: { [weak self] in
+            self?.showCovidAdvices()
         }, didTouchDocument: { [weak self] in
             self?.showAttestations()
         }, didTouchManageData: { [weak self] in
@@ -55,6 +58,10 @@ final class HomeCoordinator: WindowedCoordinator {
             self?.showKeyFigures()
         }, didTouchDeclare: { [weak self] in
             self?.showDeclare()
+        }, didTouchCovidInfo: { [weak self] in
+            self?.showCovidInfo()
+        }, didTouchUsefulLinks: { [weak self] in
+            self?.showUsefulLinks()
         }, deinitBlock: { [weak self] in
             self?.didDeinit()
         }))
@@ -74,22 +81,35 @@ final class HomeCoordinator: WindowedCoordinator {
     }
     
     private func showAbout() {
-        let aboutCoordinator: AboutCoordinator = AboutCoordinator(presentingController: navigationController, parent: self)
+        let aboutCoordinator: AboutCoordinator = AboutCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: aboutCoordinator)
     }
     
+    private func showUsefulLinks() {
+        let linksCoordinator: LinksCoordinator = LinksCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
+        addChild(coordinator: linksCoordinator)
+    }
+    
     private func showPrivacy() {
-        let privacyCoordinator: PrivacyCoordinator = PrivacyCoordinator(presentingController: navigationController, parent: self)
+        let privacyCoordinator: PrivacyCoordinator = PrivacyCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: privacyCoordinator)
     }
 
     private func showAttestations() {
-        let attestationsCoordinator: AttestationsCoordinator = AttestationsCoordinator(presentingController: navigationController, parent: self)
+        let attestationsCoordinator: AttestationsCoordinator = AttestationsCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: attestationsCoordinator)
     }
 
     private func showTestingSites() {
         URL(string: "myHealthController.testingSites.url".localized)?.openInSafari()
+    }
+    
+    private func showCovidAdvices() {
+        URL(string: "myHealthController.covidAdvices.url".localized)?.openInSafari()
+    }
+    
+    private func showCovidInfo() {
+        URL(string: "home.moreSection.covidInfo.url".localized)?.openInSafari()
     }
     
     private func showManageData() {
@@ -99,17 +119,17 @@ final class HomeCoordinator: WindowedCoordinator {
     }
     
     private func showMyHealth() {
-        let sickCoordinator: SickCoordinator = SickCoordinator(presentingController: navigationController, parent: self)
+        let sickCoordinator: SickCoordinator = SickCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: sickCoordinator)
     }
     
     private func showInfo() {
-        let infoCenterCoordinator: InfoCenterCoordinator = InfoCenterCoordinator(presentingController: navigationController, parent: self)
+        let infoCenterCoordinator: InfoCenterCoordinator = InfoCenterCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: infoCenterCoordinator)
     }
     
     private func showDeclare() {
-        let declareCoordinator: DeclareCoordinator = DeclareCoordinator(presentingController: navigationController, parent: self)
+        let declareCoordinator: DeclareCoordinator = DeclareCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: declareCoordinator)
     }
     
@@ -124,23 +144,23 @@ final class HomeCoordinator: WindowedCoordinator {
         })
         addChild(coordinator: captchaCoordinator)
     }
-    
+ 
     private func showFlash() {
-        let flashCodeCoordinator: FlashCodeCoordinator = FlashCodeCoordinator(presentingController: navigationController, parent: self)
+        let flashCodeCoordinator: FlashCodeCoordinator = FlashCodeCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: flashCodeCoordinator)
     }
     private func showEnterCode(code: String?) {
-        let enterCodeCoordinator: EnterCodeCoordinator = EnterCodeCoordinator(presentingController: navigationController, parent: self, initialCode: code)
+        let enterCodeCoordinator: EnterCodeCoordinator = EnterCodeCoordinator(presentingController: navigationController?.topPresentedController, parent: self, initialCode: code)
         addChild(coordinator: enterCodeCoordinator)
     }
     
     private func showInformation() {
-        let informationCoordinator: InformationCoordinator = InformationCoordinator(presentingController: navigationController, parent: self)
+        let informationCoordinator: InformationCoordinator = InformationCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: informationCoordinator)
     }
     
     private func showKeyFigures() {
-        let keyFiguresCoordinator: KeyFiguresCoordinator = KeyFiguresCoordinator(presentingController: navigationController, parent: self)
+        let keyFiguresCoordinator: KeyFiguresCoordinator = KeyFiguresCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: keyFiguresCoordinator)
     }
     
@@ -168,7 +188,8 @@ extension HomeCoordinator {
     
     private func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterCodeFromDeeplink(_:)), name: .didEnterCodeFromDeeplink, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(newAttestationFromDeeplink(_:)), name: .newAttestationFromDeeplink, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(newAttestationFromDeeplink), name: .newAttestationFromDeeplink, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(dismissAllAndShowRecommandations), name: .dismissAllAndShowRecommandations, object: nil)
     }
     
     private func removeObservers() {
@@ -184,8 +205,14 @@ extension HomeCoordinator {
         }
     }
     
-    @objc private func newAttestationFromDeeplink(_ notification: Notification) {
+    @objc private func newAttestationFromDeeplink() {
         showAttestations()
+    }
+    
+    @objc private func dismissAllAndShowRecommandations() {
+        navigationController?.dismiss(animated: true) {
+            self.showMyHealth()
+        }
     }
     
 }

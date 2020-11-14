@@ -16,14 +16,15 @@ final class StandardCardCell: CVTableViewCell {
 
     override func setup(with row: CVRow) {
         super.setup(with: row)
-        setupUI()
+        setupUI(with: row)
         setupAccessibility()
     }
 
-    private func setupUI() {
+    private func setupUI(with row: CVRow) {
         containerView.backgroundColor = backgroundColor
         backgroundColor = .clear
         containerView.layer.cornerRadius = 10.0
+        containerView.layer.maskedCorners = row.theme.maskedCorners
         containerView.layer.masksToBounds = true
     }
 

@@ -41,7 +41,6 @@ enum XibName: String {
     case keyFiguresCell = "KeyFiguresCell"
     case declareCell = "DeclareCell"
     case contactStatusCell = "ContactStatusCell"
-    case menuCell = "MenuCell"
     case cardTextCell = "CardTextCell"
     case paragraphCell = "ParagraphCell"
     case imageCell = "ImageCell"
@@ -52,5 +51,6 @@ enum XibName: String {
     case qrCodeCell = "QRCodeCell"
     case dateCell = "DateCell"
     case textWithoutStackCell = "TextWithoutStackCell"
+    case attestationCell = "AttestationCell"
     
 }

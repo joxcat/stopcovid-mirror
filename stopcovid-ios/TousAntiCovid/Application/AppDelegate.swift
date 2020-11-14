@@ -23,12 +23,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     var isAppAlreadyInstalled: Bool = false
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
-        
+    
     private var lastStatusTriggerEventTimestamp: TimeInterval = 0.0
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         initAppearance()
         initUrlCache()
+        NotificationsManager.shared.start()
         LocalizationsManager.shared.start()
         InfoCenterManager.shared.start()
         KeyFiguresManager.shared.start()
@@ -38,6 +39,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             WidgetManager.shared.start()
         }
         PrivacyManager.shared.start()
+        LinksManager.shared.start()
         OrientationManager.shared.start()
         if isOnboardingDone {
             BluetoothStateManager.shared.start()
@@ -65,8 +67,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             NotificationsManager.shared.triggerRestartNotification()
         }, didReceiveProximityHandler: {
             self.triggerStatusRequestIfNeeded()
-        }, didSaveProximity: { proximity in
-        })
+        }, didSaveProximity: { _ in })
         ParametersManager.shared.start()
         isAppAlreadyInstalled = true
         rootCoordinator.start()
@@ -88,6 +89,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidBecomeActive(_ application: UIApplication) {
         ParametersManager.shared.fetchConfig { _ in }
         UIApplication.shared.clearBadge()
+        RBManager.shared.clearOldLocalProximities()
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
@@ -144,7 +146,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
         completionHandler()
     }
-
+    
     private func initAppearance() {
         UINavigationBar.appearance().tintColor = Asset.Colors.tint.color
     }
@@ -167,9 +169,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UIApplication.shared.shortcutItems = [shortcut]
     }
 
-    func triggerStatusRequestIfNeeded(showNotifications: Bool = false, completion: ((_ error: Error?) -> ())? = nil) {
+    func triggerStatusRequestIfNeeded(showNotifications: Bool = false, force: Bool = false, completion: ((_ error: Error?) -> ())? = nil) {
         let nowTimestamp: TimeInterval = Date().timeIntervalSince1970
-        guard nowTimestamp - lastStatusTriggerEventTimestamp > Constant.secondsBeforeStatusRetry else {
+        guard nowTimestamp - lastStatusTriggerEventTimestamp > Constant.secondsBeforeStatusRetry || force else {
             completion?(NSError.localizedError(message: "lastStatusTriggerEventTimestamp registered less than \(Int(Constant.secondsBeforeStatusRetry)) seconds ago", code: 0))
             return
         }
@@ -179,19 +181,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             let lastStatusSuccessTimestamp: Double = RBManager.shared.lastStatusReceivedDate?.timeIntervalSince1970 ?? 0.0
             let mostRecentResponseTimestamp: Double = max(lastStatusErrorTimestamp, lastStatusSuccessTimestamp)
             let nowTimestamp: Double = Date().timeIntervalSince1970
-            if nowTimestamp - mostRecentResponseTimestamp >= ParametersManager.shared.minStatusRetryTimeInterval && nowTimestamp - lastStatusSuccessTimestamp >= ParametersManager.shared.statusTimeInterval {
+            if (nowTimestamp - mostRecentResponseTimestamp >= ParametersManager.shared.minStatusRetryTimeInterval && nowTimestamp - lastStatusSuccessTimestamp >= ParametersManager.shared.statusTimeInterval) || force {
                 switch ParametersManager.shared.apiVersion {
                 case .v3:
                     RBManager.shared.statusV3 { error in
                         if showNotifications {
                             self.processStatusResponseNotification(error: error)
                         }
+                        if error == nil {
+                            NotificationsManager.shared.scheduleUltimateNotification(minHour: ParametersManager.shared.minHourContactNotif, maxHour: ParametersManager.shared.maxHourContactNotif)
+                        }
                         completion?(error)
                     }
                 default:
-                    RBManager.shared.status { error in
-                        completion?(error)
-                    }
+                    completion?(nil)
                 }
             } else {
                 if showNotifications && ParametersManager.shared.apiVersion == .v3 {
@@ -220,4 +223,5 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
+    
 }

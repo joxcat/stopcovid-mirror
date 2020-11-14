@@ -33,6 +33,7 @@ struct CVRow {
         var separatorLeftInset: CGFloat?
         var separatorRightInset: CGFloat?
         var buttonStyle: CVButton.Style = .primary
+        var maskedCorners: CACornerMask = .all
     }
     
     static var empty: CVRow {

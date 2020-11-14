@@ -29,7 +29,7 @@ final class InfoCenterController: CVTableViewController {
         updateTitle()
         reloadUI()
         addObservers()
-        InfoCenterManager.shared.fetchInfo(force: false)
+        InfoCenterManager.shared.fetchInfo(force: true)
     }
     
     override func viewWillDisappear(_ animated: Bool) {

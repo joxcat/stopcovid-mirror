@@ -47,8 +47,8 @@ public protocol ProximityNotificationLoggerProtocol {
     /// - Parameters:
     ///   - logLevel: The log level of the log.
     ///   - message: The message to log.
-    ///   - message: The log source.
-    func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: String)
+    ///   - source: The log source.
+    func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: @autoclosure () -> String)
 }
 
 class ProximityNotificationConsoleLogger: ProximityNotificationLoggerProtocol {
@@ -61,7 +61,7 @@ class ProximityNotificationConsoleLogger: ProximityNotificationLoggerProtocol {
     
     init() {}
     
-    func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: String) {
+    func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: @autoclosure () -> String) {
         guard logLevel != .none else { return }
         
         var logType: OSLogType = .default
@@ -91,21 +91,21 @@ class ProximityNotificationLogger {
         self.logger = logger
     }
     
-    func debug(message: @autoclosure () -> String, source: String) {
-        log(logLevel: .debug, message: message(), source: source)
+    func debug(message: @autoclosure () -> String, source: @autoclosure () -> String) {
+        log(logLevel: .debug, message: message(), source: source())
     }
     
-    func info(message: @autoclosure () -> String, source: String) {
-        log(logLevel: .info, message: message(), source: source)
+    func info(message: @autoclosure () -> String, source: @autoclosure () -> String) {
+        log(logLevel: .info, message: message(), source: source())
     }
     
-    func error(message: @autoclosure () -> String, source: String) {
-        log(logLevel: .error, message: message(), source: source)
+    func error(message: @autoclosure () -> String, source: @autoclosure () -> String) {
+        log(logLevel: .error, message: message(), source: source())
     }
     
-    private func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: String) {
+    private func log(logLevel: ProximityNotificationLoggerLevel, message: @autoclosure () -> String, source: @autoclosure () -> String) {
         if logLevel >= logger.minimumLogLevel {
-            logger.log(logLevel: logLevel, message: message(), source: source)
+            logger.log(logLevel: logLevel, message: message(), source: source())
         }
     }
 }

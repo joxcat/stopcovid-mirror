@@ -70,6 +70,7 @@ public final class RBManager {
     
     public var proximitiesRetentionDurationInDays: Int?
     public var preSymptomsSpan: Int?
+    public var positiveSampleSpan: Int?
     
     private var isAtRiskDidChangeHandler: ((_ isAtRisk: Bool?) -> ())?
     private var didStopProximityDueToLackOfEpochsHandler: (() -> ())?
@@ -244,8 +245,10 @@ extension RBManager {
         }
     }
     
-    public func report(code: String, symptomsOrigin: Date?, completion: @escaping (_ error: Error?) -> ()) {
-        let origin: Date = symptomsOrigin?.rbDateByAddingDays(-(preSymptomsSpan ?? 0)) ?? .distantPast
+    public func report(code: String, symptomsOrigin: Date?, positiveTestDate: Date?, completion: @escaping (_ error: Error?) -> ()) {
+        let originSymptoms: Date? = symptomsOrigin?.rbDateByAddingDays(-(preSymptomsSpan ?? 0))
+        let originPositiveTest: Date? = positiveTestDate?.rbDateByAddingDays(-(positiveSampleSpan ?? 0))
+        let origin: Date = originSymptoms ?? originPositiveTest ?? .distantPast
         let localHelloMessages: [RBLocalProximity] = storage.getLocalProximityList(from: origin, to: Date())
         do {
             let filteredProximities: [RBLocalProximity] = try filter.filter(proximities: localHelloMessages)
@@ -440,12 +443,12 @@ extension RBManager {
     public func clearAllLocalData() {
         storage.clearAll(includingDBKey: false)
     }
-    
-    private func clearOldLocalProximities() {
+
+    public func clearOldLocalProximities() {
         guard let retentionDuration = proximitiesRetentionDurationInDays else { return }
         storage.clearProximityList(before: Date().rbDateByAddingDays(-retentionDuration))
     }
-    
+
 }
 
 extension RBManager {

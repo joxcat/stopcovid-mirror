@@ -29,8 +29,10 @@ internal enum Asset {
     internal static let scDarkBlue = ColorAsset(name: "scDarkBlue")
     internal static let scGreen = ColorAsset(name: "scGreen")
     internal static let scOrange = ColorAsset(name: "scOrange")
+    internal static let gradientEndBlue = ColorAsset(name: "gradientEndBlue")
     internal static let gradientEndGreen = ColorAsset(name: "gradientEndGreen")
     internal static let gradientEndRed = ColorAsset(name: "gradientEndRed")
+    internal static let gradientStartBlue = ColorAsset(name: "gradientStartBlue")
     internal static let gradientStartGreen = ColorAsset(name: "gradientStartGreen")
     internal static let gradientStartRed = ColorAsset(name: "gradientStartRed")
     internal static let notificationButtonBackground = ColorAsset(name: "notificationButtonBackground")
@@ -50,6 +52,7 @@ internal enum Asset {
     internal static let tint = ColorAsset(name: "tint")
   }
   internal enum Images {
+    internal static let attestationCard = ImageAsset(name: "attestationCard")
     internal static let declareCard = ImageAsset(name: "declareCard")
     internal static let healthCard = ImageAsset(name: "healthCard")
     internal static let shareCard = ImageAsset(name: "shareCard")
@@ -112,7 +115,9 @@ internal enum Asset {
     internal static let tabBarSharingSelected = ImageAsset(name: "TabBarSharing-Selected")
     internal static let tabBarSickSelected = ImageAsset(name: "TabBarSick-Selected")
     internal static let tabBarSupportSelected = ImageAsset(name: "TabBarSupport-Selected")
+    internal static let usefulLinks = ImageAsset(name: "UsefulLinks")
     internal static let about = ImageAsset(name: "about")
+    internal static let bubble = ImageAsset(name: "bubble")
     internal static let compass = ImageAsset(name: "compass")
     internal static let homeRing = ImageAsset(name: "homeRing")
     internal static let location = ImageAsset(name: "location")
