@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import Lottie
 
 struct CVRow {
 
@@ -27,6 +28,7 @@ struct CVRow {
         var subtitleColor: UIColor = Appearance.Cell.Text.subtitleColor
         var placeholderColor: UIColor = Appearance.Cell.Text.placeholderColor
         var accessoryTextFont: (() -> UIFont?)?
+        var accessoryTextColor: UIColor = Appearance.Cell.Text.captionTitleColor
         var imageTintColor: UIColor?
         var imageSize: CGSize?
         var imageRatio: CGFloat?
@@ -47,6 +49,7 @@ struct CVRow {
     var accessoryText: String?
     var titleHighlightText: String?
     var image: UIImage?
+    var animation: Animation?
     var buttonTitle: String?
     var isOn: Bool?
     var xibName: XibName

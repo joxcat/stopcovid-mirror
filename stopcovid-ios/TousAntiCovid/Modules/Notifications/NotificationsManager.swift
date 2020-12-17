@@ -75,16 +75,15 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
     
-    func scheduleAtRiskNotification(minHour: Int?, maxHour: Int?) {
+    func scheduleAtRiskNotification(minHour: Int?, maxHour: Int?, triggerDate: Date = Date(), textPrefix: String = "notification.atRisk", identifier: String = NotificationsContant.Identifier.atRisk) {
         let content = UNMutableNotificationContent()
-        content.title = "notification.atRisk.title".localized
-        content.body = "notification.atRisk.message".localized
+        content.title = "\(textPrefix).title".localized
+        content.body = "\(textPrefix).message".localized
         content.sound = .default
         content.badge = 1
-        let now: Date = Date()
-        var triggerDate: Date = now
+        var triggerDate: Date = triggerDate
         if let minHour = minHour, let maxHour = maxHour {
-            var components: DateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
+            var components: DateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerDate)
             let hour: Int = components.hour ?? 0
             if hour < minHour {
                 components.hour = minHour
@@ -102,11 +101,12 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
                 }
             }
         }
-        let delay: Double = max(triggerDate.timeIntervalSince1970 - now.timeIntervalSince1970, 0.0)
+        let delay: Double = max(triggerDate.timeIntervalSince1970 - Date().timeIntervalSince1970, 0.0)
         let trigger: UNTimeIntervalNotificationTrigger? = delay == 0 ? nil : UNTimeIntervalNotificationTrigger(timeInterval: delay, repeats: false)
-        let request: UNNotificationRequest = UNNotificationRequest(identifier: NotificationsContant.Identifier.atRisk, content: content, trigger: trigger)
+        let request: UNNotificationRequest = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
         requestAuthorization { _ in
-            UNUserNotificationCenter.current().add(request) { error in }
+            UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [identifier])
+            UNUserNotificationCenter.current().add(request) { _ in }
         }
     }
     
@@ -187,6 +187,14 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
     
+    func scheduleAtWarningRiskNotification(minHour: Int?, maxHour: Int?) {
+        scheduleAtRiskNotification(minHour: minHour, maxHour: maxHour, textPrefix: "notification.atWarning")
+    }
+    
+    func scheduleStillHavingFeverNotification(minHour: Int?, maxHour: Int?, triggerDate: Date) {
+        scheduleAtRiskNotification(minHour: minHour, maxHour: maxHour, triggerDate: triggerDate, textPrefix: "notification.stillHavingFever", identifier: NotificationsContant.Identifier.stillHavingFever)
+    }
+    
     func scheduleUltimateNotification(minHour: Int?, maxHour: Int?) {
         let content = UNMutableNotificationContent()
         content.title = "notification.ultimateStatus.title".localized
@@ -221,7 +229,7 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         requestAuthorization { _ in
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [NotificationsContant.Identifier.ultimate])
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [NotificationsContant.Identifier.ultimate])
-            UNUserNotificationCenter.current().add(request) { error in }
+            UNUserNotificationCenter.current().add(request) { _ in }
         }
     }
     
@@ -236,13 +244,18 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         requestAuthorization { _ in
             UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [NotificationsContant.Identifier.proximityReactivation])
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [NotificationsContant.Identifier.proximityReactivation])
-            UNUserNotificationCenter.current().add(request) { error in }
+            UNUserNotificationCenter.current().add(request) { _ in }
         }
     }
     
     func cancelProximityReactivationNotification() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [NotificationsContant.Identifier.proximityReactivation])
         UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [NotificationsContant.Identifier.proximityReactivation])
+    }
+    
+    func cancelStillHavingFeverNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [NotificationsContant.Identifier.stillHavingFever])
+        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [NotificationsContant.Identifier.stillHavingFever])
     }
     
     func removeAllPendingNotifications() {

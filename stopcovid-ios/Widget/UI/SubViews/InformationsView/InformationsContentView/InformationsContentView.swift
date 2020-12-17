@@ -32,12 +32,12 @@ struct InformationsContentView: View {
                 }
             }
             HStack {
-                let maxLines: Int = family.isSmall ? (subtitle == nil ? 4 : 2) : 3
+                let maxLines: Int = family.isSmall ? (subtitle == nil ? 4 : 3) : 3
                 let font: SwiftUI.Font = family.isSmall && subtitle == nil ? SwiftUI.Font(FontFamily.Marianne.bold.font(size: 13)) : SwiftUI.Font(FontFamily.Marianne.bold.font(size: 15))
                 Text(title)
                     .fixedSize(horizontal: false, vertical: true)
                     .font(font)
-                    .foregroundColor(didReceiveStatus && !isSick ? .white : Color(.label))
+                    .foregroundColor(didReceiveStatus || isSick ? .white : Color(.label))
                     .lineLimit(maxLines)
                 Spacer()
             }

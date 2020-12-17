@@ -62,6 +62,7 @@ final class DateCell: TextFieldCell {
     @objc private func doneButtonPressed() {
         cvTextField.resignFirstResponder()
         datePickerValueChanged()
+        currentAssociatedRow?.didValidateValue?(datePicker.date, self)
     }
     
     @objc private func datePickerValueChanged() {

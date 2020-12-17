@@ -30,6 +30,26 @@ public final class StorageManager: RBStorage {
         case isSick
         case positiveToSymptoms
         case pushToken
+        case reportDate
+        case reportDataOriginDate
+        case reportSymptomsStartDate
+        case reportPositiveTestDate
+        case reportToken
+        case lastWarningRiskReceivedDate
+        case currentWarningRiskScoringDate
+        case currentRiskScoringDate
+        
+        case isolationState
+        case isolationLastContactDate
+        case isolationIsKnownIndexAtHome
+        case isolationKnowsIndexSymptomsEndDate
+        case isolationIndexSymptomsEndDate
+        case isolationIsTestNegative
+        case isolationPositiveTestingDate
+        case isolationIsHavingSymptoms
+        case isolationSymptomsStartDate
+        case isolationIsStillHavingFever
+        case isolationIsFeverReminderScheduled
     }
     
     let keychain: KeychainSwift = KeychainSwift(keyPrefix: "SC")
@@ -194,69 +214,52 @@ public final class StorageManager: RBStorage {
     }
 
     // MARK: - Status: last status request date -
-       public func saveLastStatusRequestDate(_ date: Date?) {
-           if let date = date {
-               keychain.set("\(date.timeIntervalSince1970)", forKey: KeychainKey.lastStatusRequestDate.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-           } else {
-               keychain.delete(KeychainKey.lastStatusRequestDate.rawValue)
-           }
-           notifyStatusDataChanged()
-       }
-
-       public func lastStatusRequestDate() -> Date? {
-           guard let timestampString = keychain.get(KeychainKey.lastStatusRequestDate.rawValue), let timestamp = Double(timestampString) else { return nil }
-           return Date(timeIntervalSince1970: timestamp)
-       }
+    public func saveLastStatusRequestDate(_ date: Date?) {
+        saveDate(date, key: .lastStatusRequestDate)
+    }
+    
+    public func lastStatusRequestDate() -> Date? {
+        getDate(key: .lastStatusRequestDate)
+    }
     
     // MARK: - Status: last status received date -
     public func saveLastStatusReceivedDate(_ date: Date?) {
-        if let date = date {
-            keychain.set("\(date.timeIntervalSince1970)", forKey: KeychainKey.lastStatusReceivedDate.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-        } else {
-            keychain.delete(KeychainKey.lastStatusReceivedDate.rawValue)
-        }
-        notifyStatusDataChanged()
+        saveDate(date, key: .lastStatusReceivedDate)
     }
     
     public func lastStatusReceivedDate() -> Date? {
-        guard let timestampString = keychain.get(KeychainKey.lastStatusReceivedDate.rawValue), let timestamp = Double(timestampString) else { return nil }
-        return Date(timeIntervalSince1970: timestamp)
+        getDate(key: .lastStatusReceivedDate)
     }
     
     // MARK: - Status: last status error date -
     public func saveLastStatusErrorDate(_ date: Date?) {
-        if let date = date {
-            keychain.set("\(date.timeIntervalSince1970)", forKey: KeychainKey.lastStatusErrorDate.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-        } else {
-            keychain.delete(KeychainKey.lastStatusErrorDate.rawValue)
-        }
-        notifyStatusDataChanged()
+        saveDate(date, key: .lastStatusErrorDate)
     }
     
     public func lastStatusErrorDate() -> Date? {
-        guard let timestampString = keychain.get(KeychainKey.lastStatusErrorDate.rawValue), let timestamp = Double(timestampString) else { return nil }
-        return Date(timeIntervalSince1970: timestamp)
+        getDate(key: .lastStatusErrorDate)
     }
     
     // MARK: - Status: last risk received date -
     public func saveLastRiskReceivedDate(_ date: Date?) {
-        if let date = date {
-            keychain.set("\(date.timeIntervalSince1970)", forKey: KeychainKey.lastRiskReceivedDate.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-        } else {
-            keychain.delete(KeychainKey.lastRiskReceivedDate.rawValue)
-        }
-        notifyStatusDataChanged()
+        saveDate(date, key: .lastRiskReceivedDate)
     }
     
     public func lastRiskReceivedDate() -> Date? {
-        guard let timestampString = keychain.get(KeychainKey.lastRiskReceivedDate.rawValue), let timestamp = Double(timestampString) else { return nil }
-        return Date(timeIntervalSince1970: timestamp)
+        getDate(key: .lastRiskReceivedDate)
+    }
+    
+    public func saveCurrentRiskScoringDate(_ date: Date?) {
+        saveDate(date, key: .currentRiskScoringDate)
+    }
+    
+    public func currentRiskScoringDate() -> Date? {
+        getDate(key: .currentRiskScoringDate)
     }
     
     // MARK: - Status: Is sick -
     public func save(isSick: Bool) {
-        keychain.set(isSick, forKey: KeychainKey.isSick.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-        notifyStatusDataChanged()
+        saveBool(bool: isSick, key: .isSick)
     }
     
     public func isSick() -> Bool {
@@ -265,16 +268,194 @@ public final class StorageManager: RBStorage {
     
     // MARK: - Push token -
     public func save(pushToken: String?) {
-        if let pushToken = pushToken {
-            keychain.set(pushToken, forKey: KeychainKey.pushToken.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
-        } else {
-            keychain.delete(KeychainKey.pushToken.rawValue)
-        }
-        notifyStatusDataChanged()
+        saveString(string: pushToken, key: .pushToken)
     }
     
     public func pushToken() -> String? {
         keychain.get(KeychainKey.pushToken.rawValue)
+    }
+    
+    // MARK: - Report dates -
+    public func saveReportDate(_ date: Date?) {
+        saveDate(date, key: .reportDate)
+    }
+    
+    public func reportDate() -> Date? {
+        getDate(key: .reportDate)
+    }
+    
+    public func saveReportDataOriginDate(_ date: Date?) {
+        saveDate(date, key: .reportDataOriginDate)
+    }
+    
+    public func reportDataOriginDate() -> Date? {
+        getDate(key: .reportDataOriginDate)
+    }
+    
+    public func saveReportSymptomsStartDate(_ date: Date?) {
+        saveDate(date, key: .reportSymptomsStartDate)
+    }
+    
+    public func reportSymptomsStartDate() -> Date? {
+        getDate(key: .reportSymptomsStartDate)
+    }
+    
+    public func saveReportPositiveTestDate(_ date: Date?) {
+        saveDate(date, key: .reportPositiveTestDate)
+    }
+    
+    public func reportPositiveTestDate() -> Date? {
+        getDate(key: .reportPositiveTestDate)
+    }
+    
+    // MARK: - Report token -
+    public func saveReportToken(_ token: String?) {
+        saveString(string: token, key: .reportToken, notify: false)
+    }
+    
+    public func reportToken() -> String? {
+        keychain.get(KeychainKey.reportToken.rawValue)
+    }
+
+    // MARK: - Warning Status: isAtRisk for Venues -
+    public func saveLastWarningRiskReceivedDate(_ date: Date?) {
+        saveDate(date, key: .lastWarningRiskReceivedDate)
+    }
+    
+    public func lastWarningRiskReceivedDate() -> Date? {
+        getDate(key: .lastWarningRiskReceivedDate)
+    }
+    
+    public func saveCurrentWarningRiskScoringDate(_ date: Date?) {
+        saveDate(date, key: .currentWarningRiskScoringDate)
+    }
+    
+    public func currentWarningRiskScoringDate() -> Date? {
+        getDate(key: .currentWarningRiskScoringDate)
+    }
+    
+    // MARK: - Isolation -
+    public func saveIsolationState(_ state: String?) {
+        saveString(string: state, key: .isolationState, notify: false)
+    }
+    
+    public func isolationState() -> String? {
+        keychain.get(KeychainKey.isolationState.rawValue)
+    }
+    
+    public func saveIsolationLastContactDate(_ date: Date?) {
+        saveDate(date, key: .isolationLastContactDate, notify: false)
+    }
+    
+    public func isolationLastContactDate() -> Date? {
+        getDate(key: .isolationLastContactDate)
+    }
+    
+    public func saveIsolationIsKnownIndexAtHome(_ isAtHome: Bool?) {
+        saveBool(bool: isAtHome, key: .isolationIsKnownIndexAtHome, notify: false)
+    }
+    
+    public func isolationIsKnownIndexAtHome() -> Bool? {
+        keychain.getBool(KeychainKey.isolationIsKnownIndexAtHome.rawValue)
+    }
+    
+    public func saveIsolationKnowsIndexSymptomsEndDate(_ knowsEndDate: Bool?) {
+        saveBool(bool: knowsEndDate, key: .isolationKnowsIndexSymptomsEndDate, notify: false)
+    }
+    
+    public func isolationKnowsIndexSymptomsEndDate() -> Bool? {
+        keychain.getBool(KeychainKey.isolationKnowsIndexSymptomsEndDate.rawValue)
+    }
+    
+    public func saveIsolationIndexSymptomsEndDate(_ date: Date?) {
+        saveDate(date, key: .isolationIndexSymptomsEndDate, notify: false)
+    }
+    
+    public func isolationIndexSymptomsEndDate() -> Date? {
+        getDate(key: .isolationIndexSymptomsEndDate)
+    }
+    
+    public func saveIsolationIsTestNegative(_ isTestNegative: Bool?) {
+        saveBool(bool: isTestNegative, key: .isolationIsTestNegative, notify: false)
+    }
+    
+    public func isolationIsTestNegative() -> Bool? {
+        keychain.getBool(KeychainKey.isolationIsTestNegative.rawValue)
+    }
+    
+    public func saveIsolationPositiveTestingDate(_ date: Date?) {
+        saveDate(date, key: .isolationPositiveTestingDate, notify: false)
+    }
+    
+    public func isolationPositiveTestingDate() -> Date? {
+        getDate(key: .isolationPositiveTestingDate)
+    }
+    
+    public func saveIsolationIsHavingSymptoms(_ havingSymptoms: Bool?) {
+        saveBool(bool: havingSymptoms, key: .isolationIsHavingSymptoms, notify: false)
+    }
+    
+    public func isolationIsHavingSymptoms() -> Bool? {
+        keychain.getBool(KeychainKey.isolationIsHavingSymptoms.rawValue)
+    }
+    
+    public func saveIsolationSymptomsStartDate(_ date: Date?) {
+        saveDate(date, key: .isolationSymptomsStartDate, notify: false)
+    }
+    
+    public func isolationSymptomsStartDate() -> Date? {
+        getDate(key: .isolationSymptomsStartDate)
+    }
+    
+    public func saveIsolationIsStillHavingFever(_ stillHavingFever: Bool?) {
+        saveBool(bool: stillHavingFever, key: .isolationIsStillHavingFever, notify: false)
+    }
+    
+    public func isolationIsStillHavingFever() -> Bool? {
+        keychain.getBool(KeychainKey.isolationIsStillHavingFever.rawValue)
+    }
+    
+    public func saveIsolationIsFeverReminderScheduled(_ isScheduled: Bool?) {
+        saveBool(bool: isScheduled, key: .isolationIsFeverReminderScheduled, notify: false)
+    }
+    
+    public func isolationIsFeverReminderScheduled() -> Bool? {
+        keychain.getBool(KeychainKey.isolationIsFeverReminderScheduled.rawValue)
+    }
+    
+    private func saveDate(_ date: Date?, key: KeychainKey, notify: Bool = true) {
+        if let date = date {
+            keychain.set("\(date.timeIntervalSince1970)", forKey: key.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+        } else {
+            keychain.delete(key.rawValue)
+        }
+        guard notify else { return }
+        notifyStatusDataChanged()
+    }
+    
+    private func getDate(key: KeychainKey) -> Date? {
+        guard let timestampString = keychain.get(key.rawValue), let timestamp = Double(timestampString) else { return nil }
+        return Date(timeIntervalSince1970: timestamp)
+    }
+    
+    private func saveString(string: String?, key: KeychainKey, notify: Bool = true) {
+        if let string = string {
+            keychain.set(string, forKey: key.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+        } else {
+            keychain.delete(key.rawValue)
+        }
+        guard notify else { return }
+        notifyStatusDataChanged()
+    }
+    
+    private func saveBool(bool: Bool?, key: KeychainKey, notify: Bool = true) {
+        if let bool = bool {
+            keychain.set(bool, forKey: key.rawValue, withAccess: .accessibleAfterFirstUnlockThisDeviceOnly)
+        } else {
+            keychain.delete(key.rawValue)
+        }
+        guard notify else { return }
+        notifyStatusDataChanged()
     }
     
     // MARK: - Data cleraing -
@@ -415,6 +596,53 @@ public extension StorageManager {
     
 }
 
+public extension StorageManager {
+
+    func saveVenueQrCode(_ venueQrCode: VenueQrCode) {
+        guard let realm = realm else { return }
+        let realmVenueQrCode: RealmVenueQrCode = RealmVenueQrCode.from(venueQrCode: venueQrCode)
+        try! realm.write {
+            realm.add(realmVenueQrCode, update: .all)
+        }
+        notifyVenueQrCodeDataChanged()
+    }
+    
+    func deleteVenueQrCode(_ venueQrCode: VenueQrCode) {
+        guard let realm = realm else { return }
+        guard let realmVenueQrCode = realm.object(ofType: RealmVenueQrCode.self, forPrimaryKey: venueQrCode.id) else { return }
+        try! realm.write {
+            realm.delete(realmVenueQrCode)
+        }
+        notifyVenueQrCodeDataChanged()
+    }
+
+    func venuesQrCodes() -> [VenueQrCode] {
+        guard let realm = realm else { return [] }
+        return realm.objects(RealmVenueQrCode.self).map { $0.toVenueQrCode() }
+    }
+
+    func deleteVenuesQrCodeData() {
+        guard let realm = realm else { return }
+        try! realm.write {
+            realm.delete(realm.objects(RealmVenueQrCode.self))
+        }
+        notifyVenueQrCodeDataChanged()
+    }
+    
+    func deleteExpiredVenuesQrCodeData(durationInSeconds: Double) {
+        guard let realm = realm else { return }
+        let now: Date = Date()
+        let expiredVenueQrCodes: [RealmVenueQrCode] = [RealmVenueQrCode](realm.objects(RealmVenueQrCode.self)).filter { venueQrCode in
+            (Double(now.timeIntervalSince1900) - Double(venueQrCode.ntpTimestamp)) >= durationInSeconds
+        }
+        try! realm.write {
+            realm.delete(expiredVenueQrCodes)
+        }
+        notifyVenueQrCodeDataChanged()
+    }
+
+}
+
 private extension StorageManager {
     
     func notifyStatusDataChanged() {
@@ -427,6 +655,10 @@ private extension StorageManager {
     
     func notifyAttestationDataChanged() {
         NotificationCenter.default.post(name: .attestationDataDidChange, object: nil)
+    }
+
+    func notifyVenueQrCodeDataChanged() {
+        NotificationCenter.default.post(name: .venueQrCodeDataDidChange, object: nil)
     }
     
 }
@@ -464,11 +696,12 @@ private extension Realm {
         let classes: [Object.Type] = [RealmEpoch.self,
                                       RealmLocalProximity.self,
                                       RealmAttestation.self,
+                                      RealmVenueQrCode.self,
                                       Permission.self,
                                       PermissionRole.self,
                                       PermissionUser.self]
         let databaseUrl: URL = dbsDirectoryUrl().appendingPathComponent("db.realm")
-        let userConfig: Realm.Configuration = Realm.Configuration(fileURL: databaseUrl, encryptionKey: key, schemaVersion: 9, migrationBlock: { _, _ in }, objectTypes: classes)
+        let userConfig: Realm.Configuration = Realm.Configuration(fileURL: databaseUrl, encryptionKey: key, schemaVersion: 14, migrationBlock: { _, _ in }, objectTypes: classes)
         return userConfig
     }
     

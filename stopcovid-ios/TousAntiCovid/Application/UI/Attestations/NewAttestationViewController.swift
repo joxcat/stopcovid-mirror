@@ -148,13 +148,13 @@ final class NewAttestationViewController: CVTableViewController {
             }
             guard let qrCodeDisplayableString = AttestationsManager.shared.generateQRCodeDisplayableString(for: self.fieldValues) else {
                 self.showGenerationErrorAlert()
-                 return
+                return
             }
             guard let qrCodeFooter = AttestationsManager.shared.generateQRCodeFooter(for: self.fieldValues) else {
                 self.showGenerationErrorAlert()
                 return
             }
-            AttestationsManager.shared.saveAttestation(timestamp: Int(self.outingDate.timeIntervalSince1970), qrCode: qrCodeData, footer: qrCodeFooter, qrCodeString: qrCodeDisplayableString)
+            AttestationsManager.shared.saveAttestation(timestamp: Int(self.outingDate.timeIntervalSince1970), qrCode: qrCodeData, footer: qrCodeFooter, qrCodeString: qrCodeDisplayableString, reason: self.fieldValues["reason-code"] ?? "")
             self.saveFieldValuesIfNeeded()
             HUD.hide()
             self.dismiss(animated: true)

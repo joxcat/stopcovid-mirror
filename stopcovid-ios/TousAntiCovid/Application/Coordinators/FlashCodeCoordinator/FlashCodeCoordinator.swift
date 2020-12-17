@@ -25,7 +25,7 @@ final class FlashCodeCoordinator: Coordinator {
     }
     
     private func start() {
-        let controller: UIViewController = FlashCodeController.controller(didFlash: { [weak self] code in
+        let controller: UIViewController = FlashReportCodeController.controller(didFlash: { [weak self] code in
             guard let code = code else { return }
             self?.showSymptomsOrigin(symptomsParams: SymptomsDeclarationParams(code: code))
         }) { [weak self] in

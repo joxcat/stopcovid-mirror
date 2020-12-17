@@ -45,10 +45,12 @@ extension UserDefault {
         case lastStringsUpdateDate
         case lastPrivacyUpdateDate
         case lastLinksUpdateDate
+        case lastKeyFiguresExplanationsUpdateDate
         case lastRemoteFileLanguageCode
         case lastInitialStringsBuildNumber
         case lastInitialPrivacyBuildNumber
         case lastInitialLinksBuildNumber
+        case lastInitialKeyFiguresExplanationsBuildNumber
         case lastMaintenanceUpdateDate
         case infoCenterLastUpdatedAt
         case infoCenterDidReceiveNewInfo
@@ -56,7 +58,11 @@ extension UserDefault {
         case keyFiguresLastUpdatedAt
         case lastInitialAttestationFormBuildNumber
         case saveAttestationFieldsData
-        case isDepartmentLevelActivated
+        case didAlreadySeeVenuesRecordingOnboarding
+        case venuesFeaturedWasActivatedAtLeastOneTime
+        case privateEventQrCodeString
+        case privateEventQrCodeData
+        case privateEventQrCodeDate
         
         case lastNotificationTimestamp
         case showNewInfoNotification

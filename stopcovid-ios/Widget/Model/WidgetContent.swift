@@ -16,5 +16,6 @@ struct WidgetContent: TimelineEntry, Codable {
     var isProximityActivated: Bool
     var isAtRisk: Bool
     var isSick: Bool
+    var isAtWarningRisk: Bool
     var lastStatusReceivedDate: Date?
 }

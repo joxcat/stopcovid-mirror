@@ -37,22 +37,33 @@ struct SmallWidgetView: View {
                     if entry.isSick {
                         SmallInformationsView(date: date,
                                               isAtRisk: false,
-                                              isSick: true)
+                                              isSick: true,
+                                              isAtWarningRisk: false)
                     } else if entry.isAtRisk {
                         Link(destination: WidgetManager.moreInformationsDeeplink) {
                             SmallInformationsView(date: date,
                                                   isAtRisk: true,
-                                                  isSick: false)
+                                                  isSick: false,
+                                                  isAtWarningRisk: false)
+                        }
+                    } else if entry.isAtWarningRisk {
+                        Link(destination: WidgetManager.moreInformationsDeeplink) {
+                            SmallInformationsView(date: date,
+                                                  isAtRisk: false,
+                                                  isSick: false,
+                                                  isAtWarningRisk: true)
                         }
                     } else {
                         SmallInformationsView(date: date,
                                               isAtRisk: entry.isAtRisk,
-                                              isSick: false)
+                                              isSick: false,
+                                              isAtWarningRisk: false)
                     }
                 } else if WidgetManager.shared.isRegistered {
                     SmallInformationsView(date: nil,
                                           isAtRisk: false,
                                           isSick: false,
+                                          isAtWarningRisk: false,
                                           didReceiveStatus: false)
                 } else {
                     Link(destination: WidgetManager.activationDeeplink) {
@@ -65,10 +76,10 @@ struct SmallWidgetView: View {
 }
 
 private struct PreviewData {
-    static let activatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: false, isSick: false, lastStatusReceivedDate: Date())
-    static let activatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: true, isSick: false, lastStatusReceivedDate: Date())
-    static let notActivatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: false, isSick: false, lastStatusReceivedDate: Date())
-    static let notActivatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: true, isSick: false, lastStatusReceivedDate: Date())
+    static let activatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: false, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
+    static let activatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: true, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
+    static let notActivatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: false, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
+    static let notActivatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: true, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
 }
 
 struct SmallLightWidgetView_Previews: PreviewProvider {

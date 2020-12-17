@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -47,8 +47,8 @@
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="Xu0-Id-ffX" customClass="DynamicContentStackView" customModule="TAC_Multi_" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="65" width="499" height="151"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="Xu0-Id-ffX" customClass="DynamicContentStackView" customModule="TAC_Multi_" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="65" width="499" height="149"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="RKC-C7-NBC">
                                                 <rect key="frame" x="0.0" y="0.0" width="499" height="69.5"/>
@@ -129,7 +129,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" axis="vertical" spacing="4" translatesAutoresizingMaskIntoConstraints="NO" id="erx-ch-Evc">
-                                                <rect key="frame" x="0.0" y="81.5" width="499" height="69.5"/>
+                                                <rect key="frame" x="0.0" y="79.5" width="499" height="69.5"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="1000" verticalHuggingPriority="1000" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="02I-lR-IPa">
                                                         <rect key="frame" x="0.0" y="0.0" width="499" height="20.5"/>
@@ -209,10 +209,10 @@
                                         </subviews>
                                     </stackView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lNc-aC-j1s">
-                                        <rect key="frame" x="0.0" y="228" width="499" height="38"/>
+                                        <rect key="frame" x="0.0" y="226" width="499" height="40"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IdA-4F-zcE">
-                                                <rect key="frame" x="0.0" y="6" width="46" height="32"/>
+                                                <rect key="frame" x="0.0" y="6" width="46" height="34"/>
                                                 <state key="normal" title="Button"/>
                                                 <connections>
                                                     <action selector="buttonPressed:" destination="nOf-t1-9te" eventType="touchUpInside" id="DTV-bz-h21"/>
@@ -250,6 +250,7 @@
                 <outlet property="bottomConstraint" destination="wa5-F9-dDG" id="aQp-RM-Z9d"/>
                 <outlet property="button" destination="IdA-4F-zcE" id="Tcd-er-cPm"/>
                 <outlet property="containerView" destination="7aM-RZ-DOj" id="gPR-m3-fX8"/>
+                <outlet property="cvAccessoryLabel" destination="VrG-oJ-FUN" id="Ub0-xB-ERV"/>
                 <outlet property="headerImageView" destination="fgc-rN-66v" id="cqQ-9A-Chv"/>
                 <outlet property="headerLabel" destination="fv2-LV-NsU" id="fvC-cQ-fiP"/>
                 <outlet property="leadingConstraint" destination="IEw-ZF-5wc" id="HUo-iA-tiU"/>
@@ -260,7 +261,6 @@
                 <outlet property="titleHeaderSecondaryLabel" destination="0jT-xh-EaN" id="Auz-Fw-kaP"/>
                 <outlet property="topConstraint" destination="1Sd-Yn-Bbr" id="k15-zP-HpW"/>
                 <outlet property="trailingConstraint" destination="iHL-po-46m" id="LZw-e1-v3l"/>
-                <outlet property="updateLabel" destination="VrG-oJ-FUN" id="OGe-Wn-tnm"/>
                 <outlet property="valuesParentStackView" destination="Xu0-Id-ffX" id="otY-dm-xHU"/>
                 <outletCollection property="titleLabels" destination="Eh0-BG-88W" collectionClass="NSMutableArray" id="QKu-bg-sAt"/>
                 <outletCollection property="titleLabels" destination="jJs-PJ-JMS" collectionClass="NSMutableArray" id="92d-eV-jbI"/>

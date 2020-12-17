@@ -37,7 +37,6 @@ enum XibName: String {
     case linkButtonCell = "LinkButtonCell"
     case activationButtonCell = "ActivationButtonCell"
     case lastInfoCell = "LastInfoCell"
-    case sharingCell = "SharingCell"
     case keyFiguresCell = "KeyFiguresCell"
     case declareCell = "DeclareCell"
     case contactStatusCell = "ContactStatusCell"
@@ -52,5 +51,12 @@ enum XibName: String {
     case dateCell = "DateCell"
     case textWithoutStackCell = "TextWithoutStackCell"
     case attestationCell = "AttestationCell"
-    
+    case animationCell = "AnimationCell"
+    case venueRecordCell = "VenueRecordCell"
+    case privateEventCell = "PrivateEventCell"
+    case privateEventQRCodeCell = "PrivateEventQRCodeCell"
+    case highlightedKeyFigureCell = "HighlightedKeyFigureCell"
+    case isolationTopCell = "IsolationTopCell"
+    case isolationInitialCaseSafeCell = "IsolationInitialCaseSafeCell"
+    case venueHistoryCell = "VenueHistoryCell"
 }

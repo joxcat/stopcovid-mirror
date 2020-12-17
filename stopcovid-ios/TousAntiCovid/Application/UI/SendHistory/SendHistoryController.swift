@@ -72,26 +72,27 @@ final class SendHistoryController: CVTableViewController {
     
     private func sendButtonPressed() {
         HUD.show(.progress)
-        RBManager.shared.report(code: symptomsParams.code,
-                                symptomsOrigin: symptomsParams.symptomsDate,
-                                positiveTestDate: symptomsParams.positiveTestDate) { error in
-            HUD.hide()
-            if let error = error {
-                if (error as NSError).code == -1 {
-                    self.showAlert(title: "common.error.clockNotAligned.title".localized,
-                                    message: "common.error.clockNotAligned.message".localized,
-                                    okTitle: "common.ok".localized)
+        switch ParametersManager.shared.apiVersion {
+        case .v4:
+            RBManager.shared.reportV4(code: symptomsParams.code,
+                                      symptomsOrigin: symptomsParams.symptomsDate,
+                                      positiveTestDate: symptomsParams.positiveTestDate) { error in
+                if VenuesManager.shared.isVenuesRecordingActivated {
+                    VenuesManager.shared.report { _ in
+                        HUD.hide()
+                        self.processPostReport(error: error)
+                    }
                 } else {
-                    self.showAlert(title: "sendHistoryController.alert.invalidCode.title".localized,
-                                   message: "sendHistoryController.alert.invalidCode.message".localized,
-                                   okTitle: "common.ok".localized,
-                                   handler: {
-                        self.dismissBlock()
-                    })
+                    HUD.hide()
+                    self.processPostReport(error: error)
                 }
-                self.bottomButtonContainerController?.unlockButtons()
-            } else {
-                self.showSuccessAlert()
+            }
+        default:
+            RBManager.shared.report(code: symptomsParams.code,
+                                    symptomsOrigin: symptomsParams.symptomsDate,
+                                    positiveTestDate: symptomsParams.positiveTestDate) { error in
+                HUD.hide()
+                self.processPostReport(error: error)
             }
         }
     }
@@ -102,6 +103,29 @@ final class SendHistoryController: CVTableViewController {
                   okTitle: "sendHistoryController.successAlert.button.learnMore".localized, handler: {
             NotificationCenter.default.post(name: .dismissAllAndShowRecommandations, object: nil)
         })
+    }
+    
+    private func processPostReport(error: Error?) {
+        if let error = error {
+            if (error as NSError).code == -1 {
+                showAlert(title: "common.error.clockNotAligned.title".localized,
+                          message: "common.error.clockNotAligned.message".localized,
+                          okTitle: "common.ok".localized)
+            } else {
+                showAlert(title: "sendHistoryController.alert.invalidCode.title".localized,
+                          message: "sendHistoryController.alert.invalidCode.message".localized,
+                          okTitle: "common.ok".localized,
+                          handler: {
+                            self.dismissBlock()
+                          })
+            }
+            bottomButtonContainerController?.unlockButtons()
+        } else {
+            RBManager.shared.isProximityActivated = false
+            RBManager.shared.stopProximityDetection()
+            NotificationsManager.shared.cancelProximityReactivationNotification()
+            showSuccessAlert()
+        }
     }
     
 }

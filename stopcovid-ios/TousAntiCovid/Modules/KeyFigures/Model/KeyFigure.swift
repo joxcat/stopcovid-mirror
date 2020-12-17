@@ -52,7 +52,8 @@ struct KeyFigure: Codable {
     let valueGlobalToDisplay: String
     let valueGlobal: Double?
     let isFeatured: Bool
-    let lastUpdate: Int
+    let isHighlighted: Bool?
+    let extractDate: Int
     let trend: Trend?
     let valuesDepartments: [KeyFigureDepartment]?
     
@@ -68,9 +69,9 @@ struct KeyFigure: Codable {
     var formattedDate: String {
         switch category {
         case .health:
-            return Date(timeIntervalSince1970: Double(lastUpdate)).relativelyFormattedDay(prefixStringKey: "keyFigures.update")
+            return Date(timeIntervalSince1970: Double(extractDate)).relativelyFormattedDay(prefixStringKey: "keyFigures.update")
         case .app:
-            return Date(timeIntervalSince1970: Double(lastUpdate)).relativelyFormatted(prefixStringKey: "keyFigures.update")
+            return Date(timeIntervalSince1970: Double(extractDate)).relativelyFormatted(prefixStringKey: "keyFigures.update")
         }
     }
     

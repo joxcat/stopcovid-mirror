@@ -13,15 +13,20 @@ import PKHUD
 import RobertSDK
 import StorageSDK
 import ServerSDK
+import MessageUI
 
 final class DeclareController: CVTableViewController {
     
-    var didTouchFlash: (() -> ())?
-    var didTouchTap: (() -> ())?
+    let didTouchFlash: () -> ()
+    let didTouchTap: () -> ()
+    let didTouchShowVideo: (_ url: URL) -> ()
+    let deinitBlock: () -> ()
     
-    init(didTouchFlash: (() -> ())?, didTouchTap: (() -> ())?) {
+    init(didTouchFlash: @escaping () -> (), didTouchTap: @escaping () -> (), didTouchShowVideo: @escaping (_ url: URL) -> (), deinitBlock: @escaping () -> ()) {
         self.didTouchFlash = didTouchFlash
         self.didTouchTap = didTouchTap
+        self.didTouchShowVideo = didTouchShowVideo
+        self.deinitBlock = deinitBlock
         super.init(style: .plain)
     }
     
@@ -39,6 +44,7 @@ final class DeclareController: CVTableViewController {
     
     deinit {
         removeObservers()
+        deinitBlock()
     }
     
     private func updateTitle() {
@@ -63,11 +69,11 @@ final class DeclareController: CVTableViewController {
                                                           bottomInset: 0.0))
             rows.append(textRow)
             let codeNotReceivedButtonRow: CVRow = CVRow(title: "declareController.codeNotReceived.buttonTitle".localized,
-                                            xibName: .buttonCell,
-                                            theme: CVRow.Theme(topInset: 0.0, bottomInset: 0.0, buttonStyle: .quaternary),
-                                            selectionAction: { [weak self] in
-                                                self?.didTouchCodeNotReceivedButton()
-            })
+                                                        xibName: .buttonCell,
+                                                        theme: CVRow.Theme(topInset: 0.0, bottomInset: 0.0, buttonStyle: .quaternary),
+                                                        selectionAction: { [weak self] in
+                                                            self?.didTouchCodeNotReceivedButton()
+                                                        })
             rows.append(codeNotReceivedButtonRow)
             let flashButtonRow: CVRow = CVRow(title: "sickController.button.flash".localized,
                                               xibName: .buttonCell,
@@ -122,7 +128,7 @@ final class DeclareController: CVTableViewController {
     @objc private func didTouchFlashButton() {
         CameraAuthorizationManager.requestAuthorization { granted, isFirstTimeRequest in
             if granted {
-                self.didTouchFlash?()
+                self.didTouchFlash()
             } else if !isFirstTimeRequest {
                 self.showAlert(title: "scanCodeController.camera.authorizationNeeded.title".localized,
                                message: "scanCodeController.camera.authorizationNeeded.message".localized,
@@ -135,17 +141,35 @@ final class DeclareController: CVTableViewController {
     }
     
     @objc private func didTouchTapButton() {
-        didTouchTap?()
+        didTouchTap()
     }
     
     @objc private func didTouchCodeNotReceivedButton() {
-        showAlert(title: "declareController.codeNotReceived.alert.title".localized,
-                  message: "declareController.codeNotReceived.alert.message".localized,
-                  okTitle: "common.ok".localized)
+        let alertController: UIAlertController = UIAlertController(title: "declareController.codeNotReceived.alert.title".localized,
+                                                                   message: "declareController.codeNotReceived.alert.message".localized,
+                                                                   preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "common.ok".localized, style: .default))
+        alertController.addAction(UIAlertAction(title: "declareController.codeNotReceived.alert.showVideo".localized, style: .default, handler: { [weak self] _ in
+            self?.didTouchShowVideo(URL(string: "declareController.codeNotReceived.alert.video.url".localized)!)
+        }))
+        alertController.addAction(UIAlertAction(title: "declareController.codeNotReceived.alert.contactUs".localized, style: .default, handler: { [weak self] _ in
+            self?.showEmailController()
+        }))
+        present(alertController, animated: true, completion: nil)
     }
     
     @objc private func statusDataChanged() {
         reloadUI()
+    }
+    
+    private func showEmailController() {
+        if MFMailComposeViewController.canSendMail() {
+            let mailController: MFMailComposeViewController = MFMailComposeViewController()
+            mailController.navigationBar.tintColor = Asset.Colors.tint.color
+            mailController.mailComposeDelegate = self
+            mailController.setToRecipients(["aboutController.contactEmail".localized])
+            present(mailController, animated: true, completion: nil)
+        }
     }
 
 }
@@ -155,6 +179,14 @@ extension DeclareController: LocalizationsChangesObserver {
     func localizationsChanged() {
         updateTitle()
         reloadUI()
+    }
+    
+}
+
+extension DeclareController: MFMailComposeViewControllerDelegate {
+    
+    public func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true, completion: nil)
     }
     
 }

@@ -28,6 +28,10 @@ public final class RBManager {
         get { storage.isProximityActivated() }
         set { storage.save(proximityActivated: newValue) }
     }
+    public var canReactivateProximity: Bool {
+        guard let reportDate = storage.reportDate() else { return true }
+        return Date().timeIntervalSince1970 - reportDate.timeIntervalSince1970 > RBConstants.proximityReactivationBlockingDelay
+    }
     public var isSick: Bool {
         get { storage.isSick() }
         set { storage.save(isSick: newValue) }
@@ -41,7 +45,7 @@ public final class RBManager {
         let riskStartingDate: Date? = lastRiskReceivedDate?.rbDateByAddingDays(-(lastExposureTimeFrame ?? 0))
         let isolationEndDate: Date? = riskStartingDate?.rbDateByAddingDays(14)
         let now: Date = Date()
-        return now.timeIntervalSince1970 - (isolationEndDate ?? now).timeIntervalSince1970 < 0.0
+        return (isolationEndDate ?? now).timeIntervalSince1970 - now.timeIntervalSince1970 > 0.0
     }
     public var lastStatusRequestDate: Date? {
         get { storage.lastStatusRequestDate() }
@@ -55,9 +59,37 @@ public final class RBManager {
     public var lastRiskReceivedDate: Date? {
         get { storage.lastRiskReceivedDate() }
         set {
+            let wasAlreadyAtRisk: Bool = isAtRisk
+            if newValue == nil {
+                if !wasAlreadyAtRisk {
+                    storage.saveCurrentRiskScoringDate(nil)
+                }
+            } else {
+                storage.saveCurrentRiskScoringDate(newValue)
+            }
             storage.saveLastRiskReceivedDate(newValue)
             isAtRiskDidChangeHandler?(isAtRisk)
         }
+    }
+    public var reportDate: Date? {
+        get { storage.reportDate() }
+        set { storage.saveReportDate(newValue) }
+    }
+    public var reportDataOriginDate: Date? {
+        get { storage.reportDataOriginDate() }
+        set { storage.saveReportDataOriginDate(newValue) }
+    }
+    public var reportSymptomsStartDate: Date? {
+        get { storage.reportSymptomsStartDate() }
+        set { storage.saveReportSymptomsStartDate(newValue) }
+    }
+    public var reportPositiveTestDate: Date? {
+        get { storage.reportPositiveTestDate() }
+        set { storage.saveReportPositiveTestDate(newValue) }
+    }
+    public var reportToken: String? {
+        get { storage.reportToken() }
+        set { storage.saveReportToken(newValue) }
     }
     public var lastExposureTimeFrame: Int? {
         get { storage.lastExposureTimeFrame() }
@@ -96,7 +128,12 @@ public final class RBManager {
         self.storage.start()
         if isProximityActivated && restartProximityIfPossible && !isFirstInstall {
             if isRegistered {
-                startProximityDetection()
+                if canReactivateProximity {
+                    startProximityDetection()
+                } else {
+                    isProximityActivated = false
+                    stopProximityDetection()
+                }
             } else {
                 isProximityActivated = false
                 stopProximityDetection()
@@ -173,42 +210,6 @@ public final class RBManager {
 // MARK: - Server methods -
 extension RBManager {
     
-    public func status(_ completion: @escaping (_ error: Error?) -> ()) {
-        guard let ka = ka else {
-            completion(NSError.rbLocalizedError(message: "No key found to make request", code: 0))
-            return
-        }
-        guard let epoch = currentEpochOrLast else {
-            completion(NSError.rbLocalizedError(message: "No epoch found to make request", code: 0))
-            return
-        }
-        do {
-            let ntpTimestamp: Int = Date().timeIntervalSince1900
-            let statusMessage: RBStatusMessage = try RBMessageGenerator.generateStatusMessage(for: epoch, ntpTimestamp: ntpTimestamp, key: ka)
-            lastStatusRequestDate = Date()
-            server.status(epochId: statusMessage.epochId, ebid: statusMessage.ebid, time: statusMessage.time, mac: statusMessage.mac) { result in
-                switch result {
-                case let .success(response):
-                    do {
-                        try self.processStatusResponse(response)
-                        self.clearOldLocalProximities()
-                        completion(nil)
-                    } catch {
-                        self.storage.saveLastStatusErrorDate(Date())
-                        completion(error)
-                    }
-                case let .failure(error):
-                    if (error as NSError).code != NSError.lostConnectionCode {
-                        self.storage.saveLastStatusErrorDate(Date())
-                    }
-                    completion(error)
-                }
-            }
-        } catch {
-            completion(error)
-        }
-    }
-    
     public func statusV3(_ completion: @escaping (_ error: Error?) -> ()) {
         guard let ka = ka else {
             completion(NSError.rbLocalizedError(message: "No key found to make request", code: 0))
@@ -266,52 +267,30 @@ extension RBManager {
         }
     }
     
-    public func registerIfNeeded(token: String, completion: @escaping (_ error: Error?) -> ()) {
-        if isRegistered {
-            completion(nil)
-        } else {
-            register(token: token, completion: completion)
-        }
-    }
-    
-    public func register(token: String, completion: @escaping (_ error: Error?) -> ()) {
-        guard let keys: RBECKeys = try? RBKeysManager.generateKeys() else {
-            completion(NSError.rbLocalizedError(message: "Impossible to set keys up.", code: 0))
-            return
-        }
-        lastStatusRequestDate = Date()
-        server.register(token: token, publicKey: keys.publicKeyBase64) { result in
-            switch result {
-            case let .success(response):
-                do {
-                    try self.processRegisterResponse(response, keys: keys)
+    public func reportV4(code: String, symptomsOrigin: Date?, positiveTestDate: Date?, completion: @escaping (_ error: Error?) -> ()) {
+        let originSymptoms: Date? = symptomsOrigin?.rbDateByAddingDays(-(preSymptomsSpan ?? 0))
+        let originPositiveTest: Date? = positiveTestDate?.rbDateByAddingDays(-(positiveSampleSpan ?? 0))
+        let origin: Date = originSymptoms ?? originPositiveTest ?? .distantPast
+        let localHelloMessages: [RBLocalProximity] = storage.getLocalProximityList(from: origin, to: Date())
+        do {
+            let filteredProximities: [RBLocalProximity] = try filter.filter(proximities: localHelloMessages)
+            server.reportV4(code: code, helloMessages: filteredProximities) { result in
+                switch result {
+                case let .success(token):
+                    self.reportToken = token
+                    self.reportDate = symptomsOrigin ?? positiveTestDate ?? Date()
+                    self.reportDataOriginDate = origin
+                    self.reportSymptomsStartDate = symptomsOrigin
+                    self.reportPositiveTestDate = positiveTestDate
+                    self.clearLocalProximityList()
+                    self.isSick = true
                     completion(nil)
-                } catch {
+                case let .failure(error):
                     completion(error)
                 }
-            case let .failure(error):
-                completion(error)
             }
-        }
-    }
-    
-    public func registerV2(captcha: String, captchaId: String, completion: @escaping (_ error: Error?) -> ()) {
-        guard let keys: RBECKeys = try? RBKeysManager.generateKeys() else {
-            completion(NSError.rbLocalizedError(message: "Impossible to set keys up.", code: 0))
-            return
-        }
-        server.registerV2(captcha: captcha, captchaId: captchaId, publicKey: keys.publicKeyBase64) { result in
-            switch result {
-            case let .success(response):
-                do {
-                    try self.processRegisterResponse(response, keys: keys)
-                    completion(nil)
-                } catch {
-                    completion(error)
-                }
-            case let .failure(error):
-                completion(error)
-            }
+        } catch {
+            completion(NSError.rbLocalizedError(message: "Filtering of hello messages failed: \(error.localizedDescription)", code: 0))
         }
     }
     
@@ -332,40 +311,6 @@ extension RBManager {
             case let .failure(error):
                 completion(error)
             }
-        }
-    }
-    
-    public func unregister(_ completion: @escaping (_ error: Error?, _ isBlocking: Bool) -> ()) {
-        guard isRegistered else {
-            isProximityActivated = false
-            stopProximityDetection()
-            clearAllLocalData()
-            completion(nil, false)
-            return
-        }
-        guard let ka = ka else {
-            completion(NSError.rbLocalizedError(message: "No key found to make request", code: 0), false)
-            return
-        }
-        guard let epoch = currentEpochOrLast else {
-            completion(NSError.rbLocalizedError(message: "No epoch found to make request", code: 0), false)
-            return
-        }
-        do {
-            let ntpTimestamp: Int = Date().timeIntervalSince1900
-            let unregisterMessage: RBUnregisterMessage = try RBMessageGenerator.generateUnregisterMessage(for: epoch, ntpTimestamp: ntpTimestamp, key: ka)
-            server.unregister(epochId: unregisterMessage.epochId, ebid: unregisterMessage.ebid, time: unregisterMessage.time, mac: unregisterMessage.mac, completion: { error in
-                if let error = error, (error as NSError).code == -1001 {
-                    completion(error, true)
-                } else {
-                    self.isProximityActivated = false
-                    self.stopProximityDetection()
-                    self.clearAllLocalData()
-                    completion(error, false)
-                }
-            })
-        } catch {
-            completion(error, false)
         }
     }
     

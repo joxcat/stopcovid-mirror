@@ -46,39 +46,6 @@ public final class Server: NSObject, RBServer {
         ParametersManager.shared.certificateFile = configCertificateFile
     }
     
-    public func status(epochId: Int, ebid: String, time: String, mac: String, completion: @escaping (_ result: Result<RBStatusResponse, Error>) -> ()) {
-        ParametersManager.shared.fetchConfig { configResult in
-            switch configResult {
-            case let .success(serverTime):
-                let nowTimeStamp: Double = Date().timeIntervalSince1970
-                if abs(nowTimeStamp - serverTime) > ServerConstant.maxClockShiftToleranceInSeconds {
-                    self.deviceTimeNotAlignedToServerTimeDetected()
-                    completion(.failure(NSError.deviceTime))
-                } else {
-                    let body: RBServerStatusBody = RBServerStatusBody(epochId: epochId, ebid: ebid, time: time, mac: mac)
-                    self.processRequest(url: self.baseUrl().appendingPathComponent("status"), method: .post, body: body) { result in
-                        switch result {
-                        case let .success(data):
-                            do {
-                                let response: RBServerStatusResponse = try JSONDecoder().decode(RBServerStatusResponse.self, from: data)
-                                let transformedResponse: RBStatusResponse = RBStatusResponse(atRisk: response.atRisk,
-                                                                                             lastExposureTimeFrame: response.lastExposureTimeframe,
-                                                                                             tuples: response.tuples)
-                                completion(.success(transformedResponse))
-                            } catch {
-                                completion(.failure(error))
-                            }
-                        case let .failure(error):
-                            completion(.failure(error))
-                        }
-                    }
-                }
-            case let .failure(error):
-                completion(.failure(error))
-            }
-        }
-    }
-    
     public func statusV3(epochId: Int, ebid: String, time: String, mac: String, completion: @escaping (_ result: Result<RBStatusResponse, Error>) -> ()) {
         ParametersManager.shared.fetchConfig { configResult in
             switch configResult {
@@ -157,7 +124,7 @@ public final class Server: NSObject, RBServer {
         }
     }
     
-    public func register(token: String, publicKey: String, completion: @escaping (_ result: Result<RBRegisterResponse, Error>) -> ()) {
+    public func reportV4(code: String, helloMessages: [RBLocalProximity], completion: @escaping (_ result: Result<String, Error>) -> ()) {
         ParametersManager.shared.fetchConfig { configResult in
             switch configResult {
             case let .success(serverTime):
@@ -166,57 +133,22 @@ public final class Server: NSObject, RBServer {
                     self.deviceTimeNotAlignedToServerTimeDetected()
                     completion(.failure(NSError.deviceTime))
                 } else {
-                    let body: RBServerRegisterBody = RBServerRegisterBody(captcha: token, clientPublicECDHKey: publicKey)
-                    self.processRequest(url: self.baseUrl().appendingPathComponent("register"), method: .post, body: body) { result in
+                    let contacts: [RBServerContact] = self.prepareContactsReport(from: helloMessages)
+                    let body: RBServerReportBody = RBServerReportBody(token: code, contacts: contacts)
+                    self.processRequest(url: self.baseUrl().appendingPathComponent("report"), method: .post, body: body) { result in
                         switch result {
                         case let .success(data):
                             do {
-                                let response: RBServerRegisterResponse = try JSONDecoder().decode(RBServerRegisterResponse.self, from: data)
-                                
-                                let rootJson: [String: Any] = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] ?? [:]
-                                let config: [[String: Any]] = rootJson["config"] as? [[String: Any]] ?? []
-                                
-                                let transformedResponse: RBRegisterResponse = RBRegisterResponse(tuples: response.tuples,
-                                                                                                 timeStart: response.timeStart,
-                                                                                                 config: config)
-                                completion(.success(transformedResponse))
-                            } catch {
-                                completion(.failure(error))
-                            }
-                        case let .failure(error):
-                            completion(.failure(error))
-                        }
-                    }
-                }
-            case let .failure(error):
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    public func registerV2(captcha: String, captchaId: String, publicKey: String, completion: @escaping (_ result: Result<RBRegisterResponse, Error>) -> ()) {
-        ParametersManager.shared.fetchConfig { configResult in
-            switch configResult {
-            case let .success(serverTime):
-                let nowTimeStamp: Double = Date().timeIntervalSince1970
-                if abs(nowTimeStamp - serverTime) > ServerConstant.maxClockShiftToleranceInSeconds {
-                    self.deviceTimeNotAlignedToServerTimeDetected()
-                    completion(.failure(NSError.deviceTime))
-                } else {
-                    let body: RBServerRegisterBodyV2 = RBServerRegisterBodyV2(captcha: captcha, captchaId: captchaId, clientPublicECDHKey: publicKey)
-                    self.processRequest(url: self.baseUrl().appendingPathComponent("register"), method: .post, body: body) { result in
-                        switch result {
-                        case let .success(data):
-                            do {
-                                let response: RBServerRegisterResponse = try JSONDecoder().decode(RBServerRegisterResponse.self, from: data)
-                                
-                                let rootJson: [String: Any] = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] ?? [:]
-                                let config: [[String: Any]] = rootJson["config"] as? [[String: Any]] ?? []
-                                
-                                let transformedResponse: RBRegisterResponse = RBRegisterResponse(tuples: response.tuples,
-                                                                                                 timeStart: response.timeStart,
-                                                                                                 config: config)
-                                completion(.success(transformedResponse))
+                                if data.isEmpty {
+                                    completion(.failure(NSError.svLocalizedError(message: "Empty data received", code: 0)))
+                                } else {
+                                    let response: RBServerReportResponse = try JSONDecoder().decode(RBServerReportResponse.self, from: data)
+                                    if response.success != false {
+                                        completion(.success(response.reportValidationToken))
+                                    } else {
+                                        completion(.failure(NSError.svLocalizedError(message: response.message ?? "An unknown error occurred", code: 0)))
+                                    }
+                                }
                             } catch {
                                 completion(.failure(error))
                             }
@@ -244,44 +176,6 @@ public final class Server: NSObject, RBServer {
                 }
             case .failure:
                 self.processRegisterV3(captcha: captcha, captchaId: captchaId, publicKey: publicKey, completion: completion)
-            }
-        }
-    }
-    
-    public func unregister(epochId: Int, ebid: String, time: String, mac: String, completion: @escaping (_ error: Error?) -> ()) {
-        ParametersManager.shared.fetchConfig { configResult in
-            switch configResult {
-            case let .success(serverTime):
-                let nowTimeStamp: Double = Date().timeIntervalSince1970
-                if abs(nowTimeStamp - serverTime) > ServerConstant.maxClockShiftToleranceInSeconds {
-                    self.deviceTimeNotAlignedToServerTimeDetected()
-                    completion(NSError.deviceTime)
-                } else {
-                    let body: RBServerUnregisterBody = RBServerUnregisterBody(epochId: epochId, ebid: ebid, time: time, mac: mac)
-                    self.processRequest(url: self.baseUrl().appendingPathComponent("unregister"), method: .post, body: body) { result in
-                        switch result {
-                        case let .success(data):
-                            do {
-                                if data.isEmpty {
-                                    completion(nil)
-                                } else {
-                                    let response: RBServerStandardResponse = try JSONDecoder().decode(RBServerStandardResponse.self, from: data)
-                                    if response.success != false {
-                                        completion(nil)
-                                    } else {
-                                        completion(NSError.svLocalizedError(message: response.message ?? "An unknown error occurred", code: 0))
-                                    }
-                                }
-                            } catch {
-                                completion(error)
-                            }
-                        case let .failure(error):
-                            completion(error)
-                        }
-                    }
-                }
-            case let .failure(error):
-                completion(error)
             }
         }
     }

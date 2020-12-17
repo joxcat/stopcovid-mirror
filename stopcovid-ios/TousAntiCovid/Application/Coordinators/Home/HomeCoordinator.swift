@@ -38,10 +38,6 @@ final class HomeCoordinator: WindowedCoordinator {
             self?.showAbout()
         }, showCaptchaChallenge: { [weak self] captcha, didEnterCaptcha, didCancelCaptcha in
             self?.showCaptchaChallenge(captcha: captcha, didEnterCaptcha: didEnterCaptcha, didCancelCaptcha: didCancelCaptcha)
-        }, didTouchTestingSites: { [weak self] in
-            self?.showTestingSites()
-        }, didTouchCovidAdvices: { [weak self] in
-            self?.showCovidAdvices()
         }, didTouchDocument: { [weak self] in
             self?.showAttestations()
         }, didTouchManageData: { [weak self] in
@@ -58,10 +54,18 @@ final class HomeCoordinator: WindowedCoordinator {
             self?.showKeyFigures()
         }, didTouchDeclare: { [weak self] in
             self?.showDeclare()
-        }, didTouchCovidInfo: { [weak self] in
-            self?.showCovidInfo()
         }, didTouchUsefulLinks: { [weak self] in
             self?.showUsefulLinks()
+        }, didTouchRecordVenues: { [weak self] in
+            self?.showRecordVenues()
+        }, didTouchPrivateEvents: { [weak self] in
+            self?.showPrivateEvents()
+        }, didTouchVenuesHistory: { [weak self] in
+            self?.showVenuesHistory()
+        }, didRecordVenue: { [weak self] url in
+            self?.showVenueRecordingConfirmation(url: url)
+        }, didTouchOpenIsolationForm: { [weak self] in
+            self?.showIsolationForm()
         }, deinitBlock: { [weak self] in
             self?.didDeinit()
         }))
@@ -100,16 +104,9 @@ final class HomeCoordinator: WindowedCoordinator {
         addChild(coordinator: attestationsCoordinator)
     }
 
-    private func showTestingSites() {
-        URL(string: "myHealthController.testingSites.url".localized)?.openInSafari()
-    }
-    
-    private func showCovidAdvices() {
-        URL(string: "myHealthController.covidAdvices.url".localized)?.openInSafari()
-    }
-    
-    private func showCovidInfo() {
-        URL(string: "home.moreSection.covidInfo.url".localized)?.openInSafari()
+    private func showVenueRecordingConfirmation(url: URL) {
+        let venuesRecordingCoordinator: VenuesRecordingCoordinator = VenuesRecordingCoordinator(presentingController: navigationController?.topPresentedController, parent: self, showOnlyConfirmation: true, openingUrl: url)
+        addChild(coordinator: venuesRecordingCoordinator)
     }
     
     private func showManageData() {
@@ -133,6 +130,40 @@ final class HomeCoordinator: WindowedCoordinator {
         addChild(coordinator: declareCoordinator)
     }
     
+    private func showRecordVenues() {
+        let venuesRecordingCoordinator: VenuesRecordingCoordinator = VenuesRecordingCoordinator(presentingController: navigationController?.topViewController, parent: self)
+        addChild(coordinator: venuesRecordingCoordinator)
+    }
+    
+    private func showPrivateEvents() {
+        if VenuesManager.shared.needPrivateEventQrCodeGeneration {
+            HUD.show(.progress)
+            DispatchQueue.main.async {
+                VenuesManager.shared.generateNewPrivateEventQrCode()
+                HUD.hide()
+                self.showPrivateEventController()
+            }
+        } else {
+            self.showPrivateEventController()
+        }
+    }
+    
+    private func showPrivateEventController() {
+        let privateEventCoordinator: VenuesPrivateEventCoordinator = VenuesPrivateEventCoordinator(presentingController: navigationController?.topViewController, parent: self)
+        addChild(coordinator: privateEventCoordinator)
+    }
+    
+    private func showVenuesHistory() {
+        let venuesHistoryController: UIViewController = VenuesHistoryViewController()
+        let navigationController: UIViewController = CVNavigationController(rootViewController: venuesHistoryController)
+        self.navigationController?.present(navigationController, animated: true)
+    }
+    
+    private func showIsolationForm() {
+        let isolationFormCoordinator: IsolationFormCoordinator = IsolationFormCoordinator(presentingController: navigationController?.topViewController, parent: self)
+        addChild(coordinator: isolationFormCoordinator)
+    }
+    
     private func showCaptchaChallenge(captcha: Captcha, didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), didCancelCaptcha: @escaping () -> ()) {
         let captchaCoordinator: CaptchaCoordinator = CaptchaCoordinator(presentingController: navigationController, parent: self, captcha: captcha, didEnterCaptcha: { [weak self] id, answer in
             self?.navigationController?.dismiss(animated: true) {
@@ -144,7 +175,7 @@ final class HomeCoordinator: WindowedCoordinator {
         })
         addChild(coordinator: captchaCoordinator)
     }
- 
+        
     private func showFlash() {
         let flashCodeCoordinator: FlashCodeCoordinator = FlashCodeCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: flashCodeCoordinator)
@@ -152,11 +183,6 @@ final class HomeCoordinator: WindowedCoordinator {
     private func showEnterCode(code: String?) {
         let enterCodeCoordinator: EnterCodeCoordinator = EnterCodeCoordinator(presentingController: navigationController?.topPresentedController, parent: self, initialCode: code)
         addChild(coordinator: enterCodeCoordinator)
-    }
-    
-    private func showInformation() {
-        let informationCoordinator: InformationCoordinator = InformationCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
-        addChild(coordinator: informationCoordinator)
     }
     
     private func showKeyFigures() {

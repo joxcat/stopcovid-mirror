@@ -8,7 +8,6 @@
 //  Created by Lunabee Studio / Date - 07/11/2020 - for the TousAntiCovid project.
 //
 
-
 import UIKit
 
 final class PositiveTestController: CVTableViewController {

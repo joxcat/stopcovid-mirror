@@ -15,6 +15,7 @@ struct MediumInformationsView: View {
     
     var isAtRisk: Bool
     var isSick: Bool
+    var isAtWarningRisk: Bool
     var didReceiveStatus: Bool = true
     
     private var statusDateString: String? {
@@ -32,14 +33,18 @@ struct MediumInformationsView: View {
         } else if !didReceiveStatus {
             return WidgetManager.shared.widgetNoStatusInfo
         } else {
-            return isAtRisk ? WidgetManager.shared.widgetFullTitleAtRisk : WidgetManager.shared.widgetFullTitleNoContact
+            return isAtRisk ? WidgetManager.shared.widgetFullTitleAtRisk : (isAtWarningRisk ? WidgetManager.shared.widgetWarningFullTitle : WidgetManager.shared.widgetFullTitleNoContact)
         }
     }
     
     var body: some View {
         ZStack {
-            if isAtRisk {
+            if isSick {
+                SickGradientView()
+            } else if isAtRisk {
                 AtRiskGradientView()
+            } else if isAtWarningRisk {
+                WarningRiskGradientView()
             } else if didReceiveStatus && !isSick {
                 NoContactGradientView()
             }
@@ -64,16 +69,16 @@ struct MediumInformationsView: View {
 
 struct MediumInformationsView_Previews: PreviewProvider {
     static var previews: some View {
-        MediumInformationsView(isAtRisk: true, isSick: false)
+        MediumInformationsView(isAtRisk: true, isSick: false, isAtWarningRisk: false)
             .previewContext(WidgetPreviewContext(family: .systemMedium))
-        MediumInformationsView(isAtRisk: false, isSick: false)
+        MediumInformationsView(isAtRisk: false, isSick: false, isAtWarningRisk: false)
             .previewContext(WidgetPreviewContext(family: .systemMedium))
         
-        MediumInformationsView(isAtRisk: true, isSick: false)
+        MediumInformationsView(isAtRisk: true, isSick: false, isAtWarningRisk: false)
             .previewContext(WidgetPreviewContext(family: .systemMedium))
             .background(Color.black)
             .environment(\.colorScheme, .dark)
-        MediumInformationsView(isAtRisk: false, isSick: false)
+        MediumInformationsView(isAtRisk: false, isSick: false, isAtWarningRisk: false)
             .previewContext(WidgetPreviewContext(family: .systemMedium))
             .background(Color.black)
             .environment(\.colorScheme, .dark)

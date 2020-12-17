@@ -22,7 +22,7 @@ struct KeyFigureDepartment: Codable {
     var currentTrend: KeyFigure.Trend { trend ?? .same }
     
     var formattedDate: String {
-        Date(timeIntervalSince1970: Double(extractDate)).relativelyFormatted()
+        Date(timeIntervalSince1970: Double(extractDate)).relativelyFormattedDay(prefixStringKey: "keyFigures.update")
     }
     
     enum CodingKeys: String, CodingKey {

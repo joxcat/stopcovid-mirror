@@ -12,9 +12,11 @@ import UIKit
 
 final class KeyFiguresController: CVTableViewController {
     
+    private let didTouchReadExplanationsNow: () -> ()
     private let deinitBlock: () -> ()
     
-    init(deinitBlock: @escaping () -> ()) {
+    init(didTouchReadExplanationsNow: @escaping () -> (), deinitBlock: @escaping () -> ()) {
+        self.didTouchReadExplanationsNow = didTouchReadExplanationsNow
         self.deinitBlock = deinitBlock
         super.init(style: .plain)
     }
@@ -76,34 +78,24 @@ final class KeyFiguresController: CVTableViewController {
     override func createRows() -> [CVRow] {
         var rows: [CVRow] = []
         let healthSectionRow: CVRow =  CVRow(title: "keyFiguresController.section.health".localized,
+                                             subtitle: "keyFiguresController.section.health.subtitle".localized,
                                              xibName: .textCell,
                                              theme: CVRow.Theme(topInset: 30.0,
                                                                 bottomInset: 12.0,
                                                                 textAlignment: .natural,
                                                                 titleFont: { Appearance.Cell.Text.valueFont }))
         rows.append(healthSectionRow)
-        let explanationRow: CVRow = CVRow(title: "keyFiguresController.explanation".localized,
-                                             image: Asset.Images.help.image,
-                                             xibName: .standardCardCell,
-                                             theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
-                                                                 topInset: 10.0,
-                                                                 bottomInset: 10.0,
-                                                                 textAlignment: .natural,
-                                                                 titleFont: { Appearance.Cell.Text.standardFont },
-                                                                 titleColor: Appearance.Cell.Text.headerTitleColor,
-                                                                 imageTintColor: Appearance.Cell.Text.headerTitleColor),
-                                             selectionAction: { [weak self] in
-                                                self?.didTouchExplanation()
-                                             },
-                                             willDisplay: { cell in
-                                                cell.selectionStyle = .none
-                                                cell.accessoryType = .none
+        let readNowRow: CVRow = CVRow(buttonTitle: "keyFiguresController.section.health.button".localized,
+                                             xibName: .linkButtonCell,
+                                             theme:  CVRow.Theme(topInset: 0.0,
+                                                                 bottomInset: 20.0),
+                                             secondarySelectionAction: { [weak self] in
+                                                self?.didTouchReadExplanationsNow()
                                              })
-        rows.append(explanationRow)
+        rows.append(readNowRow)
         let keyFiguresHealthRows: [CVRow] = KeyFiguresManager.shared.keyFigures.filter { $0.category == .health }.map { keyFigure in
             CVRow(title: keyFigure.label,
                   subtitle: keyFigure.description,
-                  accessoryText: keyFigure.formattedDate,
                   xibName: .keyFigureCell,
                   theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
                                      topInset: 10.0,
@@ -126,7 +118,6 @@ final class KeyFiguresController: CVTableViewController {
         let keyFiguresAppRows: [CVRow] = KeyFiguresManager.shared.keyFigures.filter { $0.category == .app }.map { keyFigure in
             CVRow(title: keyFigure.label,
                   subtitle: keyFigure.description,
-                  accessoryText: keyFigure.formattedDate,
                   xibName: .keyFigureCell,
                   theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
                                      topInset: 10.0,
@@ -164,12 +155,6 @@ final class KeyFiguresController: CVTableViewController {
         let controller: UIActivityViewController = UIActivityViewController(activityItems: activityItems.compactMap { $0 }, applicationActivities: nil)
         controller.excludedActivityTypes = [.saveToCameraRoll, .print]
         present(controller, animated: true, completion: nil)
-    }
-    
-    private func didTouchExplanation() {
-        showAlert(title: "keyFiguresController.explanation.alert.title".localized,
-                  message: "keyFiguresController.explanation.alert.message".localized,
-                  okTitle: "keyFiguresController.explanation.alert.button".localized)
     }
 
 }

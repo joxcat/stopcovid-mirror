@@ -17,8 +17,12 @@ public final class ParametersManager: NSObject {
     typealias RequestCompletion = (_ result: Result<Double, Error>) -> ()
     
     public enum ApiVersion: String {
-        case v2
         case v3
+        case v4
+    }
+    
+    public enum WarningApiVersion: String {
+        case v1
     }
     
     public static let shared: ParametersManager = ParametersManager()
@@ -33,6 +37,16 @@ public final class ParametersManager: NSObject {
            guard let hour = valueFor(name: "app.maxHourContactNotif") as? Double else { return nil }
            return Int(hour)
        }
+    
+    public var displayRecordVenues: Bool { valueFor(name: "app.displayRecordVenues") as? Bool ?? false }
+    public var displayPrivateEvent: Bool { valueFor(name: "app.displayPrivateEvent") as? Bool ?? false }
+    public var privateEventVenueType: String { valueFor(name: "app.privateEventVenueType") as? String ?? "NA" }
+    public var displayAttestation: Bool { valueFor(name: "app.displayAttestation") as? Bool ?? false }
+    
+    public var displayIsolation: Bool { valueFor(name: "app.displayIsolation") as? Bool ?? false }
+    public var isolationDuration: Double { valueFor(name: "app.isolation.duration") as? Double ?? 604800.0 }
+    public var postIsolationDuration: Double { valueFor(name: "app.postIsolation.duration") as? Double ?? 604800.0 }
+    
     var appAvailability: Bool? { valueFor(name: "app.appAvailability") as? Bool }
     var preSymptomsSpan: Int? {
         guard let span = valueFor(name: "app.preSymptomsSpan") as? Double else { return nil }
@@ -80,8 +94,16 @@ public final class ParametersManager: NSObject {
         guard let period = valueFor(name: "app.quarantinePeriod") as? Double else { return nil }
         return Int(period)
     }
-    var dataRetentionPeriod: Int? {
-        guard let period = valueFor(name: "app.dataRetentionPeriod") as? Double else { return nil }
+    public var venuesTimestampRoundingInterval: Int {
+        guard let interval = valueFor(name: "app.venuesTimestampRoundingInterval") as? Double else { return 900 }
+        return Int(interval)
+    }
+    public var venuesRetentionPeriod: Int {
+        guard let period = valueFor(name: "app.venuesRetentionPeriod") as? Double else { return 14 }
+        return Int(period)
+    }
+    var dataRetentionPeriod: Int {
+        guard let period = valueFor(name: "app.dataRetentionPeriod") as? Double else { return 14 }
         return Int(period)
     }
     public var bleServiceUuid: String? { valueFor(name: "ble.serviceUUID") as? String }
@@ -89,7 +111,8 @@ public final class ParametersManager: NSObject {
     public var bleFilteringConfig: String? { valueFor(name: "ble.filterConfig") as? String }
     public var bleFilteringMode: String? { valueFor(name: "ble.filterMode") as? String }
     
-    public var apiVersion: ApiVersion { ApiVersion(rawValue: valueFor(name: "app.apiVersion") as? String ?? "") ?? .v2 }
+    public var apiVersion: ApiVersion { ApiVersion(rawValue: valueFor(name: "app.apiVersion") as? String ?? "") ?? .v3 }
+    public var warningApiVersion: WarningApiVersion { WarningApiVersion(rawValue: valueFor(name: "app.warningApiVersion") as? String ?? "") ?? .v1 }
     
     private var config: [[String: Any]] = [] {
         didSet { distributeUpdatedConfig() }
@@ -135,11 +158,6 @@ public final class ParametersManager: NSObject {
         let task: URLSessionDataTask = session.dataTask(with: url)
         task.taskDescription = requestId
         task.resume()
-    }
-    
-    public func clearConfig() {
-        config = []
-        try? FileManager.default.removeItem(at: localFileUrl())
     }
     
     private func loadLocalConfig() {

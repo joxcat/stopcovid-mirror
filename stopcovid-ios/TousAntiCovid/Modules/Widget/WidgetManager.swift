@@ -37,6 +37,14 @@ final class WidgetManager {
         }
     }
     
+    @WidgetUserDefault(key: .isAtWarningRisk)
+    var isAtWarningRisk: Bool = false {
+        didSet {
+            guard oldValue != isAtWarningRisk else { return }
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+    }
+    
     @OptionalWidgetUserDefault(key: .lastStatusReceivedDate)
     var lastStatusReceivedDate: Date? {
         didSet {
@@ -124,6 +132,10 @@ final class WidgetManager {
     var widgetSickFullTitle: String = ""
     @WidgetUserDefault(key: .widgetNoStatusInfo)
     var widgetNoStatusInfo: String = ""
+    @WidgetUserDefault(key: .widgetWarningSmallTitle)
+    var widgetWarningSmallTitle: String = ""
+    @WidgetUserDefault(key: .widgetWarningFullTitle)
+    var widgetWarningFullTitle: String = ""
     
     private init() {}
     
@@ -153,6 +165,7 @@ final class WidgetManager {
     }
     
     private func triggerProximityActivation() {
+        guard RBManager.shared.canReactivateProximity else { return }
         if !RBManager.shared.isRegistered {
             NotificationCenter.default.post(name: .widgetDidRequestRegister, object: nil)
         } else if !RBManager.shared.isProximityActivated {
@@ -179,6 +192,7 @@ final class WidgetManager {
         lastStatusReceivedDate = RBManager.shared.lastStatusReceivedDate
         lastRiskReceivedDate = RBManager.shared.lastRiskReceivedDate
         isAtRisk = RBManager.shared.isAtRisk
+        isAtWarningRisk = VenuesManager.shared.lastWarningRiskReceivedDate != nil
         isSick = RBManager.shared.isSick
         isRegistered = RBManager.shared.isRegistered
         isOnboardingDone = isAppOnboardingDone
@@ -221,7 +235,9 @@ extension WidgetManager: LocalizationsChangesObserver {
         widgetMoreInfo = "widget.info.moreInfo".localizedOrEmpty
         widgetOpenTheApp = "widget.openTheApp".localizedOrEmpty
         widgetSickSmallTitle = "widget.isSick.small.title".localizedOrEmpty
-        widgetSickFullTitle = "widget.isSick.full.title".localizedOrEmpty
+        widgetSickFullTitle = "home.healthSection.isSick.standaloneTitle".localizedOrEmpty
+        widgetWarningSmallTitle = "home.healthSection.warningContact.cellTitle".localizedOrEmpty
+        widgetWarningFullTitle = "sickController.state.warning.title".localizedOrEmpty
         widgetNoStatusInfo = "widget.noStatus.info".localizedOrEmpty
         let date: Date = lastStatusReceivedDate ?? Date()
         widgetFullTitleDate = date.relativelyFormattedForWidget()

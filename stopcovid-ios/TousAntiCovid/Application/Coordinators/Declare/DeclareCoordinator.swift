@@ -29,6 +29,10 @@ final class DeclareCoordinator: Coordinator {
             self?.showFlash()
         }, didTouchTap: { [weak self] in
             self?.showTap()
+        }, didTouchShowVideo: { [weak self] url in
+            self?.showRemoteVideo(url: url)
+        }, deinitBlock: { [weak self] in
+            self?.didDeinit()
         }))
         self.navigationController = navigationController
         presentingController?.present(navigationController, animated: true)
@@ -44,4 +48,8 @@ final class DeclareCoordinator: Coordinator {
         addChild(coordinator: enterCodeCoordinator)
     }
     
+    private func showRemoteVideo(url: URL) {
+        url.openInSafari()
+    }
+
 }

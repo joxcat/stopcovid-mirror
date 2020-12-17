@@ -32,16 +32,10 @@ final class KeyFiguresManager: NSObject {
     static let shared: KeyFiguresManager = KeyFiguresManager()
     
     var keyFigures: [KeyFigure] = []
-    var featuredKeyFigures: [KeyFigure] { [KeyFigure](keyFigures.filter { $0.isFeatured }.prefix(3)) }
+    var highlightedKeyFigure: KeyFigure? { keyFigures.filter { $0.isFeatured && ($0.isHighlighted == true) }.first }
+    var featuredKeyFigures: [KeyFigure] { [KeyFigure](keyFigures.filter { $0.isFeatured && ($0.isHighlighted != true) }.prefix(3)) }
     
-    var displayDepartmentLevel: Bool {
-        return ParametersManager.shared.displayDepartmentLevel
-    }
-    
-    @UserDefault(key: .isDepartmentLevelActivated)
-    var isDepartmentLevelActivated: Bool = false {
-        didSet { notifyObservers() }
-    }
+    var displayDepartmentLevel: Bool { ParametersManager.shared.displayDepartmentLevel }
     
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
@@ -58,7 +52,7 @@ final class KeyFiguresManager: NSObject {
     var currentDepartmentName: String?
     
     var currentFormattedDepartmentNameAndPostalCode: String? {
-        guard isDepartmentLevelActivated else { return nil }
+        guard displayDepartmentLevel else { return nil }
         guard let departmentName = currentDepartmentName, let postalCode = currentPostalCode else { return nil }
         return "\(departmentName) - \(postalCode)".uppercased()
     }
@@ -152,6 +146,7 @@ extension KeyFiguresManager {
     
     private func fetchKeyFiguresFile(_ completion: @escaping () -> ()) {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
+        session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: KeyFiguresConstant.jsonUrl) { data, response, error in
             guard let data = data else { return }
             do {

@@ -69,6 +69,7 @@ class CVTableViewCell: UITableViewCell {
         
         cvAccessoryLabel?.isHidden = row.accessoryText == nil
         cvAccessoryLabel?.font = row.theme.accessoryTextFont?()
+        cvAccessoryLabel?.textColor = row.theme.accessoryTextColor
         cvAccessoryLabel?.textAlignment = row.theme.textAlignment
         cvAccessoryLabel?.adjustsFontForContentSizeCategory = true
         

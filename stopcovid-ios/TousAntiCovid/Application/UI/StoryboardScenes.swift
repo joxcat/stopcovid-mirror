@@ -32,10 +32,15 @@ internal enum StoryboardScene {
 
     internal static let cvNavigationChildController = SceneType<TousAntiCovid.CVNavigationChildController>(storyboard: CVNavigationChild.self, identifier: "CVNavigationChildController")
   }
-  internal enum FlashCode: StoryboardType {
-    internal static let storyboardName = "FlashCode"
+  internal enum FlashReportCode: StoryboardType {
+    internal static let storyboardName = "FlashReportCode"
 
-    internal static let flashCodeController = SceneType<TousAntiCovid.FlashCodeController>(storyboard: FlashCode.self, identifier: "FlashCodeController")
+    internal static let flashCodeController = SceneType<TousAntiCovid.FlashReportCodeController>(storyboard: FlashReportCode.self, identifier: "FlashCodeController")
+  }
+  internal enum FlashVenueCode: StoryboardType {
+    internal static let storyboardName = "FlashVenueCode"
+
+    internal static let flashCodeController = SceneType<TousAntiCovid.FlashVenueCodeController>(storyboard: FlashVenueCode.self, identifier: "FlashCodeController")
   }
   internal enum ModalContainer: StoryboardType {
     internal static let storyboardName = "ModalContainer"

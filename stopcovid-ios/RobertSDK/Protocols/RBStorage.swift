@@ -66,6 +66,8 @@ public protocol RBStorage {
     // MARK: - Status: last risk received date -
     func saveLastRiskReceivedDate(_ date: Date?)
     func lastRiskReceivedDate() -> Date?
+    func saveCurrentRiskScoringDate(_ date: Date?)
+    func currentRiskScoringDate() -> Date?
     
     // MARK: - Status: Is sick -
     func save(isSick: Bool)
@@ -74,6 +76,20 @@ public protocol RBStorage {
     // MARK: - Push token -
     func save(pushToken: String?)
     func pushToken() -> String?
+    
+    // MARK: - Report dates -
+    func saveReportDate(_ date: Date?)
+    func reportDate() -> Date?
+    func saveReportDataOriginDate(_ date: Date?)
+    func reportDataOriginDate() -> Date?
+    func saveReportSymptomsStartDate(_ date: Date?)
+    func reportSymptomsStartDate() -> Date?
+    func saveReportPositiveTestDate(_ date: Date?)
+    func reportPositiveTestDate() -> Date?
+    
+    // MARK: - Report token -
+    func saveReportToken(_ token: String?)
+    func reportToken() -> String?
     
     // MARK: - Data cleraing -
     func clearLocalEpochs()

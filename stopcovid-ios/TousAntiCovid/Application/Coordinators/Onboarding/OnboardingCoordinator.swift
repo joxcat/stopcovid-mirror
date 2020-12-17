@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import ServerSDK
 
 final class OnboardingCoordinator: WindowedCoordinator {
     
@@ -71,6 +72,17 @@ extension OnboardingCoordinator {
     }
     
     private func didProcessAllowNotifications() {
+        guard VenuesManager.shared.isVenuesRecordingActivated else {
+            didContinueOnVenues()
+            return
+        }
+        let controller: UIViewController = CVNavigationChildController.controller(OnboardingVenuesController(didContinue:  { [weak self] in
+            self?.didContinueOnVenues()
+        }))
+        navigationController?.show(controller, sender: nil)
+    }
+    
+    private func didContinueOnVenues() {
         let controller: UIViewController = CVNavigationChildController.controller(OnboardingGesturesController(didContinue:  { [weak self] in
             self?.didTouchNoted()
         }))

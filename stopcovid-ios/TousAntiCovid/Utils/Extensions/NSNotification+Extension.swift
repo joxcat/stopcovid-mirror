@@ -19,5 +19,6 @@ extension NSNotification.Name {
     static var newAttestationFromDeeplink: NSNotification.Name = NSNotification.Name(rawValue: "newAttestationFromDeeplink")
     static var widgetDidRequestRegister: NSNotification.Name = NSNotification.Name(rawValue: "widgetDidRequestRegister")
     static var dismissAllAndShowRecommandations: NSNotification.Name = NSNotification.Name(rawValue: "dismissAllAndShowRecommandations")
-    
+    static var newVenueRecordingFromDeeplink: NSNotification.Name = NSNotification.Name(rawValue: "newVenueRecordingFromDeeplink")
+    static var openFullVenueRecordingFlowFromDeeplink: NSNotification.Name = NSNotification.Name(rawValue: "openFullVenueRecordingFlowFromDeeplink")
 }

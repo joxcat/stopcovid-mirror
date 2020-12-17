@@ -163,7 +163,7 @@ final class TestingManager {
         let lineString: String = "\n" + values.joined(separator: ",")
         do {
             try lineString.data(using: .utf8)?.append(fileURL: currentCsvFileUrl())
-        } catch { }
+        } catch {}
     }
     
     func allTestFilesUrls() -> [URL] {

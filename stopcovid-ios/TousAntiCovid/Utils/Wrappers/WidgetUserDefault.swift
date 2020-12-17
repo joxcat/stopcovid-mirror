@@ -42,6 +42,7 @@ extension WidgetUserDefault {
         case isSick
         case isRegistered
         case isAtRisk
+        case isAtWarningRisk
         case lastStatusReceivedDate
         case lastRiskReceivedDate
         case widgetAppName
@@ -59,6 +60,8 @@ extension WidgetUserDefault {
         case widgetOpenTheApp
         case widgetSickSmallTitle
         case widgetSickFullTitle
+        case widgetWarningSmallTitle
+        case widgetWarningFullTitle
         case widgetNoStatusInfo
     }
     

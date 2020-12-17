@@ -120,6 +120,7 @@ extension InfoCenterManager {
     
     private func fetchLastUpdatedAtFile(_ completion: @escaping (_ areUpdatesAvailable: Bool, _ languageChanged: Bool, _ lastUpdatedAt: Int, _ informAboutNews: Bool) -> ()) {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
+        session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: InfoCenterConstant.lastUpdatedAtUrl) { data, response, error in
             guard let data = data else { return }
             do {
@@ -142,6 +143,7 @@ extension InfoCenterManager {
     
     private func fetchTagsFile(_ completion: @escaping () -> ()) {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
+        session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: InfoCenterConstant.tagsUrl) { data, response, error in
             guard let data = data else { return }
             do {
@@ -161,6 +163,7 @@ extension InfoCenterManager {
     
     private func fetchInfoCenterFile(_ completion: @escaping () -> ()) {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
+        session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: InfoCenterConstant.infoCenterUrl) { data, response, error in
             guard let data = data else { return }
             do {
@@ -181,6 +184,7 @@ extension InfoCenterManager {
     private func fetchLabelsFile(languageCode: String, completion: @escaping () -> ()) {
         let url: URL = labelsUrl(for: languageCode)
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
+        session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: url) { data, response, error in
             guard let data = data else { return }
             do {

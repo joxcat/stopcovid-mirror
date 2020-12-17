@@ -25,10 +25,10 @@ struct WidgetView: View {
 }
 
 private struct PreviewData {
-    static let activatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: false, isSick: false, lastStatusReceivedDate: Date())
-    static let activatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: true, isSick: false, lastStatusReceivedDate: Date())
-    static let notActivatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: false, isSick: false, lastStatusReceivedDate: Date())
-    static let notActivatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: true, isSick: false, lastStatusReceivedDate: Date())
+    static let activatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: false, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
+    static let activatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: true, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
+    static let notActivatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: false, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
+    static let notActivatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: true, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
 }
 
 struct MainSmallLightWidgetView_Previews: PreviewProvider {

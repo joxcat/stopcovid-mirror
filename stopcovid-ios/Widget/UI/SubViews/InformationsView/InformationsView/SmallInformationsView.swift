@@ -16,6 +16,7 @@ struct SmallInformationsView: View {
     var date: Date?
     var isAtRisk: Bool
     var isSick: Bool
+    var isAtWarningRisk: Bool
     var didReceiveStatus: Bool = true
     
     private var statusDateString: String? {
@@ -45,15 +46,19 @@ struct SmallInformationsView: View {
         } else if !didReceiveStatus {
             return WidgetManager.shared.widgetNoStatusInfo
         } else {
-            return isAtRisk ? WidgetManager.shared.widgetSmallTitleAtRisk : WidgetManager.shared.widgetSmallTitleNoContact
+            return isAtRisk ? WidgetManager.shared.widgetSmallTitleAtRisk : (isAtWarningRisk ? WidgetManager.shared.widgetWarningSmallTitle : WidgetManager.shared.widgetSmallTitleNoContact)
         }
     }
     
     var body: some View {
         ZStack {
-            if isAtRisk {
+            if isSick {
+                SickGradientView()
+            } else if isAtRisk {
                 AtRiskGradientView()
-            } else if didReceiveStatus && !isSick {
+            } else if isAtWarningRisk {
+                WarningRiskGradientView()
+            } else if didReceiveStatus {
                 NoContactGradientView()
             }
             VStack(spacing: 4) {
@@ -70,16 +75,16 @@ struct SmallInformationsView: View {
 
 struct SmallInformationsView_Previews: PreviewProvider {
     static var previews: some View {
-        SmallInformationsView(date: Date(), isAtRisk: true, isSick: false)
+        SmallInformationsView(date: Date(), isAtRisk: true, isSick: false, isAtWarningRisk: false)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
-        SmallInformationsView(date: Date(), isAtRisk: false, isSick: false)
+        SmallInformationsView(date: Date(), isAtRisk: false, isSick: false, isAtWarningRisk: false)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
         
-        SmallInformationsView(date: Date(), isAtRisk: true, isSick: false)
+        SmallInformationsView(date: Date(), isAtRisk: true, isSick: false, isAtWarningRisk: false)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
             .background(Color.black)
             .environment(\.colorScheme, .dark)
-        SmallInformationsView(date: Date(), isAtRisk: false, isSick: false)
+        SmallInformationsView(date: Date(), isAtRisk: false, isSick: false, isAtWarningRisk: false)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
             .background(Color.black)
             .environment(\.colorScheme, .dark)

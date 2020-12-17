@@ -106,6 +106,10 @@ enum Appearance {
             static let stepColor: UIColor = Asset.Colors.buttonLabel.color
         }
         
+        enum Isolation {
+            static let actionBackgroundColor: UIColor = Asset.Colors.isolationAction.color
+        }
+        
         enum Text {
             static var titleColor: UIColor {
                 if #available(iOS 13.0, *) {
@@ -117,9 +121,12 @@ enum Appearance {
             static var captionTitleFont: UIFont { UIFontMetrics(forTextStyle: .caption2).scaledFont(for: .regular(size: 11.0)) }
             static var captionTitleFont2: UIFont { UIFontMetrics(forTextStyle: .caption2).scaledFont(for: .marianneMedium(size: 12.0)) }
             static var headTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 25.0)) }
-            static var headTitleFont2: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 50.0)) }
+            static var headTitleFont2: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneExtraBold(size: 50.0)) }
+            static var headTitleFont3: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 50.0)) }
             static var titleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 17.0)) }
+            static var titleFontExtraBold: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneExtraBold(size: 17.0)) }
             static var titleHighlightFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .medium(size: 17.0)) }
+            static var actionTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .bold(size: 15.0)) }
             static var subtitleColor: UIColor {
                 if #available(iOS 13.0, *) {
                     return .label
@@ -149,7 +156,7 @@ enum Appearance {
             
             static var headerTitleColor: UIColor { Asset.Colors.tint.color }
             static var valueTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .semibold(size: 12.0)) }
-            static var valueFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 24.0)) }
+            static var valueFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneExtraBold(size: 24.0)) }
 
             static var errorColor: UIColor { Asset.Colors.error.color }
             

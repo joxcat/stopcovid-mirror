@@ -38,8 +38,9 @@ final class InformationController: CVTableViewController {
     
     override func createRows() -> [CVRow] {
         let isAtRisk: Bool = RBManager.shared.isAtRisk
+        let isAtWarningRisk: Bool = VenuesManager.shared.lastWarningRiskReceivedDate != nil
         var rows: [CVRow] = []
-        let textVariantToken: String = isAtRisk ? "atRisk" : "nothing"
+        let textVariantToken: String = isAtRisk ? "atRisk" : (isAtWarningRisk ? "warning" : "nothing")
         let textRow: CVRow = CVRow(title: "informationController.mainMessage.\(textVariantToken).title".localized,
                                    subtitle: "informationController.mainMessage.\(textVariantToken).subtitle".localized,
                                    xibName: .textCell,
@@ -60,26 +61,14 @@ final class InformationController: CVTableViewController {
         }
         rows.append(contentsOf: step2Rows)
         
-        let step3VariantToken: String = isAtRisk ? "appointment" : "moreInfo"
-        let step3Rows: [CVRow] = rowsBlock(title: String(format: "informationController.step.\(step3VariantToken).title".localized, 3),
-                                           subtitle: "informationController.step.\(step3VariantToken).subtitle".localized,
-                                           buttonTitle: "informationController.step.\(step3VariantToken).buttonTitle".localized) { [weak self] in
-            guard let self = self else { return }
-            if isAtRisk {
+        if isAtRisk || isAtWarningRisk {
+            let step3Rows: [CVRow] = rowsBlock(title: String(format: "informationController.step.appointment.title".localized, 3),
+                                               subtitle: "informationController.step.appointment.subtitle".localized,
+                                               buttonTitle: "informationController.step.appointment.buttonTitle".localized) { [weak self] in
+                guard let self = self else { return }
                 "callCenter.phoneNumber".localized.callPhoneNumber(from: self)
-            } else {
-                URL(string: "informationController.step.moreInfo.url".localized)?.openInSafari()
             }
-        }
-        rows.append(contentsOf: step3Rows)
-        
-        if isAtRisk {
-            let step4Rows: [CVRow] = rowsBlock(title: String(format: "informationController.step.moreInfo.title".localized, 4),
-                                               subtitle: "informationController.step.moreInfo.subtitle".localized,
-                                               buttonTitle: "informationController.step.moreInfo.buttonTitle".localized) {
-                URL(string: "informationController.step.moreInfo.url".localized)?.openInSafari()
-            }
-            rows.append(contentsOf: step4Rows)
+            rows.append(contentsOf: step3Rows)
         }
         
         return rows

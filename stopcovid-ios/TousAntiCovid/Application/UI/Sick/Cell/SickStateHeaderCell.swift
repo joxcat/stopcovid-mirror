@@ -26,13 +26,13 @@ final class SickStateHeaderCell: CVTableViewCell {
     }
     
     private func setupTheme(_ row: CVRow) {
-        guard let isAtRisk = row.associatedValue as? Bool else { return }
+        guard let colors = row.associatedValue as? (startColor: UIColor, endColor: UIColor, buttonColor: UIColor) else { return }
         cvTitleLabel?.textColor = .white
         cvSubtitleLabel?.textColor = .white
         cvAccessoryLabel?.textColor = .white
         bottomButton.titleLabel?.font = Appearance.ShadowedButton.font
         bottomButton.tintColor = .white
-        bottomButton.backgroundColor = isAtRisk ? Asset.Colors.notificationRiskButtonBackground.color : Asset.Colors.notificationButtonBackground.color
+        bottomButton.backgroundColor = colors.buttonColor
         bottomButton.layer.cornerRadius = 4.0
         bottomButton.layer.masksToBounds = false
         bottomButton.layer.shadowColor = UIColor.black.withAlphaComponent(0.2).cgColor
@@ -42,8 +42,8 @@ final class SickStateHeaderCell: CVTableViewCell {
         topRightButton.tintColor = .white
         containerView.layer.cornerRadius = 10.0
         containerView.layer.masksToBounds = true
-        gradientView.startColor = isAtRisk ? Asset.Colors.gradientStartRed.color : Asset.Colors.gradientStartGreen.color
-        gradientView.endColor = isAtRisk ? Asset.Colors.gradientEndRed.color : Asset.Colors.gradientEndGreen.color
+        gradientView.startColor = colors.startColor
+        gradientView.endColor = colors.endColor
     }
     
     private func setupContent(_ row: CVRow) {

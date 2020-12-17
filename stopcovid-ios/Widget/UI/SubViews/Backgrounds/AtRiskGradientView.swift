@@ -15,8 +15,8 @@ struct AtRiskGradientView: View {
     var body: some View {
         Rectangle()
             .fill(LinearGradient(gradient: Gradient(colors: [Color("gradientStartRed"), Color("gradientEndRed")]),
-                                 startPoint: .init(x: 0, y: 1),
-                                 endPoint: .init(x: 1, y: 0)))
+                                 startPoint: .init(x: 0, y: 0.5),
+                                 endPoint: .init(x: 1, y: 0.5)))
     }
 }
 

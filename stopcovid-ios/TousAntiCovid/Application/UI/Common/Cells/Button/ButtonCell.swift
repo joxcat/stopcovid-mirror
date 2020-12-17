@@ -23,7 +23,7 @@ final class ButtonCell: CVTableViewCell {
         button?.accessibilityLabel = row.title?.removingEmojis()
         button?.accessibilityHint = nil
         button?.buttonStyle = row.theme.buttonStyle
-        button.alpha = row.enabled ? 1.0 : 0.3
+        button?.alpha = row.enabled ? 1.0 : 0.3
         isUserInteractionEnabled = row.enabled
         accessoryType = .none
         selectionStyle = .none

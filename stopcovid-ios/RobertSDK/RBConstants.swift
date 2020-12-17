@@ -13,6 +13,7 @@ import Foundation
 public enum RBConstants {
 
     public static let epochDurationInSeconds: Int = 15 * 60
+    public static let proximityReactivationBlockingDelay: Double = 5_356_800.0 // 2 months in seconds.
     
     enum Prefix {
         static let c1: UInt8 = 0b00000001

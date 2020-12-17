@@ -34,7 +34,7 @@ final class AttestationsManager: NSObject {
     
     var formFields: [[AttestationFormField]] = []
     var formFieldsCount: Int { formFields.reduce([], +).count }
-    var attestations: [Attestation] { storageManager.attestations().sorted { $0.timestamp < $1.timestamp } }
+    var attestations: [Attestation] { storageManager.attestations().sorted { $0.timestamp > $1.timestamp } }
     
     private var observers: [AttestationsObserverWrapper] = []
     private var storageManager: StorageManager!
@@ -90,12 +90,12 @@ final class AttestationsManager: NSObject {
         do {
             let regex: NSRegularExpression = try NSRegularExpression(pattern: "<[a-zA-Z0-9\\-]+>")
             qrCodeString = regex.stringByReplacingMatches(in: qrCodeString, range: NSRange(qrCodeString.startIndex..., in: qrCodeString), withTemplate: "qrCode.infoNotAvailable".localized)
-        } catch { }
+        } catch {}
         return qrCodeString
     }
     
-    func saveAttestation(timestamp: Int, qrCode: Data, footer: String, qrCodeString: String) {
-        let attestation: Attestation = Attestation(timestamp: timestamp, qrCode: qrCode, footer: footer, qrCodeString: qrCodeString)
+    func saveAttestation(timestamp: Int, qrCode: Data, footer: String, qrCodeString: String, reason: String) {
+        let attestation: Attestation = Attestation(timestamp: timestamp, qrCode: qrCode, footer: footer, qrCodeString: qrCodeString, reason: reason)
         storageManager.saveAttestation(attestation)
     }
     

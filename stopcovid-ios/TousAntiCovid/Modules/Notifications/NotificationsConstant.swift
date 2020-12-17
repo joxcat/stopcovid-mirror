@@ -19,6 +19,7 @@ enum NotificationsContant {
         static let deviceTimeError: String = "deviceTimeErrorNotification"
         static let ultimate: String = "ultimateNotification"
         static let proximityReactivation: String = "proximityReactivationNotification"
+        static let stillHavingFever: String = "stillHavingFever"
     }
     
 }

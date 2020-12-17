@@ -18,6 +18,7 @@ final class OnboardingPrivacyController: OnboardingController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.separatorStyle = .singleLine
+        tableView.backgroundColor = Appearance.Controller.cardTableViewBackgroundColor
         PrivacyManager.shared.addObserver(self)
     }
     
@@ -49,7 +50,7 @@ final class OnboardingPrivacyController: OnboardingController {
     }
     
     override func createRows() -> [CVRow] {
-        var rows: [CVRow] = []
+        var rows: [CVRow] = isOpenedFromOnboarding ? [] : [blockSeparatorRow()]
         if isOpenedFromOnboarding {
             let titleRow: CVRow = CVRow.titleRow(title: title) { [weak self] cell in
                 self?.navigationChildController?.updateLabel(titleLabel: cell.cvTitleLabel, containerView: cell)
@@ -61,15 +62,17 @@ final class OnboardingPrivacyController: OnboardingController {
             let sectionRow: CVRow = CVRow(title: section.section,
                                           subtitle: section.description,
                                           xibName: .textCell,
-                                          theme: CVRow.Theme(topInset: 30.0,
-                                                             bottomInset: 15.0,
+                                          theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                                             topInset: Appearance.Cell.leftMargin,
+                                                             bottomInset: Appearance.Cell.leftMargin,
                                                              textAlignment: .natural,
                                                              separatorLeftInset: Appearance.Cell.leftMargin))
             let linkRows: [CVRow] = section.links?.map { link in
                 CVRow(title: link.label,
                       xibName: .standardCell,
-                      theme: CVRow.Theme(topInset: 15.0,
-                                         bottomInset: 15.0,
+                      theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                         topInset: Appearance.Cell.leftMargin,
+                                         bottomInset: Appearance.Cell.leftMargin,
                                          textAlignment: .natural,
                                          titleFont: { Appearance.Cell.Text.standardFont },
                                          titleColor: Appearance.tintColor,
@@ -81,11 +84,19 @@ final class OnboardingPrivacyController: OnboardingController {
                         cell.accessoryType = .none
                 })
             } ?? []
-            return [sectionRow] + linkRows
+            return [sectionRow] + linkRows + [blockSeparatorRow()]
         }.reduce([], +)
         rows.append(contentsOf: sectionsRows)
+        rows.removeLast()
         rows.append(.empty)
         return rows
+    }
+    
+    private func blockSeparatorRow() -> CVRow {
+        var row: CVRow = .emptyFor(topInset: 15.0, bottomInset: 15.0)
+        row.theme.separatorLeftInset = 0.0
+        row.theme.separatorRightInset = 0.0
+        return row
     }
 
 }

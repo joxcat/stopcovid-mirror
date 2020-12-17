@@ -28,6 +28,20 @@ final class KeyFigureCell: CVTableViewCell {
     @IBOutlet private var valuesContainerStackView: DynamicContentStackView!
     @IBOutlet private var sharingButton: UIButton!
     
+    @IBOutlet private var baselineAlignmentConstraint: NSLayoutConstraint!
+    
+    private var contentSizeCategoryThreashold: UIContentSizeCategory = .accessibilityMedium
+    private var isLarge: Bool { UIApplication.shared.preferredContentSizeCategory >= contentSizeCategoryThreashold }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        addObservers()
+    }
+    
+    deinit {
+        removeObservers()
+    }
+    
     override func setup(with row: CVRow) {
         super.setup(with: row)
         setupUI()
@@ -42,10 +56,22 @@ final class KeyFigureCell: CVTableViewCell {
         return image
     }
 
+    private func addObservers() {
+        removeObservers()
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(changeInPreferredContentSize),
+                                               name: UIContentSizeCategory.didChangeNotification,
+                                               object: nil)
+    }
+    
+    private func removeObservers() {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     private func setupUI() {
         containerView.backgroundColor = backgroundColor
         backgroundColor = .clear
-        valuesContainerStackView.threshold = .accessibilityMedium
+        valuesContainerStackView.threshold = contentSizeCategoryThreashold
         valuesContainerStackView.thresholdAxis = .vertical
         valuesContainerStackView.thresholdAlignment = .leading
         valuesContainerStackView.thresholdSpacing = 20.0
@@ -55,7 +81,7 @@ final class KeyFigureCell: CVTableViewCell {
         departmentLabel?.font = Appearance.Cell.Text.captionTitleFont2
         countryLabel?.textColor = Appearance.Cell.Text.captionTitleColor
         countryLabel?.font = Appearance.Cell.Text.captionTitleFont2
-        countryValueLabel?.font = Appearance.Cell.Text.titleFont
+        countryValueLabel?.font = Appearance.Cell.Text.titleFontExtraBold
         cvSubtitleLabel?.font = Appearance.Cell.Text.subtitleFont
         valueLabel.font = Appearance.Cell.Text.headTitleFont2
         sharingImageView.tintColor = Appearance.tintColor
@@ -65,13 +91,13 @@ final class KeyFigureCell: CVTableViewCell {
     }
     
     private func setupContent(row: CVRow) {
-        dateLabel.text = row.accessoryText
         guard let keyFigure = row.associatedValue as? KeyFigure else { return }
         valueLabel.textColor = keyFigure.color
         cvTitleLabel?.textColor = keyFigure.color
         countryValueLabel?.textColor = keyFigure.color
         if let departmentKeyFigure = keyFigure.currentDepartmentSpecificKeyFigure {
-            departmentLabel?.text = KeyFiguresManager.shared.currentDepartmentName?.uppercased()
+            dateLabel.text = departmentKeyFigure.formattedDate
+            departmentLabel?.text = departmentKeyFigure.label.uppercased()
             departmentLabel?.isHidden = false
             valueLabel.text = departmentKeyFigure.valueToDisplay.formattingValueWithThousandsSeparatorIfPossible()
             countryLabel?.text = "france".localized.uppercased()
@@ -82,6 +108,7 @@ final class KeyFigureCell: CVTableViewCell {
             countryTrendImageView.image = keyFigure.trend?.image
             countryTrendImageView.isHidden = keyFigure.trend?.image == nil
         } else {
+            dateLabel.text = keyFigure.formattedDate
             if KeyFiguresManager.shared.currentFormattedDepartmentNameAndPostalCode == nil || keyFigure.category == .app {
                 departmentLabel?.isHidden = true
             } else {
@@ -113,12 +140,20 @@ final class KeyFigureCell: CVTableViewCell {
         let trendString: String = (keyFigure.currentDepartmentSpecificKeyFigure == nil ? keyFigure.trend?.accessibilityLabel : keyFigure.currentDepartmentSpecificKeyFigure?.trend?.accessibilityLabel) ?? ""
         cvTitleLabel?.accessibilityLabel = "\(cvTitleLabel?.text ?? ""), \(value), \(trendString)"
         sharingButton.accessibilityLabel = "accessibility.hint.keyFigure.share".localized
-        let date: Date = Date(timeIntervalSince1970: Double(keyFigure.lastUpdate))
+        let date: Date = Date(timeIntervalSince1970: Double(keyFigure.extractDate))
         dateLabel.accessibilityLabel = date.accessibilityRelativelyFormattedDate(prefixStringKey: "keyFigures.update")
     }
     
     @IBAction private func didTouchSharingButton(_ sender: Any) {
         currentAssociatedRow?.selectionActionWithCell?(self)
+    }
+    
+    @objc private func changeInPreferredContentSize() {
+        if isLarge {
+            baselineAlignmentConstraint.isActive = false
+        } else {
+            baselineAlignmentConstraint.isActive = true
+        }
     }
 
 }

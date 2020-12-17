@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import MessageUI
 
 final class AboutController: CVTableViewController {
     
@@ -52,7 +53,7 @@ final class AboutController: CVTableViewController {
                                    xibName: .textCell,
                                    theme: CVRow.Theme(topInset: 40.0, bottomInset: 20.0, textAlignment: .natural, separatorLeftInset: nil))
         rows.append(textRow)
-        let internetRow: CVRow = CVRow(title: "aboutController.webpage".localized,
+        let contactRow: CVRow = CVRow(title: "aboutController.contactUsByEmail".localized,
                                    xibName: .standardCell,
                                    theme: CVRow.Theme(topInset: 15.0,
                                                       bottomInset: 15.0,
@@ -60,10 +61,10 @@ final class AboutController: CVTableViewController {
                                                       titleFont: { Appearance.Cell.Text.standardFont },
                                                       titleColor: Asset.Colors.tint.color,
                                                       separatorLeftInset: Appearance.Cell.leftMargin),
-                                   selectionAction: {
-            URL(string: "aboutController.webpageUrl".localized)?.openInSafari()
-        })
-        rows.append(internetRow)
+                                   selectionAction: { [weak self] in
+                                    self?.showEmailController()
+                                   })
+        rows.append(contactRow)
         let faqRow: CVRow = CVRow(title: "aboutController.faq".localized,
                                    xibName: .standardCell,
                                    theme: CVRow.Theme(topInset: 15.0,
@@ -73,8 +74,8 @@ final class AboutController: CVTableViewController {
                                                       titleColor: Asset.Colors.tint.color,
                                                       separatorLeftInset: Appearance.Cell.leftMargin),
                                    selectionAction: {
-            URL(string: "aboutController.faqUrl".localized)?.openInSafari()
-        })
+                                    URL(string: "aboutController.faqUrl".localized)?.openInSafari()
+                                   })
         rows.append(faqRow)
         let opinionRow: CVRow = CVRow(title: "aboutController.opinion".localized,
                                    xibName: .standardCell,
@@ -85,9 +86,21 @@ final class AboutController: CVTableViewController {
                                                       titleColor: Asset.Colors.tint.color,
                                                       separatorLeftInset: 0.0),
                                    selectionAction: {
-            URL(string: "aboutController.opinionUrl".localized)?.openInSafari()
-        })
+                                    URL(string: "aboutController.opinionUrl".localized)?.openInSafari()
+                                   })
         rows.append(opinionRow)
+        let internetRow: CVRow = CVRow(title: "aboutController.webpage".localized,
+                                   xibName: .standardCell,
+                                   theme: CVRow.Theme(topInset: 15.0,
+                                                      bottomInset: 15.0,
+                                                      textAlignment: .natural,
+                                                      titleFont: { Appearance.Cell.Text.standardFont },
+                                                      titleColor: Asset.Colors.tint.color,
+                                                      separatorLeftInset: Appearance.Cell.leftMargin),
+                                   selectionAction: {
+                                    URL(string: "aboutController.webpageUrl".localized)?.openInSafari()
+                                   })
+        rows.append(internetRow)
         rows.append(.empty)
         return rows
     }
@@ -106,6 +119,16 @@ final class AboutController: CVTableViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "common.close".localized, style: .plain, target: self, action: #selector(didTouchCloseButton))
     }
     
+    private func showEmailController() {
+        if MFMailComposeViewController.canSendMail() {
+            let mailController: MFMailComposeViewController = MFMailComposeViewController()
+            mailController.navigationBar.tintColor = Asset.Colors.tint.color
+            mailController.mailComposeDelegate = self
+            mailController.setToRecipients(["aboutController.contactEmail".localized])
+            present(mailController, animated: true, completion: nil)
+        }
+    }
+    
     @objc private func didTouchCloseButton() {
         dismiss(animated: true, completion: nil)
     }
@@ -121,3 +144,10 @@ extension AboutController: LocalizationsChangesObserver {
     
 }
 
+extension AboutController: MFMailComposeViewControllerDelegate {
+    
+    public func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        controller.dismiss(animated: true, completion: nil)
+    }
+    
+}

@@ -13,4 +13,5 @@ import Foundation
 enum AttestationsConstant {
     
     static let jsonUrl: URL = URL(string: "https://app.stopcovid.gouv.fr/json/version-\(Constant.Server.jsonVersion)/Attestations/form.json")!
+    
 }

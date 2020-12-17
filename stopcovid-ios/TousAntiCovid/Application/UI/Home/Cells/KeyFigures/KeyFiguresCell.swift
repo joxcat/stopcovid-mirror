@@ -16,7 +16,6 @@ final class KeyFiguresCell: CVTableViewCell {
     @IBOutlet private var containerView: UIView!
     @IBOutlet private var headerLabel: UILabel!
     @IBOutlet private var headerImageView: UIImageView!
-    @IBOutlet private var updateLabel: UILabel!
     
     @IBOutlet weak var titleHeaderLabel: UILabel!
     @IBOutlet private var titleLabels: [UILabel] = []
@@ -37,13 +36,10 @@ final class KeyFiguresCell: CVTableViewCell {
     }
     
     private func setupUI() {
-        updateLabel.text = "keyfigure.dailyUpdates".localized
-        updateLabel.font = Appearance.Cell.Text.captionTitleFont
-        updateLabel.textColor = Appearance.Cell.Text.captionTitleColor
+        cvAccessoryLabel?.font = Appearance.Cell.Text.captionTitleFont
+        cvAccessoryLabel?.textColor = Appearance.Cell.Text.captionTitleColor
         containerView.backgroundColor = backgroundColor
         backgroundColor = .clear
-        cvTitleLabel?.font = Appearance.Cell.Text.titleFont
-        cvSubtitleLabel?.font = Appearance.Cell.Text.subtitleFont
         button?.contentHorizontalAlignment = .left
         button?.tintColor = Appearance.Button.Tertiary.titleColor
         button?.titleLabel?.font = Appearance.Button.linkFont
@@ -53,7 +49,6 @@ final class KeyFiguresCell: CVTableViewCell {
         headerImageView.image = Asset.Images.compass.image
         headerImageView.tintColor = Appearance.Cell.Text.errorColor
         headerLabel.textColor = Appearance.Cell.Text.errorColor
-        headerLabel.text = "home.infoSection.keyFigures".localized
         headerLabel.font = Appearance.Cell.Text.titleFont
         titleHeaderLabel.text = "common.country.france".localized.uppercased()
         titleHeaderLabel.font = Appearance.Cell.Text.captionTitleFont2
@@ -90,6 +85,7 @@ final class KeyFiguresCell: CVTableViewCell {
     }
     
     private func setupContent(row: CVRow) {
+        headerLabel.text = row.title
         button.setTitle(row.buttonTitle, for: .normal)
         button.isHidden = row.buttonTitle == nil
         guard let keyFigures = row.associatedValue as? [KeyFigure] else { return }
@@ -99,20 +95,20 @@ final class KeyFiguresCell: CVTableViewCell {
             valueLabels[index].text = keyFigures[index].valueGlobalToDisplay.formattingValueWithThousandsSeparatorIfPossible()
         }
         let departmentKeyFigures: [KeyFigureDepartment?] = keyFigures.map { $0.currentDepartmentSpecificKeyFigure }
-        let hideDepartmentKeyFigures: Bool = departmentKeyFigures.compactMap { $0 } .isEmpty
+        let filteredDepartmentKeyFigures: [KeyFigureDepartment] = departmentKeyFigures.compactMap { $0 }
+        let hideDepartmentKeyFigures: Bool = filteredDepartmentKeyFigures.isEmpty
         titleHeaderLabel.isHidden = hideDepartmentKeyFigures
         secondaryStackView.isHidden = hideDepartmentKeyFigures
-        titleHeaderSecondaryLabel.text = KeyFiguresManager.shared.currentDepartmentName?.uppercased()
+        titleHeaderSecondaryLabel.text = filteredDepartmentKeyFigures.last?.label.uppercased()
         (0..<departmentKeyFigures.count).forEach { index in
             titleSecondaryLabels[index].text = keyFigures[index].shortLabel
             titleSecondaryLabels[index].textColor = keyFigures[index].color
             valueSecondaryLabels[index].text = departmentKeyFigures[index]?.valueToDisplay.formattingValueWithThousandsSeparatorIfPossible() ?? "-"
         }
-
     }
     
     private func setupAccessibility() {
-        accessibilityElements = [headerLabel, updateLabel].compactMap { $0 }
+        accessibilityElements = [headerLabel, cvAccessoryLabel].compactMap { $0 }
         if KeyFiguresManager.shared.displayDepartmentLevel && KeyFiguresManager.shared.currentPostalCode != nil {
             accessibilityElements?.append(titleHeaderSecondaryLabel!)
             accessibilityElements?.append(contentsOf: titleSecondaryLabels)

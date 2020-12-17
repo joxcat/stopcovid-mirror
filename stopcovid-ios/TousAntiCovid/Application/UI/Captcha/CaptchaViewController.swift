@@ -233,7 +233,7 @@ final class CaptchaViewController: CVTableViewController {
                 self.captcha = captcha
                 self.reloadUI(animated: true)
             case let .failure(error):
-                 self.showAlert(title: "common.error".localized, message: error.localizedDescription, okTitle: "common.ok".localized)
+                self.showAlert(title: "common.error".localized, message: error.localizedDescription, okTitle: "common.ok".localized)
             }
         }
     }

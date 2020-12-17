@@ -14,6 +14,12 @@ import StorageSDK
 
 extension Attestation {
     
-    var isExpired: Bool { Date().timeIntervalSince1970 - Double(timestamp) > ParametersManager.shared.qrCodeExpiredHours * 3600.0 }
+    var isExpired: Bool {
+        if reason == "sport_animaux" {
+            return Date().timeIntervalSince1970 - Double(timestamp) > 3.0 * 3600.0
+        } else {
+            return Date().timeIntervalSince1970 - Double(timestamp) > ParametersManager.shared.qrCodeExpiredHours * 3600.0
+        }
+    }
     
 }

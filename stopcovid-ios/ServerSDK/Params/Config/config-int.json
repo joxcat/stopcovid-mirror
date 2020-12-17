@@ -2,31 +2,111 @@
   "config": [
 	{
       "name": "lastUpdate",
-      "value": "2 September 2020"
+      "value": "28 november 2020"
     },
     {
-      "name": "app.randomStatusHour",
-      "value": 0
+      "name": "version",
+      "value": 10
     },
     {
       "name": "app.apiVersion",
-      "value": "v3"
+      "value": "v4"
+    },
+    {
+      "name": "app.warningApiVersion",
+      "value": "v1"
+    },
+    {
+      "name": "app.keyfigures.displayDepartmentLevel",
+      "value": true
+    },
+    {
+      "name": "app.displayIsolation",
+      "value": true
+    },
+    {
+      "name": "app.isolation.duration",
+      "value": 691200
+    },
+    {
+      "name": "app.postIsolation.duration",
+      "value": 691200
+    },
+    {
+      "name": "app.displayRecordVenues",
+      "value": true
+    },
+    {
+      "name": "app.displayPrivateEvent",
+      "value": true
+    },
+    {
+      "name": "app.privateEventVenueType",
+      "value": "PEV"
+    },
+    {
+      "name": "app.displayAttestation",
+      "value": true
     },
     {
       "name": "app.push.displayOnSuccess",
-      "value": true
+      "value": false
     },
     {
       "name": "app.push.displayAll",
-      "value": true
+      "value": false
+    },
+    {
+      "name": "app.proximityReactivation.reminderHours",
+      "value": [1.0, 2.0, 4.0, 8.0, 12.0]
     },
     {
       "name": "app.push.minHoursBetweenVisibleNotifications",
-      "value": 1.0
+      "value": 13.0
+    },
+    {
+      "name": "app.qrCode.deletionHours",
+      "value": 24.0
+    },
+    {
+      "name": "app.qrCode.expiredHours",
+      "value": 8.0
+    },
+    {
+      "name": "app.qrCode.formattedString",
+      "value": "Cree le: <creationDate> a <creationHour>;\nNom: <lastname>;\nPrenom: <firstname>;\nNaissance: <dob> a <cityofbirth>;\nAdresse: <address> <zip> <city>;\nSortie: <datetime-day> a <datetime-hour>;\nMotifs: <reason-code>"
+    },
+    {
+      "name": "app.qrCode.formattedStringDisplayed",
+      "value": "Créé le <creationDate> à <creationHour>\nNom : <lastname>\nPrénom : <firstname>\nNaissance : <dob> à <cityofbirth>\nAdresse : <address> <zip> <city>\nSortie : <datetime-day> à <datetime-hour>\nCode motif: <reason-code>"
+    },
+    {
+      "name": "app.qrCode.footerString",
+      "value": "<firstname> - <datetime-day>, <datetime-hour>\n<reason-shortlabel>"
+    },
+    {
+      "name": "app.randomStatusHour",
+      "value": 0.1
+    },
+    {
+      "name": "app.venuesTimestampRoundingInterval",
+      "value": 900
+    },
+    {
+      "name": "app.venuesRetentionPeriod",
+      "value": 14
     },
     {
       "name": "app.dataRetentionPeriod",
       "value": 14
+    },
+    {
+      "name": "app.preSymptomsSpan",
+      "value": 2
+    },
+    {
+      "name": "app.positiveSampleSpan",
+      "value": 7
     },
     {
       "name": "app.quarantinePeriod",
@@ -34,15 +114,11 @@
     },
     {
       "name": "app.checkStatusFrequency",
-      "value": 0.5
+      "value": 0.51
     },
     {
       "name": "app.minStatusRetryDuration",
       "value": 0.1
-    },
-    {
-      "name": "app.preSymptomsSpan",
-      "value": 2
     },
     {
       "name": "app.appAvailability",
@@ -58,7 +134,7 @@
     },
     {
       "name": "ble.serviceUUID",
-      "value": "0000f062-0000-1000-8000-00805f9b34fb"
+      "value": "0000fd64-0000-1000-8000-00805f9b34fb"
     },
     {
       "name": "ble.characteristicUUID",
@@ -66,11 +142,11 @@
     },
     {
       "name": "ble.backgroundServiceManufacturerData",
-      "value": "1.0.0.0.0.0.0.0.0.0.0.0.0.-128.0.0.0"
+      "value": "1.0.0.0.0.0.0.0.0.0.0.8.0.0.0.0.0"
     },
     {
       "name": "ble.filterConfig",
-      "value": "{\"a\":4.3429448190325175,\"b\":0.1,\"deltas\":[39.0,27.0,23.0,21.0,20.0,19.0,18.0,17.0,16.0,15.0],\"durationThreshold\":120,\"p0\":-66.0,\"rssiThreshold\":-25,\"timeOverlap\":60,\"timeWindow\":120,\"riskThreshold\":0.1}"
+      "value": "{\"a\":4.3429448190325175,\"b\":0.1,\"deltas\":[29.6,20.9,18.5,17.6,16.9,15.5,15.0,15.0,15.0,15.0],\"durationThreshold\":90,\"p0\":-66.0,\"rssiThreshold\":-25,\"timeOverlap\":60,\"timeWindow\":120,\"riskThreshold\":0.1}"
     },
     {
       "name": "ble.filterMode",

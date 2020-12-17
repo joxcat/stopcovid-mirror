@@ -38,6 +38,7 @@ final class AttestationsViewController: CVTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        DeepLinkingManager.shared.attestationController = self
         title = "attestationsController.title".localized
         initUI()
         reloadUI()

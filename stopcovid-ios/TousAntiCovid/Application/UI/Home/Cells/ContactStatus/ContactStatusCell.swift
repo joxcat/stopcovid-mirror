@@ -23,7 +23,7 @@ final class ContactStatusCell: CVTableViewCell {
     
     private func setupUI() {
         cvTitleLabel?.font = Appearance.Cell.Text.titleFont
-        cvSubtitleLabel?.font = Appearance.Cell.Text.accessoryFont
+        cvSubtitleLabel?.font = Appearance.Cell.Text.subtitleFont
         cvAccessoryLabel?.font = Appearance.Cell.Text.accessoryFont
         cvAccessoryLabel?.textColor = .white
         containerView.layer.cornerRadius = 10.0

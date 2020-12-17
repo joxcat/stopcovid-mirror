@@ -45,7 +45,7 @@ extension Date {
     
     func dayMonthYearFormatted() -> String {
         let formatter: DateFormatter = DateFormatter()
-        formatter.dateFormat = "d MMMM YYYY"
+        formatter.dateFormat = "d MMMM yyyy"
         return formatter.string(from: self)
     }
     
@@ -95,12 +95,12 @@ extension Date {
     func relativelyFormatted(prefixStringKey: String = "myHealthController.notification.update") -> String {
         if Calendar.current.isDateInToday(self) {
             let lastPart: String = String(format: "\("common.today".localized), %@", timeFormatted())
-            return String(format: prefixStringKey.localized, lastPart)
+            return prefixStringKey.isEmpty ? lastPart : String(format: prefixStringKey.localized, lastPart)
         } else if Calendar.current.isDateInYesterday(self) {
             let lastPart: String = String(format: "\("common.yesterday".localized), %@", timeFormatted())
-            return String(format: prefixStringKey.localized, lastPart)
+            return prefixStringKey.isEmpty ? lastPart : String(format: prefixStringKey.localized, lastPart)
         } else {
-            return String(format: "\(prefixStringKey.localized), %@", dayMonthFormatted(), timeFormatted())
+            return prefixStringKey.isEmpty ? String(format: "%@, %@", dayMonthFormatted(), timeFormatted()) : String(format: "\(prefixStringKey.localized), %@", dayMonthFormatted(), timeFormatted())
         }
     }
     
@@ -157,5 +157,38 @@ extension Date {
         }
     }
     #endif
+    
+    func roundingToBeginningOfDay() -> Date? {
+        var components: DateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: self)
+        components.hour = 0
+        components.minute = 0
+        components.second = 0
+        return Calendar.current.date(from: components)
+    }
+    
+    func roundingToEndOfDay() -> Date? {
+        var components: DateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: self)
+        components.hour = 23
+        components.minute = 59
+        components.second = 59
+        return Calendar.current.date(from: components)
+    }
 
+}
+
+extension Date {
+    
+    var timeIntervalSince1900: Int {
+        return Int(timeIntervalSince1970) + 2208988800
+    }
+    
+    init(timeIntervalSince1900: Int) {
+        self.init(timeIntervalSince1970: Double(timeIntervalSince1900 - 2208988800))
+    }
+    
+    func roundedTimeIntervalSince1900(interval: Int) -> Int {
+        let timeInterval: Int = timeIntervalSince1900
+        return timeInterval + interval / 2 - (timeInterval + interval / 2) % interval
+    }
+    
 }

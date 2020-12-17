@@ -57,7 +57,7 @@ final class SickController: CVTableViewController {
             rows.append(contentsOf: notRegisteredRows())
         } else {
             if RBManager.shared.lastStatusReceivedDate != nil {
-                rows.append(RBManager.shared.isAtRisk ? contactRow() : nothingRow())
+                rows.append(RBManager.shared.isAtRisk ? contactRow() : (VenuesManager.shared.lastWarningRiskReceivedDate != nil ? warningRow() : nothingRow()))
             }
             rows.append(contentsOf: paragraphsRows(showNotificationInfoRow: !RBManager.shared.isAtRisk))
         }
@@ -67,6 +67,11 @@ final class SickController: CVTableViewController {
     private func contactRow() -> CVRow {
         let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
         let notificationDateString: String = notificationDate?.relativelyFormatted() ?? "N/A"
+        
+        let colors: (startColor: UIColor, endColor: UIColor, buttonColor: UIColor) = (Asset.Colors.gradientStartRed.color,
+                                                                                      Asset.Colors.gradientEndRed.color,
+                                                                                      Asset.Colors.notificationRiskButtonBackground.color)
+        
         let stateRow: CVRow = CVRow(title: "sickController.state.contact.title".localized,
                                     subtitle: "sickController.state.contact.subtitle".localized,
                                     accessoryText: notificationDateString,
@@ -76,7 +81,33 @@ final class SickController: CVTableViewController {
                                                        bottomInset: 10.0,
                                                        textAlignment: .natural,
                                                        accessoryTextFont: { Appearance.Cell.Text.accessoryFont }),
-                                    associatedValue: true,
+                                    associatedValue: colors,
+                                    secondarySelectionAction: { [weak self] in
+            self?.didTouchMoreButton()
+        }, tertiarySelectionAction: { [weak self] in
+            self?.didTouchReadMoreButton()
+        })
+        return stateRow
+    }
+    
+    private func warningRow() -> CVRow {
+        let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
+        let notificationDateString: String = notificationDate?.relativelyFormatted() ?? "N/A"
+        
+        let colors: (startColor: UIColor, endColor: UIColor, buttonColor: UIColor) = (Asset.Colors.gradientStartOrange.color,
+                                                                                      Asset.Colors.gradientEndOrange.color,
+                                                                                      Asset.Colors.notificationWarningButtonBackground.color)
+        
+        let stateRow: CVRow = CVRow(title: "sickController.state.warning.title".localized,
+                                    subtitle: "sickController.state.warning.subtitle".localized,
+                                    accessoryText: notificationDateString,
+                                    buttonTitle: "myHealthController.alert.atitudeToAdopt".localized,
+                                    xibName: .sickStateHeaderCell,
+                                    theme: CVRow.Theme(topInset: 0.0,
+                                                       bottomInset: 10.0,
+                                                       textAlignment: .natural,
+                                                       accessoryTextFont: { Appearance.Cell.Text.accessoryFont }),
+                                    associatedValue: colors,
                                     secondarySelectionAction: { [weak self] in
             self?.didTouchMoreButton()
         }, tertiarySelectionAction: { [weak self] in
@@ -88,6 +119,11 @@ final class SickController: CVTableViewController {
     private func nothingRow() -> CVRow {
         let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
         let notificationDateString: String = notificationDate?.relativelyFormatted() ?? "N/A"
+        
+        let colors: (startColor: UIColor, endColor: UIColor, buttonColor: UIColor) = (Asset.Colors.gradientStartGreen.color,
+                                                                                      Asset.Colors.gradientEndGreen.color,
+                                                                                      Asset.Colors.notificationButtonBackground.color)
+        
         let stateRow: CVRow = CVRow(title: "sickController.state.nothing.title".localized,
                                     subtitle: "sickController.state.nothing.subtitle".localized,
                                     accessoryText: notificationDateString,
@@ -97,7 +133,7 @@ final class SickController: CVTableViewController {
                                                        bottomInset: 10.0,
                                                        textAlignment: .natural,
                                                        accessoryTextFont: { Appearance.Cell.Text.accessoryFont }),
-                                    associatedValue: false,
+                                    associatedValue: colors,
                                     secondarySelectionAction: { [weak self] in
             self?.didTouchMoreButton()
         }, tertiarySelectionAction: { [weak self] in
@@ -292,7 +328,7 @@ final class SickController: CVTableViewController {
                   isOkDestructive: true,
                   cancelTitle: "common.no".localized, handler:  {
                     switch ParametersManager.shared.apiVersion {
-                    case .v3:
+                    case .v3, .v4:
                         HUD.show(.progress)
                         RBManager.shared.unregisterV3 { [weak self] error, isErrorBlocking in
                             HUD.hide()
@@ -301,20 +337,9 @@ final class SickController: CVTableViewController {
                                                 message: "common.error.server".localized,
                                                 okTitle: "common.ok".localized)
                             } else {
-                                ParametersManager.shared.clearConfig()
-                                NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
-                            }
-                        }
-                    default:
-                        HUD.show(.progress)
-                        RBManager.shared.unregister { [weak self] error, isErrorBlocking in
-                            HUD.hide()
-                            if error != nil && isErrorBlocking {
-                                self?.showAlert(title: "common.error".localized,
-                                                message: "common.error.server".localized,
-                                                okTitle: "common.ok".localized)
-                            } else {
-                                ParametersManager.shared.clearConfig()
+                                KeyFiguresManager.shared.currentPostalCode = nil
+                                AttestationsManager.shared.clearAllData()
+                                VenuesManager.shared.clearAllData()
                                 NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
                             }
                         }
