@@ -67,6 +67,9 @@ public class RegisterControllerWsRestTest {
     private String pathPrefixV2;
 
     @Value("${controller.path.prefix}" + UriConstants.API_V3)
+    private String pathPrefixV3;
+
+    @Value("${controller.path.prefix}" + UriConstants.API_V4)
     private String pathPrefix;
 
     @Inject
@@ -158,14 +161,15 @@ public class RegisterControllerWsRestTest {
 
     @Test
     public void testBadRequests() {
+        String captchaId = "92c9623a7c474c4a92661614cd29d08b";
 
         assertEquals(HttpStatus.BAD_REQUEST, 
                 this.restTemplate.exchange(this.targetUrl.toString(), HttpMethod.POST, new HttpEntity<>(
-                        RegisterVo.builder().captcha("").captchaId("92c9623a7c474c4a92661614cd29d08b").clientPublicECDHKey(Base64.encode("an12kmdpsd".getBytes())).build()
+                        RegisterVo.builder().captcha("").captchaId(captchaId).clientPublicECDHKey(Base64.encode("an12kmdpsd".getBytes())).build()
                         , this.headers), String.class).getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST, 
                 this.restTemplate.exchange(this.targetUrl.toString(), HttpMethod.POST, new HttpEntity<>(
-                        RegisterVo.builder().captchaId("92c9623a7c474c4a92661614cd29d08b").clientPublicECDHKey(Base64.encode("an12kmdpsd".getBytes())).build()
+                        RegisterVo.builder().captchaId(captchaId).clientPublicECDHKey(Base64.encode("an12kmdpsd".getBytes())).build()
                         , this.headers), String.class).getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST, 
                 this.restTemplate.exchange(this.targetUrl.toString(), HttpMethod.POST, new HttpEntity<>(
@@ -177,11 +181,11 @@ public class RegisterControllerWsRestTest {
                         , this.headers), String.class).getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST, 
                 this.restTemplate.exchange(this.targetUrl.toString(), HttpMethod.POST, new HttpEntity<>(
-                        RegisterVo.builder().captcha("mycaptcha").captchaId("92c9623a7c474c4a92661614cd29d08b").clientPublicECDHKey("").build()
+                        RegisterVo.builder().captcha("mycaptcha").captchaId(captchaId).clientPublicECDHKey("").build()
                         , this.headers), String.class).getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST, 
                 this.restTemplate.exchange(this.targetUrl.toString(), HttpMethod.POST, new HttpEntity<>(
-                        RegisterVo.builder().captcha("mycaptcha").captchaId("92c9623a7c474c4a92661614cd29d08b").build()
+                        RegisterVo.builder().captcha("mycaptcha").captchaId(captchaId).build()
                         , this.headers), String.class).getStatusCode());
     }
 
@@ -274,6 +278,12 @@ public class RegisterControllerWsRestTest {
     @Test
     public void testSuccessV2() {
         testRegisterSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV2).path(UriConstants.REGISTER).build().toUri()
+                .toString());
+    }
+
+    @Test
+    public void testSuccessV3() {
+        testRegisterSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV3).path(UriConstants.REGISTER).build().toUri()
                 .toString());
     }
 

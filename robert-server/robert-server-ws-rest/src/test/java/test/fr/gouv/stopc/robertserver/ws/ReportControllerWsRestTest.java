@@ -1,5 +1,6 @@
 package test.fr.gouv.stopc.robertserver.ws;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,6 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import fr.gouv.stopc.robertserver.ws.RobertServerWsRestApplication;
 import fr.gouv.stopc.robertserver.ws.config.RobertServerWsConfiguration;
 import fr.gouv.stopc.robertserver.ws.dto.ReportBatchResponseDto;
+import fr.gouv.stopc.robertserver.ws.dto.ReportBatchResponseV4Dto;
 import fr.gouv.stopc.robertserver.ws.dto.VerifyResponseDto;
 import fr.gouv.stopc.robertserver.ws.exception.ApiError;
 import fr.gouv.stopc.robertserver.ws.exception.RobertServerException;
@@ -77,6 +79,9 @@ public class ReportControllerWsRestTest {
     private String pathPrefixV2;
 
     @Value("${controller.path.prefix}" + UriConstants.API_V3)
+    private String pathPrefixV3;
+
+    @Value("${controller.path.prefix}" + UriConstants.API_V4)
     private String pathPrefix;
 
     @MockBean
@@ -88,7 +93,7 @@ public class ReportControllerWsRestTest {
 
     private final String contactsAsBinary = "contactsAsBinary";
 
-	private List<ContactVo> contacts;
+    private List<ContactVo> contacts;
 
     private ReportBatchRequestVo reportBatchRequestVo;
 
@@ -102,18 +107,19 @@ public class ReportControllerWsRestTest {
 
         this.targetUrl = UriComponentsBuilder.fromUriString(this.pathPrefix).path(UriConstants.REPORT).build().encode().toUri();
 
-		HelloMessageDetailVo info = HelloMessageDetailVo.builder() //
-			.timeCollectedOnDevice(1L) //
-			.timeFromHelloMessage(1) //
-			.mac("1") //
-			.rssiCalibrated(20) //
-			.build();
+        HelloMessageDetailVo info = HelloMessageDetailVo.builder() //
+                .timeCollectedOnDevice(1L) //
+                .timeFromHelloMessage(1) //
+                .mac("1") //
+                .rssiCalibrated(20) //
+                .build();
 
-		ContactVo contact = ContactVo.builder().ecc("FR").ebid("ABCDEFGH").ids(Arrays.asList(info)).build();
+        ContactVo contact = ContactVo.builder().ecc("FR").ebid("ABCDEFGH").ids(Arrays.asList(info)).build();
 
         this.contacts = Arrays.asList(contact);
 
         this.reportBatchRequestVo = ReportBatchRequestVo.builder().token(this.token).contacts(this.contacts).build();
+
     }
 
     @Test
@@ -213,7 +219,7 @@ public class ReportControllerWsRestTest {
                     .timeFromHelloMessage(22465) //
                     .mac("MEjHn3mWfhGNhbAooSiVBbVoNayotrLhMPDI8l3tum0=").rssiCalibrated(0).build();
 
-                ContactVo contact = ContactVo.builder().ecc("2g==").ebid("GTr1XTqVS5g=").ids(Arrays.asList(info)).build();
+            ContactVo contact = ContactVo.builder().ecc("2g==").ebid("GTr1XTqVS5g=").ids(Arrays.asList(info)).build();
 
 
             this.contacts = Arrays.asList(contact);
@@ -225,7 +231,7 @@ public class ReportControllerWsRestTest {
             when(this.restApiService.verifyReportToken(token, "1")).thenReturn(Optional.of(VerifyResponseDto.builder().valid(true).build()));
 
             // When
-            ResponseEntity<ReportBatchResponseDto> response = this.testRestTemplate.exchange(targetUrl, HttpMethod.POST, this.requestEntity, ReportBatchResponseDto.class);
+            ResponseEntity<ReportBatchResponseV4Dto> response = this.testRestTemplate.exchange(targetUrl, HttpMethod.POST, this.requestEntity, ReportBatchResponseV4Dto.class);
 
             // Then
             assertNotNull(response);
@@ -233,7 +239,7 @@ public class ReportControllerWsRestTest {
             assertNotNull(response.getHeaders());
             assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
             assertNotNull(response.getBody());
-            assertThat(response.getBody(), equalTo(buildReportBatchResponseDto()));
+            assertResponseBodyIsSuccess(response.getBody());
             verify(this.contactDtoService, atLeast(1)).saveContacts(any());
         } catch (RobertServerException e) {
             fail(EXCEPTION_FAIL_MESSAGE);
@@ -246,14 +252,19 @@ public class ReportControllerWsRestTest {
         reportContactHistorySucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV2).path(UriConstants.REPORT).build().encode().toUri());
     }
 
-    /** {@link #reportContactHistorySucceeds(URI)} and shortcut to test for API V2 exposure */
+    /** {@link #reportContactHistorySucceeds(URI)} and shortcut to test for API V3 exposure */
     @Test
-    public void testReportContactHistorySucceedsV3() {
+    public void testAccessV3() {
+        reportContactHistorySucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV3).path(UriConstants.REPORT).build().encode().toUri());
+    }
+
+    /** {@link #reportContactHistorySucceeds(URI)} and shortcut to test for API V4 exposure */
+    @Test
+    public void testReportContactHistorySucceeds() {
     	reportContactHistorySucceeds(this.targetUrl);
     }
 
-    protected void reportContactHistorySucceeds(URI targetUrl) {
-
+    private void reportContactHistorySucceeds(URI targetUrl) {
         try {
             // Given
             this.requestEntity = new HttpEntity<>(this.reportBatchRequestVo, this.headers);
@@ -269,7 +280,33 @@ public class ReportControllerWsRestTest {
             assertNotNull(response.getHeaders());
             assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
             assertNotNull(response.getBody());
-            assertThat(response.getBody(), equalTo(buildReportBatchResponseDto()));
+            assertResponseBodyV3IsSuccess(response.getBody());
+
+            verify(this.restApiService).verifyReportToken(token, "1");
+            verify(this.contactDtoService, atLeast(1)).saveContacts(any());
+        } catch (RobertServerException e) {
+            fail(EXCEPTION_FAIL_MESSAGE);
+        }
+    }
+
+    @Test
+    public void testReportContactHistorySucceedsV4() {
+        try {
+            // Given
+            this.requestEntity = new HttpEntity<>(this.reportBatchRequestVo, this.headers);
+
+            when(this.restApiService.verifyReportToken(token, "1")).thenReturn(Optional.of(VerifyResponseDto.builder().valid(true).build()));
+
+            // When
+            ResponseEntity<ReportBatchResponseV4Dto> response = this.testRestTemplate.exchange(targetUrl, HttpMethod.POST, this.requestEntity, ReportBatchResponseV4Dto.class);
+
+            // Then
+            assertNotNull(response);
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            assertNotNull(response.getHeaders());
+            assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
+            assertNotNull(response.getBody());
+            assertResponseBodyIsSuccess(response.getBody());
 
             verify(this.restApiService).verifyReportToken(token, "1");
             verify(this.contactDtoService, atLeast(1)).saveContacts(any());
@@ -289,7 +326,7 @@ public class ReportControllerWsRestTest {
             when(this.restApiService.verifyReportToken(token, "1")).thenReturn(Optional.of(VerifyResponseDto.builder().valid(true).build()));
 
             // When
-            ResponseEntity<ReportBatchResponseDto> response = this.testRestTemplate.exchange(targetUrl, HttpMethod.POST, this.requestEntity, ReportBatchResponseDto.class);
+            ResponseEntity<ReportBatchResponseV4Dto> response = this.testRestTemplate.exchange(targetUrl, HttpMethod.POST, this.requestEntity, ReportBatchResponseV4Dto.class);
 
             // Then
             assertNotNull(response);
@@ -297,7 +334,7 @@ public class ReportControllerWsRestTest {
             assertNotNull(response.getHeaders());
             assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
             assertNotNull(response.getBody());
-            assertThat(response.getBody(), equalTo(buildReportBatchResponseDto()));
+            assertResponseBodyIsSuccess(response.getBody());
 
             verify(this.restApiService).verifyReportToken(token, "1");
             verify(this.contactDtoService, atLeast(1)).saveContacts(any());
@@ -305,6 +342,7 @@ public class ReportControllerWsRestTest {
             fail(EXCEPTION_FAIL_MESSAGE);
         }
     }
+
     @Test
     public void testReportContacWhenContactsProvidedTwice() {
 
@@ -436,14 +474,20 @@ public class ReportControllerWsRestTest {
 
     }
 
-    private ReportBatchResponseDto buildReportBatchResponseDto() {
+    protected void assertResponseBodyV3IsSuccess(ReportBatchResponseDto response) {
+        assertEquals(MessageConstants.SUCCESSFUL_OPERATION.getValue(), response.getMessage());
+        assertEquals(true, response.getSuccess());
+    }
 
-        return ReportBatchResponseDto.builder().message(MessageConstants.SUCCESSFUL_OPERATION.getValue()).success(true).build();
+    protected void assertResponseBodyIsSuccess(ReportBatchResponseV4Dto response) {
+        assertEquals(MessageConstants.SUCCESSFUL_OPERATION.getValue(), response.getMessage());
+        assertEquals(true, response.getSuccess());
+        assertNotNull(response.getReportValidationToken());
+        assertThat(response.getReportValidationToken().length()).isGreaterThan(400);
     }
 
     private ApiError buildApiError(String message) {
 
         return ApiError.builder().message(message).build();
     }
-
 }

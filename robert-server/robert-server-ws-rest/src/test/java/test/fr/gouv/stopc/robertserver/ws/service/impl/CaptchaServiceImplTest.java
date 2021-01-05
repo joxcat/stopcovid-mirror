@@ -21,7 +21,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import fr.gouv.stopc.robert.server.common.service.IServerConfigurationService;
 import fr.gouv.stopc.robertserver.ws.dto.CaptchaDto;
 import fr.gouv.stopc.robertserver.ws.service.impl.CaptchaErrorMessage;
 import fr.gouv.stopc.robertserver.ws.service.impl.CaptchaServiceImpl;
@@ -43,9 +42,6 @@ public class CaptchaServiceImplTest {
 
     @Mock
     private RestTemplate restTemplate;
-
-    @Mock
-    private IServerConfigurationService serverConfigurationService;
 
     @Mock
     private PropertyLoader propertyLoader;
@@ -160,6 +156,5 @@ public class CaptchaServiceImplTest {
         // Then
         assertFalse(isVerified);
     }
-    
 
 }

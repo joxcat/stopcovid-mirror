@@ -74,6 +74,9 @@ public class UnregisterControllerWsRestTest {
     private String pathPrefixV2;
 
     @Value("${controller.path.prefix}" + UriConstants.API_V3)
+    private String pathPrefixV3;
+
+    @Value("${controller.path.prefix}" + UriConstants.API_V4)
     private String pathPrefix;
 
     @Inject
@@ -164,7 +167,13 @@ public class UnregisterControllerWsRestTest {
         acceptOldEBIDValueEpochSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV2).path(UriConstants.UNREGISTER).build().encode().toUri());
     }
 
-    /** {@link #acceptOldEBIDValueEpochSucceeds(URI)} and shortcut to test for API V3 exposure */
+    /** Test the access for API V3, should not be used since API V4 */
+    @Test
+    public void testAccessV3() {
+        acceptOldEBIDValueEpochSucceeds(UriComponentsBuilder.fromUriString(this.pathPrefixV3).path(UriConstants.UNREGISTER).build().encode().toUri());
+    }
+
+    /** {@link #acceptOldEBIDValueEpochSucceeds(URI)} and shortcut to test for API V4 exposure */
     @Test
     public void testAcceptOldEBIDValueEpochSucceeds() {
         acceptOldEBIDValueEpochSucceeds(this.targetUrl);
