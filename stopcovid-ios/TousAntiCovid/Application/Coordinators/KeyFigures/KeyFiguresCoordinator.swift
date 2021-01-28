@@ -27,6 +27,8 @@ final class KeyFiguresCoordinator: Coordinator {
     private func start() {
         let navigationController: CVNavigationController = CVNavigationController(rootViewController: KeyFiguresController(didTouchReadExplanationsNow: { [weak self] in
             self?.showKeyFiguresExplanations()
+        }, didTouchKeyFigure: { [weak self] keyFigure in
+            self?.showKeyFigureDetailFor(keyFigure: keyFigure)
         }, deinitBlock: { [weak self] in
             self?.didDeinit()
         }))
@@ -37,6 +39,11 @@ final class KeyFiguresCoordinator: Coordinator {
     private func showKeyFiguresExplanations() {
         let explanationsController: KeyFiguresExplanationsController = KeyFiguresExplanationsController()
         navigationController?.pushViewController(explanationsController, animated: true)
+    }
+    
+    private func showKeyFigureDetailFor(keyFigure: KeyFigure) {
+        let detailCoordinator: KeyFigureDetailCoordinator = KeyFigureDetailCoordinator(presentingController: navigationController, parent: self, keyFigure: keyFigure)
+        addChild(coordinator: detailCoordinator)
     }
 
 }

@@ -62,7 +62,7 @@ final class VenuesManager: NSObject {
         return !Calendar.current.isDate(now, inSameDayAs: currentQrCodeDate)
     }
     var currentQrCodeImage: UIImage? { UIImage(data: VenuesManager.shared.currentQrCodeData ?? Data()) }
-
+    
     private var storageManager: StorageManager!
     private var observers: [VenuesObserverWrapper] = []
     private var didAlreadyRetryReport: Bool = false
@@ -143,6 +143,30 @@ extension VenuesManager {
 // MARK: - Deeplinking -
 extension VenuesManager {
 
+    func isVenueUrlExpired(_ url: URL) -> Bool {
+        guard url.host == "tac.gouv.fr" else { return true }
+        let path: String = String(url.path.dropFirst(1))
+        let info: [String] = path.components(separatedBy: "/")
+
+        // Values
+        guard let qrType = Int(info.item(at: 0) ?? "") else { return true }
+        guard let uuid = info.item(at: 1) else { return true }
+        guard let venueType = info.item(at: 2)?.uppercased() else { return true }
+        let venueCategory: Int = Int(info.item(at: 3) ?? "") ?? 0
+        let venueCapacity: Int = Int(info.item(at: 4) ?? "") ?? 0
+        let timestamp: Double = Double(info.item(at: 5) ?? "") ?? Date().timeIntervalSince1970
+
+        // Conditions
+        guard [0, 1].contains(qrType) else { return true }
+        guard uuid.isUuidCode else { return true }
+        guard (1...3).contains(venueType.count) else { return true }
+        guard (0...5).contains(venueCategory) else { return true }
+        guard (0...).contains(venueCapacity) else { return true }
+        
+        let validityDuration: Double = Double(ParametersManager.shared.venuesRetentionPeriod) * 24.0 * 3600.0
+        return Date().timeIntervalSince1970 - timestamp >= validityDuration
+    }
+    
     @discardableResult
     func processVenueUrl(_ url: URL) -> Bool {
         guard url.host == "tac.gouv.fr" else { return false }
@@ -155,6 +179,7 @@ extension VenuesManager {
         guard let venueType = info.item(at: 2)?.uppercased() else { return false }
         let venueCategory: Int = Int(info.item(at: 3) ?? "") ?? 0
         let venueCapacity: Int = Int(info.item(at: 4) ?? "") ?? 0
+        let timestamp: Double = Double(info.item(at: 5) ?? "") ?? Date().timeIntervalSince1970
 
         // Conditions
         guard [0, 1].contains(qrType) else { return false }
@@ -162,8 +187,9 @@ extension VenuesManager {
         guard (1...3).contains(venueType.count) else { return false }
         guard (0...5).contains(venueCategory) else { return false }
         guard (0...).contains(venueCapacity) else { return false }
-
-        let nowRoundedNtpTimestamp: Int = Date().roundedTimeIntervalSince1900(interval: ParametersManager.shared.venuesTimestampRoundingInterval)
+        
+        let date: Date = Date(timeIntervalSince1970: timestamp)
+        let nowRoundedNtpTimestamp: Int = date.roundedTimeIntervalSince1900(interval: ParametersManager.shared.venuesTimestampRoundingInterval)
         
         let id: String
         if venueType == ParametersManager.shared.privateEventVenueType {
@@ -172,7 +198,8 @@ extension VenuesManager {
             id = "\(uuid)\(nowRoundedNtpTimestamp)"
         }
 
-        let salt: Int = (1...1000).randomElement() ?? 0
+        let maxSalt: Int = ParametersManager.shared.venuesSalt
+        let salt: Int = (1...maxSalt).randomElement() ?? 0
         let payload: String = "\(salt)\(uuid)".sha256()
 
         let venueQrCode: VenueQrCode = VenueQrCode(id: id,
@@ -214,7 +241,8 @@ extension VenuesManager {
 extension VenuesManager {
     
     func status(_ completion: ((_ error: Error?) -> ())? = nil) {
-        let qrCodes: [VenueQrCode] = venuesQrCodes
+        let now: Date = Date()
+        let qrCodes: [VenueQrCode] = venuesQrCodes.filter { $0.ntpTimestamp <= now.timeIntervalSince1900 }
         guard !qrCodes.isEmpty else {
             completion?(nil)
             return
@@ -238,7 +266,8 @@ extension VenuesManager {
             completion?(nil)
             return
         }
-        let qrCodes: [VenueQrCode] = venuesQrCodes
+        let now: Date = Date()
+        let qrCodes: [VenueQrCode] = venuesQrCodes.filter { $0.ntpTimestamp <= now.timeIntervalSince1900 }
         guard !qrCodes.isEmpty else {
             completion?(nil)
             return

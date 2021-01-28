@@ -16,7 +16,6 @@ import ServerSDK
 
 final class KeyFiguresExplanationsController: CVTableViewController {
     
-    
     init() {
         super.init(style: .plain)
     }

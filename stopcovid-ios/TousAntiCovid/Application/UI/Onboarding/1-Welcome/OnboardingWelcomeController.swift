@@ -71,18 +71,9 @@ final class OnboardingWelcomeController: OnboardingController {
     }
     
     private func hideLaunchScreen() {
-        let imageView: UIView? = launchScreenController?.view.subviews.first
-        let logoPoint: CGPoint = launchScreenController?.view.convert(logoImageView?.center ?? .zero, from: logoImageView?.superview) ?? .zero
-        let yDifference: CGFloat = logoPoint.y - (imageView?.center.y ?? 0.0)
-        let ratio: CGFloat = (logoImageView?.frame.height ?? 0.0) / (imageView?.frame.height ?? 0.0)
-        logoImageView?.alpha = 0.0
-        UIView.animate(withDuration: 1.0, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 1.0, options: [.curveEaseInOut], animations: {
-            imageView?.transform = CGAffineTransform(scaleX: ratio, y: ratio).concatenating(CGAffineTransform(translationX: 0.0, y: yDifference))
-        })
         UIView.animate(withDuration: 0.5, delay: 0.5, animations: {
-            self.launchScreenController?.view.backgroundColor = .clear
+            self.launchScreenController?.view.alpha = 0.0
         }) { _ in
-            self.logoImageView?.alpha = 1.0
             self.launchScreenController?.view.removeFromSuperview()
             self.launchScreenController = nil
         }

@@ -34,7 +34,7 @@ extension UIViewController {
         if let cancelTitle = cancelTitle {
             alertController.addAction(UIAlertAction(title: cancelTitle, style: .cancel, handler: { _ in cancelHandler?() }))
         }
-        present(alertController, animated: true, completion: nil)
+        topPresentedController.present(alertController, animated: true, completion: nil)
     }
     
     func showLeftAlignedAlert(title: String? = nil, message: String? = nil, okTitle: String, isOkDestructive: Bool = false, cancelTitle: String? = nil, handler: (() -> ())? = nil) {
@@ -50,14 +50,14 @@ extension UIViewController {
         if let cancelTitle = cancelTitle {
             alertController.addAction(UIAlertAction(title: cancelTitle, style: .cancel))
         }
-        present(alertController, animated: true, completion: nil)
+        topPresentedController.present(alertController, animated: true, completion: nil)
     }
     
     func showRetryAlert(title: String? = nil, message: String? = nil, retryTitle: String, retryHandler: @escaping () -> (), cancelTitle: String, isCancelDestructive: Bool = false, cancelHandler: @escaping () -> ()) {
         let alertController: UIAlertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alertController.addAction(UIAlertAction(title: retryTitle, style: .default, handler: { _ in retryHandler() }))
         alertController.addAction(UIAlertAction(title: cancelTitle, style: isCancelDestructive ? .destructive : .default, handler: { _ in cancelHandler() }))
-        present(alertController, animated: true, completion: nil)
+        topPresentedController.present(alertController, animated: true, completion: nil)
     }
     
     func showFlash(success: Bool = true) {
@@ -76,6 +76,6 @@ extension UIViewController {
             completion(textField.text ?? textFieldDefaultValue ?? "")
         }))
         alert.addAction(UIAlertAction(title: "common.cancel".localized, style: UIAlertAction.Style.cancel, handler: nil))
-        present(alert, animated: true, completion: nil)
+        topPresentedController.present(alert, animated: true, completion: nil)
     }
 }

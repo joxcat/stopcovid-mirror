@@ -174,7 +174,8 @@ public final class Server: NSObject, RBServer {
                 } else {
                     self.processRegisterV3(captcha: captcha, captchaId: captchaId, publicKey: publicKey, completion: completion)
                 }
-            case .failure:
+            case let .failure(error):
+                print(error)
                 self.processRegisterV3(captcha: captcha, captchaId: captchaId, publicKey: publicKey, completion: completion)
             }
         }

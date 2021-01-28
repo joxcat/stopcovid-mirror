@@ -77,12 +77,7 @@ final class SendHistoryController: CVTableViewController {
             RBManager.shared.reportV4(code: symptomsParams.code,
                                       symptomsOrigin: symptomsParams.symptomsDate,
                                       positiveTestDate: symptomsParams.positiveTestDate) { error in
-                if VenuesManager.shared.isVenuesRecordingActivated {
-                    VenuesManager.shared.report { _ in
-                        HUD.hide()
-                        self.processPostReport(error: error)
-                    }
-                } else {
+                VenuesManager.shared.report { _ in
                     HUD.hide()
                     self.processPostReport(error: error)
                 }

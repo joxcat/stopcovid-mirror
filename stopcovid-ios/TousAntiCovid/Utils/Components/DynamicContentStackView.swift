@@ -33,7 +33,7 @@ final class DynamicContentStackView: UIStackView {
         }
     }
     
-    private var originalAxis: NSLayoutConstraint.Axis!
+    var originalAxis: NSLayoutConstraint.Axis!
     private var originalAlignment: UIStackView.Alignment!
     private var originalSpacing: CGFloat!
 

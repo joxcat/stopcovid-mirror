@@ -61,8 +61,8 @@ final class AboutController: CVTableViewController {
                                                       titleFont: { Appearance.Cell.Text.standardFont },
                                                       titleColor: Asset.Colors.tint.color,
                                                       separatorLeftInset: Appearance.Cell.leftMargin),
-                                   selectionAction: { [weak self] in
-                                    self?.showEmailController()
+                                   selectionAction: {
+                                    URL(string: "contactUs.url".localized)?.openInSafari()
                                    })
         rows.append(contactRow)
         let faqRow: CVRow = CVRow(title: "aboutController.faq".localized,
@@ -117,16 +117,6 @@ final class AboutController: CVTableViewController {
         tableView.showsVerticalScrollIndicator = false
         navigationController?.navigationBar.titleTextAttributes = [.font: Appearance.NavigationBar.titleFont]
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "common.close".localized, style: .plain, target: self, action: #selector(didTouchCloseButton))
-    }
-    
-    private func showEmailController() {
-        if MFMailComposeViewController.canSendMail() {
-            let mailController: MFMailComposeViewController = MFMailComposeViewController()
-            mailController.navigationBar.tintColor = Asset.Colors.tint.color
-            mailController.mailComposeDelegate = self
-            mailController.setToRecipients(["aboutController.contactEmail".localized])
-            present(mailController, animated: true, completion: nil)
-        }
     }
     
     @objc private func didTouchCloseButton() {

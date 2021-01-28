@@ -24,16 +24,19 @@ final class HomeViewController: CVTableViewController {
     private let didTouchAbout: () -> ()
     private var didFinishLoad: (() -> ())?
     private var didTouchSupport: (() -> ())?
-    private var didTouchHealth: () -> ()
-    private var didTouchInfo: () -> ()
-    private var didTouchKeyFigures: () -> ()
-    private var didTouchDeclare: () -> ()
-    private var didTouchUsefulLinks: () -> ()
-    private var didTouchRecordVenues: () -> ()
-    private var didTouchPrivateEvents: () -> ()
-    private var didTouchVenuesHistory: () -> ()
-    private var didRecordVenue: (_ url: URL) -> ()
+    private let didTouchHealth: () -> ()
+    private let didTouchInfo: () -> ()
+    private let didTouchKeyFigure: (_ keyFigure: KeyFigure) -> ()
+    private let didTouchKeyFigures: () -> ()
+    private let didTouchDeclare: () -> ()
+    private let didTouchUsefulLinks: () -> ()
+    private let didTouchRecordVenues: () -> ()
+    private let didTouchPrivateEvents: () -> ()
+    private let didTouchVenuesHistory: () -> ()
+    private let didRecordVenue: (_ url: URL) -> ()
+    private let didRequestVenueScanAuthorization: (_ completion: @escaping (_ granted: Bool) -> ()) -> ()
     private(set) var didTouchOpenIsolationForm: () -> ()
+    private let didTouchVaccination: () -> ()
     private let deinitBlock: () -> ()
     
     private var popRecognizer: InteractivePopGestureRecognizer?
@@ -45,7 +48,7 @@ final class HomeViewController: CVTableViewController {
     private var areNotificationsAuthorized: Bool?
     private weak var stateCell: StateAnimationCell?
     private var isWaitingForNeededInfo: Bool = true
-
+    
     init(didTouchAbout: @escaping () -> (),
          showCaptchaChallenge: @escaping (_ captcha: Captcha, _ didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), _ didCancelCaptcha: @escaping () -> ()) -> (),
          didTouchDocument: @escaping () -> (),
@@ -55,6 +58,7 @@ final class HomeViewController: CVTableViewController {
          didTouchSupport: (() -> ())? = nil,
          didTouchHealth: @escaping () -> (),
          didTouchInfo: @escaping () -> (),
+         didTouchKeyFigure: @escaping (_ keyFigure: KeyFigure) -> (),
          didTouchKeyFigures: @escaping () -> (),
          didTouchDeclare: @escaping () -> (),
          didTouchUsefulLinks: @escaping () -> (),
@@ -62,7 +66,9 @@ final class HomeViewController: CVTableViewController {
          didTouchPrivateEvents: @escaping () -> (),
          didTouchVenuesHistory: @escaping () -> (),
          didRecordVenue: @escaping (_ url: URL) -> (),
+         didRequestVenueScanAuthorization: @escaping (_ completion: @escaping (_ granted: Bool) -> ()) -> (),
          didTouchOpenIsolationForm: @escaping () -> (),
+         didTouchVaccination: @escaping () -> (),
          deinitBlock: @escaping () -> ()) {
         self.didTouchDocument = didTouchDocument
         self.didTouchAbout = didTouchAbout
@@ -73,6 +79,7 @@ final class HomeViewController: CVTableViewController {
         self.didTouchSupport = didTouchSupport
         self.didTouchHealth = didTouchHealth
         self.didTouchInfo = didTouchInfo
+        self.didTouchKeyFigure = didTouchKeyFigure
         self.didTouchKeyFigures = didTouchKeyFigures
         self.didTouchDeclare = didTouchDeclare
         self.didTouchUsefulLinks = didTouchUsefulLinks
@@ -80,7 +87,9 @@ final class HomeViewController: CVTableViewController {
         self.didTouchPrivateEvents = didTouchPrivateEvents
         self.didTouchVenuesHistory = didTouchVenuesHistory
         self.didRecordVenue = didRecordVenue
+        self.didRequestVenueScanAuthorization = didRequestVenueScanAuthorization
         self.didTouchOpenIsolationForm = didTouchOpenIsolationForm
+        self.didTouchVaccination = didTouchVaccination
         self.deinitBlock = deinitBlock
         super.init(style: .plain)
     }
@@ -229,12 +238,12 @@ final class HomeViewController: CVTableViewController {
         rows.append(stateRow)
         rows.append(activationButtonRow(isRegistered: RBManager.shared.isRegistered))
         rows.append(contentsOf: healthSectionRows(isAtRisk: RBManager.shared.isAtRisk))
-        if !RBManager.shared.isSick && VenuesManager.shared.isVenuesRecordingActivated {
-            rows.append(contentsOf: venuesSectionRows())
-        }
         rows.append(contentsOf: infoSectionRows())
         if ParametersManager.shared.displayAttestation {
             rows.append(contentsOf: attestationSectionRows())
+        }
+        if !RBManager.shared.isSick && VenuesManager.shared.isVenuesRecordingActivated {
+            rows.append(contentsOf: venuesSectionRows())
         }
         rows.append(contentsOf: moreSectionRows())
         return rows
@@ -358,8 +367,8 @@ final class HomeViewController: CVTableViewController {
             switch result {
             case let .success(captcha):
                 self.showCaptchaChallenge(captcha, { id, answer in
-                    self.processRegisterV3(answer: answer, captchaId: id, activateProximityAfterRegistration: activateProximityAfterRegistration) {
-                        completion(nil)
+                    self.processRegisterV3(answer: answer, captchaId: id, activateProximityAfterRegistration: activateProximityAfterRegistration) { error in
+                        completion(error)
                     }
                 }, { [weak self] in
                     self?.isChangingState = false
@@ -396,12 +405,10 @@ final class HomeViewController: CVTableViewController {
                 self.processRegistrationDone()
             }
         }
-        if VenuesManager.shared.isVenuesRecordingActivated {
-            VenuesManager.shared.status()
-        }
+        VenuesManager.shared.status()
     }
     
-    private func processRegisterV3(answer: String, captchaId: String, activateProximityAfterRegistration: Bool = true, completion: @escaping () -> ()) {
+    private func processRegisterV3(answer: String, captchaId: String, activateProximityAfterRegistration: Bool = true, completion: @escaping (_ error: Error?) -> ()) {
         HUD.show(.progress)
         RBManager.shared.registerV3(captcha: answer, captchaId: captchaId) { error in
             HUD.hide()
@@ -425,12 +432,13 @@ final class HomeViewController: CVTableViewController {
                                     self?.didChangeSwitchValue(isOn: true)
                     })
                 }
+                completion(error)
             } else {
                 if activateProximityAfterRegistration {
                     self.processRegistrationDone()
                 }
+                completion(nil)
             }
-            completion()
         }
     }
     
@@ -480,14 +488,19 @@ final class HomeViewController: CVTableViewController {
     
     @objc private func newVenueRecordingFromDeeplink(_ notification: Notification) {
         guard !RBManager.shared.isSick else { return }
-        guard VenuesManager.shared.isVenuesRecordingActivated else { return }
         if let url = notification.object as? URL {
-            processOnlyRegistrationIfNeeded { error in
-                guard error == nil else { return }
-                self.didRecordVenue(url)
+            didRequestVenueScanAuthorization { granted in
+                guard granted == true else { return }
+                self.processOnlyRegistrationIfNeeded { error in
+                    guard error == nil else { return }
+                    if VenuesManager.shared.processVenueUrl(url) {
+                        self.didRecordVenue(url)
+                        self.reloadUI(animated: true)
+                    } else {
+                        self.showVenueRecordingAlertError()
+                    }
+                }
             }
-        } else {
-            showVenueRecordingAlertError()
         }
     }
     
@@ -510,7 +523,7 @@ final class HomeViewController: CVTableViewController {
         ParametersManager.shared.proximityReactivationReminderHours.forEach { hours in
             let hoursString: String = hours == 1 ? "home.deactivate.actionSheet.hours.singular" : "home.deactivate.actionSheet.hours.plural"
             alertController.addAction(UIAlertAction(title: String(format: hoursString.localized, Int(hours)), style: .default) { [weak self] _ in
-                let hoursToUse: Double = Double(hours)
+                var hoursToUse: Double = Double(hours)
                 self?.triggerReactivationReminder(hours: hoursToUse)
             })
         }
@@ -632,7 +645,7 @@ extension HomeViewController {
                                           xibName: .declareCell,
                                           theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
                                                              topInset: 0.0,
-                                                             bottomInset: 0.0,
+                                                             bottomInset: Appearance.Cell.leftMargin,
                                                              textAlignment: .natural),
                                           selectionAction: { [weak self] in
                                             self?.didTouchDeclare()
@@ -642,6 +655,26 @@ extension HomeViewController {
                                           })
             
             rows.append(declareRow)
+        }
+        if ParametersManager.shared.displayVaccination {
+            let vaccinationRow: CVRow = CVRow(title: "home.vaccinationSection.cellTitle".localized,
+                                              subtitle: "home.vaccinationSection.cellSubtitle".localized,
+                                              image: Asset.Images.pharmacy.image,
+                                              xibName: .vaccinationCell,
+                                              theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                                                 topInset: 0.0,
+                                                                 bottomInset: 0.0,
+                                                                 textAlignment: .natural,
+                                                                 titleColor: Asset.Colors.gradientEndGreen.color,
+                                                                 imageTintColor: Asset.Colors.gradientEndGreen.color),
+                                              selectionAction: { [weak self] in
+                                                self?.didTouchVaccination()
+                                              }, willDisplay: { cell in
+                                                cell.selectionStyle = .none
+                                                cell.accessoryType = .none
+                                              })
+            
+            rows.append(vaccinationRow)
         }
         if !rows.isEmpty {
             let healthSectionRow: CVRow = CVRow(title: "home.healthSection.title".localized,
@@ -736,7 +769,7 @@ extension HomeViewController {
                                                                           accessoryTextColor: Appearance.Cell.Text.titleColor,
                                                                           imageTintColor: highlightedKeyFigure.color),
                                                        selectionAction: { [weak self] in
-                                                          self?.didTouchKeyFigures()
+                                                          self?.didTouchKeyFigure(highlightedKeyFigure)
                                                        },
                                                        willDisplay: { cell in
                                                         cell.selectionStyle = .none
@@ -768,15 +801,19 @@ extension HomeViewController {
                 let newPostalCodeRow: CVRow = CVRow(title: "home.infoSection.newPostalCode".localized,
                                                     subtitle: "home.infoSection.newPostalCode.subtitle".localized,
                                                     image: Asset.Images.location.image,
-                                                    buttonTitle: "home.infoSection.newPostalCode.button".localized,
-                                                    xibName: .newPostalCodeCell,
-                                                    theme: CVRow.Theme(backgroundColor: Appearance.Button.Primary.backgroundColor,
-                                                                       topInset: 0.0,
-                                                                       bottomInset: Appearance.Cell.leftMargin,
-                                                                       textAlignment: .natural,
-                                                                       titleColor: Appearance.Button.Primary.titleColor,
-                                                                       subtitleColor: Appearance.Button.Primary.titleColor,
-                                                                       imageTintColor: Appearance.Button.Primary.titleColor),
+                                                    xibName: .isolationTopCell,
+                                                    theme:  CVRow.Theme(backgroundColor: Appearance.tintColor,
+                                                                        topInset: 0.0,
+                                                                        bottomInset: 0.0,
+                                                                        textAlignment: .natural,
+                                                                        titleFont: { Appearance.Cell.Text.titleFont },
+                                                                        titleColor: Appearance.Button.Primary.titleColor,
+                                                                        subtitleFont: { Appearance.Cell.Text.subtitleFont },
+                                                                        subtitleColor: Appearance.Button.Primary.titleColor,
+                                                                        imageTintColor: Appearance.Button.Primary.titleColor,
+                                                                        separatorLeftInset: Appearance.Cell.leftMargin,
+                                                                        separatorRightInset: Appearance.Cell.leftMargin,
+                                                                        maskedCorners: .top),
                                                     selectionAction: { [weak self] in
                                                         self?.didTouchUpdateLocation()
                                                     },
@@ -785,6 +822,11 @@ extension HomeViewController {
                                                         cell.accessoryType = .none
                                                     })
                 rows.append(newPostalCodeRow)
+                let addActionRow: CVRow = actionRow(title: "home.infoSection.newPostalCode.button".localized,
+                                                 isLastAction: true) { [weak self] in
+                    self?.didTouchUpdateLocation()
+                }
+                rows.append(addActionRow)
             } else {
                 let updatePostalCodeRow: CVRow = CVRow(title: "home.infoSection.updatePostalCode".localized,
                                                        image: Asset.Images.location.image,
@@ -896,7 +938,7 @@ extension HomeViewController {
                                                                     self?.didTouchShare()
                                                                 })]
         
-        if VenuesManager.shared.isVenuesRecordingActivated {
+        if VenuesManager.shared.isVenuesRecordingActivated || !VenuesManager.shared.venuesQrCodes.isEmpty {
             menuEntries.append(GroupedMenuEntry(image: Asset.Images.history.image,
                                                 title: "home.moreSection.venuesHistory".localized,
                                                 actionBlock: { [weak self] in

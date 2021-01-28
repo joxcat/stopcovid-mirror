@@ -12,11 +12,15 @@ import UIKit
 
 final class KeyFiguresController: CVTableViewController {
     
+    private let didTouchKeyFigure: (_ keyFigure: KeyFigure) -> ()
     private let didTouchReadExplanationsNow: () -> ()
     private let deinitBlock: () -> ()
     
-    init(didTouchReadExplanationsNow: @escaping () -> (), deinitBlock: @escaping () -> ()) {
+    init(didTouchReadExplanationsNow: @escaping () -> (),
+         didTouchKeyFigure: @escaping(_ keyFigure: KeyFigure) -> (),
+         deinitBlock: @escaping () -> ()) {
         self.didTouchReadExplanationsNow = didTouchReadExplanationsNow
+        self.didTouchKeyFigure = didTouchKeyFigure
         self.deinitBlock = deinitBlock
         super.init(style: .plain)
     }
@@ -101,10 +105,18 @@ final class KeyFiguresController: CVTableViewController {
                                      topInset: 10.0,
                                      bottomInset: 10.0,
                                      textAlignment: .natural,
-                                     titleFont: { Appearance.Cell.Text.titleFont }),
+                                     titleFont: { Appearance.Cell.Text.titleFont },
+                                     subtitleLinesCount: 2),
                   associatedValue: keyFigure,
                   selectionActionWithCell: { [weak self] cell in
                     self?.didTouchSharingFor(cell: cell, keyFigure: keyFigure)
+                  },
+                  selectionAction: { [weak self] in
+                    self?.didTouchKeyFigure(keyFigure)
+                  },
+                  willDisplay: { cell in
+                    cell.accessoryType = .none
+                    cell.selectionStyle = .none
                   })
         }
         rows.append(contentsOf: keyFiguresHealthRows)
@@ -123,10 +135,18 @@ final class KeyFiguresController: CVTableViewController {
                                      topInset: 10.0,
                                      bottomInset: 10.0,
                                      textAlignment: .natural,
-                                     titleFont: { Appearance.Cell.Text.titleFont }),
+                                     titleFont: { Appearance.Cell.Text.titleFont },
+                                     subtitleLinesCount: 2),
                   associatedValue: keyFigure,
                   selectionActionWithCell: { [weak self] cell in
                     self?.didTouchSharingFor(cell: cell, keyFigure: keyFigure)
+                  },
+                  selectionAction: { [weak self] in
+                    self?.didTouchKeyFigure(keyFigure)
+                  },
+                  willDisplay: { cell in
+                    cell.accessoryType = .none
+                    cell.selectionStyle = .none
                   })
         }
         rows.append(contentsOf: keyFiguresAppRows)
@@ -151,7 +171,7 @@ final class KeyFiguresController: CVTableViewController {
                                  keyFigure.label,
                                  keyFigure.valueGlobalToDisplay)
         }
-        let activityItems: [Any?] = [sharingText, cell.capture()]
+        let activityItems: [Any?] = [sharingText, KeyFigureCaptureView.captureKeyFigure(keyFigure)]
         let controller: UIActivityViewController = UIActivityViewController(activityItems: activityItems.compactMap { $0 }, applicationActivities: nil)
         controller.excludedActivityTypes = [.saveToCameraRoll, .print]
         present(controller, animated: true, completion: nil)

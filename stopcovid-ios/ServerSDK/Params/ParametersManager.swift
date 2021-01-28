@@ -44,6 +44,7 @@ public final class ParametersManager: NSObject {
     public var displayAttestation: Bool { valueFor(name: "app.displayAttestation") as? Bool ?? false }
     
     public var displayIsolation: Bool { valueFor(name: "app.displayIsolation") as? Bool ?? false }
+    public var displayVaccination: Bool { valueFor(name: "app.displayVaccination") as? Bool ?? false }
     public var isolationDuration: Double { valueFor(name: "app.isolation.duration") as? Double ?? 604800.0 }
     public var postIsolationDuration: Double { valueFor(name: "app.postIsolation.duration") as? Double ?? 604800.0 }
     
@@ -102,6 +103,12 @@ public final class ParametersManager: NSObject {
         guard let period = valueFor(name: "app.venuesRetentionPeriod") as? Double else { return 14 }
         return Int(period)
     }
+
+    public var venuesSalt: Int {
+        guard let period = valueFor(name: "app.venuesSalt") as? Double else { return 1000 }
+        return Int(period)
+    }
+
     var dataRetentionPeriod: Int {
         guard let period = valueFor(name: "app.dataRetentionPeriod") as? Double else { return 14 }
         return Int(period)

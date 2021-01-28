@@ -42,6 +42,7 @@ final class LastInfoCell: CVTableViewCell {
         containerView.layer.masksToBounds = true
         headerImageView.image = Asset.Images.homeRing.image
         headerImageView.tintColor = Appearance.Cell.Text.headerTitleColor
+        headerImageView.tintAdjustmentMode = .normal
         headerLabel.textColor = Appearance.Cell.Text.headerTitleColor
         headerLabel.text = "home.infoSection.lastInfo".localized
         headerLabel.font = Appearance.Cell.Text.titleFont

@@ -24,8 +24,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
     
-
     private var lastStatusTriggerEventTimestamp: TimeInterval = 0.0
+    private var backgroundFetchCompletionId: String?
+    private var remoteNotificationCompletionId: String?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         initAppearance()
@@ -75,7 +76,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             NotificationsManager.shared.triggerRestartNotification()
         }, didReceiveProximityHandler: {
             self.triggerStatusRequestIfNeeded()
-        }, didSaveProximity: { _ in })
+        }, didSaveProximity: { proximity in
+        })
         ParametersManager.shared.start()
         isAppAlreadyInstalled = true
         rootCoordinator.start()
@@ -113,8 +115,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        let uuid: String = UUID().uuidString
+        backgroundFetchCompletionId = uuid
         triggerStatusRequestIfNeeded() { error in
-            completionHandler(.newData)
+            if self.backgroundFetchCompletionId == uuid {
+                self.backgroundFetchCompletionId = nil
+                completionHandler(.newData)
+            }
         }
         InfoCenterManager.shared.fetchInfo()
         KeyFiguresManager.shared.fetchKeyFigures()
@@ -126,8 +133,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        let uuid: String = UUID().uuidString
+        remoteNotificationCompletionId = uuid
         triggerStatusRequestIfNeeded(showNotifications: true) { error in
-            completionHandler(.newData)
+            if self.remoteNotificationCompletionId == uuid {
+                self.remoteNotificationCompletionId = nil
+                completionHandler(.newData)
+            }
         }
         InfoCenterManager.shared.fetchInfo()
         KeyFiguresManager.shared.fetchKeyFigures()
@@ -155,7 +167,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
         completionHandler()
     }
-
+    
     private func initAppearance() {
         UINavigationBar.appearance().tintColor = Asset.Colors.tint.color
     }
@@ -213,9 +225,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                         }
                         completion?(error)
                     }
-                    if VenuesManager.shared.isVenuesRecordingActivated {
-                        VenuesManager.shared.status()
-                    }
+                    VenuesManager.shared.status()
                 }
             } else {
                 if showNotifications && [.v3, .v4].contains(ParametersManager.shared.apiVersion) {
@@ -252,5 +262,5 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             DeepLinkingManager.shared.processFullVenueRecordingUrl()
         }
     }
-    
+
 }

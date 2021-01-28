@@ -12,12 +12,12 @@ import Foundation
 
 extension Int {
     
-    func formattedWithThousandsSeparator() -> String? {
+    func formattedWithThousandsSeparator() -> String {
         let formatter: NumberFormatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.locale = Locale.current
         formatter.groupingSeparator = "common.thousandsSeparator".localized
-        return formatter.string(from: NSNumber(integerLiteral: self))
+        return formatter.string(from: NSNumber(integerLiteral: self)) ?? "\(self)"
     }
     
 }

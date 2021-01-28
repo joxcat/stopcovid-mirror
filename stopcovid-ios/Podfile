@@ -8,6 +8,7 @@ def projectPods
   pod 'SwiftGen'
   pod 'lottie-ios'
   pod 'TagListView'
+  pod 'Charts'
 end
 
 target 'TousAntiCovid' do

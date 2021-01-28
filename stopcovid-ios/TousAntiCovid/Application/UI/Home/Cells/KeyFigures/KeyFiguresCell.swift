@@ -48,6 +48,7 @@ final class KeyFiguresCell: CVTableViewCell {
         containerView.layer.masksToBounds = true
         headerImageView.image = Asset.Images.compass.image
         headerImageView.tintColor = Appearance.Cell.Text.errorColor
+        headerImageView.tintAdjustmentMode = .normal
         headerLabel.textColor = Appearance.Cell.Text.errorColor
         headerLabel.font = Appearance.Cell.Text.titleFont
         titleHeaderLabel.text = "common.country.france".localized.uppercased()

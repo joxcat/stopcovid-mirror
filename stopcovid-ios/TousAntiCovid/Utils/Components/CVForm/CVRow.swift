@@ -23,9 +23,11 @@ struct CVRow {
         var titleFont: (() -> UIFont) = { Appearance.Cell.Text.titleFont }
         var titleHighlightFont: (() -> UIFont) = { Appearance.Cell.Text.titleFont }
         var titleColor: UIColor = Appearance.Cell.Text.titleColor
+        var titleLinesCount: Int?
         var titleHighlightColor: UIColor = Asset.Colors.tint.color
         var subtitleFont: (() -> UIFont) = { Appearance.Cell.Text.subtitleFont }
         var subtitleColor: UIColor = Appearance.Cell.Text.subtitleColor
+        var subtitleLinesCount: Int?
         var placeholderColor: UIColor = Appearance.Cell.Text.placeholderColor
         var accessoryTextFont: (() -> UIFont?)?
         var accessoryTextColor: UIColor = Appearance.Cell.Text.captionTitleColor

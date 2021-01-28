@@ -91,6 +91,41 @@ final class KeyFiguresManager: NSObject {
         }
     }
     
+    func generateChartData(from keyFigure: KeyFigure) -> [KeyFigureChartData] {
+        var chartDatas: [KeyFigureChartData] = []
+        if let series = keyFigure.ascendingSeries, !series.isEmpty {
+            let legend: KeyFigureChartLegend = KeyFigureChartLegend(title: "common.country.france".localized,
+                                                                    image: Asset.Images.chartLegend.image,
+                                                                    color: chartDatas.isEmpty ? keyFigure.color : keyFigure.color.add(overlay: UIColor.white.withAlphaComponent(0.5)))
+            let lastDate: Date = Date(timeIntervalSince1970: series.last!.date)
+            let globalFigureToDisplay: String = keyFigure.valueGlobalToDisplay.formattingValueWithThousandsSeparatorIfPossible()
+            chartDatas.append(KeyFigureChartData(legend: legend,
+                                                 series: series,
+                                                 currentValueToDisplay: keyFigure.valueGlobalToDisplay,
+                                                 footer: String(format: "keyFigureDetailController.section.evolution.subtitle".localized, keyFigure.label, lastDate.dayMonthFormatted(), globalFigureToDisplay)))
+        }
+        if let departmentKeyFigure = keyFigure.currentDepartmentSpecificKeyFigure, let departmentSeries = departmentKeyFigure.ascendingSeries, !departmentSeries.isEmpty {
+            let departmentLegend: KeyFigureChartLegend = KeyFigureChartLegend(title: departmentKeyFigure.label,
+                                                                              image: Asset.Images.chartLegend.image,
+                                                                              color: keyFigure.color)
+            let lastDate: Date = Date(timeIntervalSince1970: departmentSeries.last?.date ?? 0.0)
+            let departmentKeyFigureToDisplay: String = departmentKeyFigure.valueToDisplay.formattingValueWithThousandsSeparatorIfPossible()
+            let footer: String
+            if chartDatas.isEmpty {
+                footer = String(format: "keyFigureDetailController.section.evolution.subtitle".localized, keyFigure.label, departmentKeyFigureToDisplay, lastDate.dayShortMonthFormatted())
+            } else {
+                let globalFigureToDisplay: String = keyFigure.valueGlobalToDisplay.formattingValueWithThousandsSeparatorIfPossible()
+                footer = String(format: "keyFigureDetailController.section.evolution.subtitle2Charts".localized, keyFigure.label, lastDate.dayMonthFormatted(), departmentKeyFigureToDisplay, globalFigureToDisplay)
+            }
+            chartDatas.insert(KeyFigureChartData(legend: departmentLegend,
+                                                 series: departmentSeries,
+                                                 currentValueToDisplay: departmentKeyFigure.valueToDisplay,
+                                                 footer: footer),
+                              at: 0)
+        }
+        return chartDatas
+    }
+    
     private func updatePostalCode(from viewController: UIViewController) {
         let alertController: UIAlertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         alertController.addAction(UIAlertAction(title: "home.infoSection.updatePostalCode.alert.newPostalCode".localized, style: .default, handler: { [weak self] _ in

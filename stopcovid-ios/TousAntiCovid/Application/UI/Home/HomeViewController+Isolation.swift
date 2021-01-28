@@ -227,7 +227,7 @@ extension HomeViewController {
         }
     }
     
-    private func actionRow(title: String, isLastAction: Bool, actionBlock: @escaping () -> ()) -> CVRow {
+    func actionRow(title: String, isLastAction: Bool, actionBlock: @escaping () -> ()) -> CVRow {
         let row: CVRow = CVRow(title: title,
                                xibName: .standardCardCell,
                                theme:  CVRow.Theme(backgroundColor: Appearance.Cell.Isolation.actionBackgroundColor,

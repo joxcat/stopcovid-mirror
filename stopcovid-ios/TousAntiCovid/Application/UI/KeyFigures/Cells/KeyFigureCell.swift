@@ -10,7 +10,7 @@
 
 import UIKit
 
-final class KeyFigureCell: CVTableViewCell {
+final class KeyFigureCell: CVTableViewCell, Xibbed {
     
     @IBOutlet private var dateLabel: UILabel!
     @IBOutlet private var valueLabel: UILabel!
@@ -28,9 +28,9 @@ final class KeyFigureCell: CVTableViewCell {
     @IBOutlet private var valuesContainerStackView: DynamicContentStackView!
     @IBOutlet private var sharingButton: UIButton!
     
-    @IBOutlet private var baselineAlignmentConstraint: NSLayoutConstraint!
+    @IBOutlet private var baselineAlignmentConstraint: NSLayoutConstraint?
     
-    private var contentSizeCategoryThreashold: UIContentSizeCategory = .accessibilityMedium
+    private var contentSizeCategoryThreashold: UIContentSizeCategory { UIScreen.main.bounds.width >= 375.0 ? .accessibilityMedium : .extraLarge }
     private var isLarge: Bool { UIApplication.shared.preferredContentSizeCategory >= contentSizeCategoryThreashold }
     
     override func awakeFromNib() {
@@ -88,6 +88,7 @@ final class KeyFigureCell: CVTableViewCell {
         sharingImageView.image = Asset.Images.shareIcon.image
         containerView.layer.cornerRadius = 10.0
         containerView.layer.masksToBounds = true
+        changeInPreferredContentSize()
     }
     
     private func setupContent(row: CVRow) {
@@ -150,9 +151,22 @@ final class KeyFigureCell: CVTableViewCell {
     
     @objc private func changeInPreferredContentSize() {
         if isLarge {
-            baselineAlignmentConstraint.isActive = false
+            baselineAlignmentConstraint?.isActive = false
         } else {
-            baselineAlignmentConstraint.isActive = true
+            baselineAlignmentConstraint?.isActive = true
+        }
+    }
+    
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        guard currentAssociatedRow?.selectionAction != nil else { return }
+        if highlighted {
+            contentView.layer.removeAllAnimations()
+            contentView.alpha = 0.6
+        } else {
+            UIView.animate(withDuration: 0.3) {
+                self.contentView.alpha = 1.0
+            }
         }
     }
 

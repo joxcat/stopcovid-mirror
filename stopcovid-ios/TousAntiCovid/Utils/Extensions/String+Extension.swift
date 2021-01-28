@@ -82,7 +82,7 @@ extension String {
         return replacingOccurrences(of: pattern, with: "", options: [.regularExpression])
     }
     
-    func formattingValueWithThousandsSeparatorIfPossible() -> String? {
+    func formattingValueWithThousandsSeparatorIfPossible() -> String {
         if let numberValue = Int(self) {
             return numberValue.formattedWithThousandsSeparator()
         } else {

@@ -87,6 +87,7 @@ internal enum Asset {
     internal static let shield = ImageAsset(name: "Shield")
     internal static let visual = ImageAsset(name: "Visual")
     internal static let web = ImageAsset(name: "Web")
+    internal static let chartLegend = ImageAsset(name: "chartLegend")
     internal static let chevron = ImageAsset(name: "chevron")
     internal static let gradient = ImageAsset(name: "gradient")
     internal static let help = ImageAsset(name: "help")
@@ -104,6 +105,7 @@ internal enum Asset {
     internal static let bluetooth = ImageAsset(name: "Bluetooth")
     internal static let logo = ImageAsset(name: "Logo")
     internal static let notification = ImageAsset(name: "Notification")
+    internal static let splash = ImageAsset(name: "Splash")
     internal static let support = ImageAsset(name: "Support")
     internal static let republicFrLogo = ImageAsset(name: "RepublicFrLogo")
     internal static let santePubliqueLogo = ImageAsset(name: "SantePubliqueLogo")
@@ -136,6 +138,7 @@ internal enum Asset {
     internal static let history = ImageAsset(name: "history")
     internal static let homeRing = ImageAsset(name: "homeRing")
     internal static let location = ImageAsset(name: "location")
+    internal static let pharmacy = ImageAsset(name: "pharmacy")
     internal static let search = ImageAsset(name: "search")
   }
 }

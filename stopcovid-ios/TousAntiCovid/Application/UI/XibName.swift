@@ -59,4 +59,6 @@ enum XibName: String {
     case isolationTopCell = "IsolationTopCell"
     case isolationInitialCaseSafeCell = "IsolationInitialCaseSafeCell"
     case venueHistoryCell = "VenueHistoryCell"
+    case vaccinationCell = "VaccinationCell"
+    case keyFigureChartCell = "KeyFigureChartCell"
 }

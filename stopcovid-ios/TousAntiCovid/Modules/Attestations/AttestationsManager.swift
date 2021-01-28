@@ -90,7 +90,9 @@ final class AttestationsManager: NSObject {
         do {
             let regex: NSRegularExpression = try NSRegularExpression(pattern: "<[a-zA-Z0-9\\-]+>")
             qrCodeString = regex.stringByReplacingMatches(in: qrCodeString, range: NSRange(qrCodeString.startIndex..., in: qrCodeString), withTemplate: "qrCode.infoNotAvailable".localized)
-        } catch {}
+        } catch {
+            print(error)
+        }
         return qrCodeString
     }
     

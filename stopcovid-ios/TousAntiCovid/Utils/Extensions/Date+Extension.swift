@@ -37,6 +37,12 @@ extension Date {
         return formatter.string(from: self)
     }
     
+    func dayShortMonthFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("dMMM")
+        return formatter.string(from: self)
+    }
+    
     func fullDayMonthFormatted() -> String {
         let formatter: DateFormatter = DateFormatter()
         formatter.dateFormat = "EEEE d MMMM"
@@ -45,7 +51,7 @@ extension Date {
     
     func dayMonthYearFormatted() -> String {
         let formatter: DateFormatter = DateFormatter()
-        formatter.dateFormat = "d MMMM yyyy"
+        formatter.setLocalizedDateFormatFromTemplate("dMMMMyyyy")
         return formatter.string(from: self)
     }
     
@@ -92,7 +98,7 @@ extension Date {
     }
     
     #if !WIDGET
-    func relativelyFormatted(prefixStringKey: String = "myHealthController.notification.update") -> String {
+    func relativelyFormatted(prefixStringKey: String = "myHealthController.notification.update", displayYear: Bool = false) -> String {
         if Calendar.current.isDateInToday(self) {
             let lastPart: String = String(format: "\("common.today".localized), %@", timeFormatted())
             return prefixStringKey.isEmpty ? lastPart : String(format: prefixStringKey.localized, lastPart)
@@ -100,7 +106,7 @@ extension Date {
             let lastPart: String = String(format: "\("common.yesterday".localized), %@", timeFormatted())
             return prefixStringKey.isEmpty ? lastPart : String(format: prefixStringKey.localized, lastPart)
         } else {
-            return prefixStringKey.isEmpty ? String(format: "%@, %@", dayMonthFormatted(), timeFormatted()) : String(format: "\(prefixStringKey.localized), %@", dayMonthFormatted(), timeFormatted())
+            return prefixStringKey.isEmpty ? String(format: "%@, %@", displayYear ? dayMonthYearFormatted() : dayMonthFormatted(), timeFormatted()) : String(format: "\(prefixStringKey.localized), %@", dayMonthFormatted(), timeFormatted())
         }
     }
     

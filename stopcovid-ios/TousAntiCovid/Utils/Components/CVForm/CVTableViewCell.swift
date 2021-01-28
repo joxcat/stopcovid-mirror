@@ -67,6 +67,9 @@ class CVTableViewCell: UITableViewCell {
         cvSubtitleLabel?.textAlignment = row.theme.textAlignment
         cvSubtitleLabel?.adjustsFontForContentSizeCategory = true
         
+        row.theme.titleLinesCount.map { cvTitleLabel?.numberOfLines = $0 }
+        row.theme.subtitleLinesCount.map { cvSubtitleLabel?.numberOfLines = $0 }
+        
         cvAccessoryLabel?.isHidden = row.accessoryText == nil
         cvAccessoryLabel?.font = row.theme.accessoryTextFont?()
         cvAccessoryLabel?.textColor = row.theme.accessoryTextColor
@@ -74,6 +77,7 @@ class CVTableViewCell: UITableViewCell {
         cvAccessoryLabel?.adjustsFontForContentSizeCategory = true
         
         cvImageView?.isHidden = row.image == nil
+        cvImageView?.tintAdjustmentMode = .normal
         
         leadingConstraint?.constant = row.theme.leftInset ?? Appearance.Cell.leftMargin
         trailingConstraint?.constant = row.theme.rightInset ?? Appearance.Cell.rightMargin

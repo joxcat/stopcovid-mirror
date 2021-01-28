@@ -62,6 +62,7 @@ class CVTableViewController: UITableViewController {
         let identifier: String = row.xibName.rawValue
         let cell: CVTableViewCell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as! CVTableViewCell
         cell.setup(with: row)
+        cell.layoutSubviews()
         return cell
     }
     

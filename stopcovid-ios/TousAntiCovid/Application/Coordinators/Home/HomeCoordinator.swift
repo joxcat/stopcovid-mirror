@@ -50,6 +50,8 @@ final class HomeCoordinator: WindowedCoordinator {
             self?.showMyHealth()
         }, didTouchInfo: { [weak self] in
             self?.showInfo()
+        }, didTouchKeyFigure: { [weak self] keyFigure in
+            self?.showKeyFigureDetailFor(keyFigure: keyFigure)
         }, didTouchKeyFigures: { [weak self] in
             self?.showKeyFigures()
         }, didTouchDeclare: { [weak self] in
@@ -64,8 +66,12 @@ final class HomeCoordinator: WindowedCoordinator {
             self?.showVenuesHistory()
         }, didRecordVenue: { [weak self] url in
             self?.showVenueRecordingConfirmation(url: url)
+        }, didRequestVenueScanAuthorization: { [weak self] completion in
+            self?.requestVenueScanAuthorization(completion)
         }, didTouchOpenIsolationForm: { [weak self] in
             self?.showIsolationForm()
+        }, didTouchVaccination: { [weak self] in
+            self?.showVaccination()
         }, deinitBlock: { [weak self] in
             self?.didDeinit()
         }))
@@ -109,6 +115,21 @@ final class HomeCoordinator: WindowedCoordinator {
         addChild(coordinator: venuesRecordingCoordinator)
     }
     
+    private func requestVenueScanAuthorization(_ completion: @escaping (_ granted: Bool) -> ()) {
+        let venueScanAuthorizationController: VenuesScanAuthorizationController = VenuesScanAuthorizationController { [weak self] granted in
+            if granted {
+                self?.navigationController?.topPresentedController.dismiss(animated: true) {
+                    completion(true)
+                }
+            } else {
+                self?.navigationController?.topPresentedController.dismiss(animated: true)
+                completion(false)
+            }
+        }
+        let navigationController: UIViewController = CVNavigationController(rootViewController: venueScanAuthorizationController)
+        self.navigationController?.topPresentedController.present(navigationController, animated: true)
+    }
+    
     private func showManageData() {
         let manageDataController: UIViewController = ManageDataController()
         let navigationController: UIViewController = CVNavigationController(rootViewController: manageDataController)
@@ -131,7 +152,7 @@ final class HomeCoordinator: WindowedCoordinator {
     }
     
     private func showRecordVenues() {
-        let venuesRecordingCoordinator: VenuesRecordingCoordinator = VenuesRecordingCoordinator(presentingController: navigationController?.topViewController, parent: self)
+        let venuesRecordingCoordinator: VenuesRecordingCoordinator = VenuesRecordingCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: venuesRecordingCoordinator)
     }
     
@@ -149,7 +170,7 @@ final class HomeCoordinator: WindowedCoordinator {
     }
     
     private func showPrivateEventController() {
-        let privateEventCoordinator: VenuesPrivateEventCoordinator = VenuesPrivateEventCoordinator(presentingController: navigationController?.topViewController, parent: self)
+        let privateEventCoordinator: VenuesPrivateEventCoordinator = VenuesPrivateEventCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: privateEventCoordinator)
     }
     
@@ -160,22 +181,22 @@ final class HomeCoordinator: WindowedCoordinator {
     }
     
     private func showIsolationForm() {
-        let isolationFormCoordinator: IsolationFormCoordinator = IsolationFormCoordinator(presentingController: navigationController?.topViewController, parent: self)
+        let isolationFormCoordinator: IsolationFormCoordinator = IsolationFormCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: isolationFormCoordinator)
     }
     
     private func showCaptchaChallenge(captcha: Captcha, didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), didCancelCaptcha: @escaping () -> ()) {
-        let captchaCoordinator: CaptchaCoordinator = CaptchaCoordinator(presentingController: navigationController, parent: self, captcha: captcha, didEnterCaptcha: { [weak self] id, answer in
-            self?.navigationController?.dismiss(animated: true) {
+        let captchaCoordinator: CaptchaCoordinator = CaptchaCoordinator(presentingController: navigationController?.topPresentedController, parent: self, captcha: captcha, didEnterCaptcha: { [weak self] id, answer in
+            self?.navigationController?.topPresentedController.dismiss(animated: true) {
                 didEnterCaptcha(id, answer)
             }
-            }, didCancelCaptcha: { [weak self] in
-                self?.navigationController?.dismiss(animated: true)
-                didCancelCaptcha()
+        }, didCancelCaptcha: { [weak self] in
+            self?.navigationController?.topPresentedController.dismiss(animated: true)
+            didCancelCaptcha()
         })
         addChild(coordinator: captchaCoordinator)
     }
-        
+    
     private func showFlash() {
         let flashCodeCoordinator: FlashCodeCoordinator = FlashCodeCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: flashCodeCoordinator)
@@ -188,6 +209,16 @@ final class HomeCoordinator: WindowedCoordinator {
     private func showKeyFigures() {
         let keyFiguresCoordinator: KeyFiguresCoordinator = KeyFiguresCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: keyFiguresCoordinator)
+    }
+    
+    private func showKeyFigureDetailFor(keyFigure: KeyFigure) {
+        let detailCoordinator: KeyFigureDetailCoordinator = KeyFigureDetailCoordinator(presentingController: navigationController, parent: self, keyFigure: keyFigure)
+        addChild(coordinator: detailCoordinator)
+    }
+    
+    private func showVaccination() {
+        let vaccinationCoordinator: VaccinationCoordinator = VaccinationCoordinator(presentingController: navigationController?.topViewController, parent: self)
+        addChild(coordinator: vaccinationCoordinator)
     }
     
     private func loadLaunchScreen() {

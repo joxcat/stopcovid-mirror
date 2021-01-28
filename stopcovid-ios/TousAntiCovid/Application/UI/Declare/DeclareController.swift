@@ -152,24 +152,14 @@ final class DeclareController: CVTableViewController {
         alertController.addAction(UIAlertAction(title: "declareController.codeNotReceived.alert.showVideo".localized, style: .default, handler: { [weak self] _ in
             self?.didTouchShowVideo(URL(string: "declareController.codeNotReceived.alert.video.url".localized)!)
         }))
-        alertController.addAction(UIAlertAction(title: "declareController.codeNotReceived.alert.contactUs".localized, style: .default, handler: { [weak self] _ in
-            self?.showEmailController()
+        alertController.addAction(UIAlertAction(title: "declareController.codeNotReceived.alert.contactUs".localized, style: .default, handler: { _ in
+            URL(string: "contactUs.url".localized)?.openInSafari()
         }))
         present(alertController, animated: true, completion: nil)
     }
     
     @objc private func statusDataChanged() {
         reloadUI()
-    }
-    
-    private func showEmailController() {
-        if MFMailComposeViewController.canSendMail() {
-            let mailController: MFMailComposeViewController = MFMailComposeViewController()
-            mailController.navigationBar.tintColor = Asset.Colors.tint.color
-            mailController.mailComposeDelegate = self
-            mailController.setToRecipients(["aboutController.contactEmail".localized])
-            present(mailController, animated: true, completion: nil)
-        }
     }
 
 }

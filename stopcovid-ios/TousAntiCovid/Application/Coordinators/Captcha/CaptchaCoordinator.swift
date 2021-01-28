@@ -34,8 +34,9 @@ final class CaptchaCoordinator: Coordinator {
     private func start() {
         let controller: UIViewController = CaptchaViewController(captcha: initialCaptcha, didEnterCaptcha: { [weak self] id, answer in
             self?.didEnterCaptcha(id, answer)
-        }) { [weak self] in
+        }, didCancelCaptcha: { [weak self] in
             self?.didCancelCaptcha()
+        }) { [weak self] in
             self?.didDeinit()
         }
         let navigationController: CVNavigationController = CVNavigationController(rootViewController: controller)

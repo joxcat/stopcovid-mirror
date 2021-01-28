@@ -21,11 +21,16 @@ final class CaptchaViewController: CVTableViewController {
     private var audioCellIndexPath: IndexPath?
     
     private let didEnterCaptcha: (_ id: String, _ answer: String) -> ()
+    private let didCancelCaptcha: () -> ()
     private let deinitBlock: () -> ()
     
-    init(captcha: Captcha, didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (), deinitBlock: @escaping () -> ()) {
+    init(captcha: Captcha,
+         didEnterCaptcha: @escaping (_ id: String, _ answer: String) -> (),
+         didCancelCaptcha: @escaping () -> (),
+         deinitBlock: @escaping () -> ()) {
         self.captcha = captcha
         self.didEnterCaptcha = didEnterCaptcha
+        self.didCancelCaptcha = didCancelCaptcha
         self.deinitBlock = deinitBlock
         super.init(style: .plain)
     }
@@ -259,7 +264,7 @@ final class CaptchaViewController: CVTableViewController {
     }
     
     @objc private func didTouchCloseButton() {
-        dismiss(animated: true, completion: nil)
+        didCancelCaptcha()
     }
     
 }

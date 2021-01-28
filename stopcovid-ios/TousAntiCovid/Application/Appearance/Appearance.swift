@@ -29,8 +29,8 @@ enum Appearance {
     
     enum Button {
         static let cornerRadius: CGFloat = 10.0
-        static var font: UIFont? { UIFontMetrics(forTextStyle: .body).scaledFont(for: .medium(size: 17.0)) }
-        static var linkFont: UIFont? { UIFontMetrics(forTextStyle: .body).scaledFont(for: .medium(size: 15.0)) }
+        static var font: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .medium(size: 17.0)) }
+        static var linkFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .medium(size: 15.0)) }
         static let contentEdgeInsets: UIEdgeInsets = UIEdgeInsets(top: 20.0, left: 0.0, bottom: 20.0, right: 0.0)
         
         enum Primary {
@@ -51,6 +51,11 @@ enum Appearance {
         enum Quaternary {
             static var backgroundColor: UIColor { .clear }
             static var titleColor: UIColor { Asset.Colors.secondaryButtonLabel.color }
+        }
+        
+        enum Destructive {
+            static var backgroundColor: UIColor { .clear }
+            static var titleColor: UIColor { Asset.Colors.error.color }
         }
         
     }
@@ -184,6 +189,10 @@ enum Appearance {
     
     enum BottomMessage {
         static var font: UIFont { UIFontMetrics(forTextStyle: .caption1).scaledFont(for: .bold(size: 13.0)) }
+    }
+    
+    enum Chart {
+        static var legendFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .bold(size: 15.0)) }
     }
     
 }

@@ -83,8 +83,13 @@ final class DeepLinkingManager {
     }
     
     private func processVenueUrl(_ url: URL) {
-        let result: Bool = VenuesManager.shared.processVenueUrl(url)
-        let notification: Notification = Notification(name: .newVenueRecordingFromDeeplink, object: result ? url : nil)
+        guard !VenuesManager.shared.isVenueUrlExpired(url) else {
+            UIApplication.shared.keyWindow?.rootViewController?.topPresentedController.showAlert(title: "enterCodeController.alert.expiredCode.title".localized,
+                                                                                                 message: "enterCodeController.alert.expiredCode.message".localized,
+                                                                                                 okTitle: "common.ok".localized)
+            return
+        }
+        let notification: Notification = Notification(name: .newVenueRecordingFromDeeplink, object: url)
         guard UIApplication.shared.applicationState == .active else {
             waitingNotification = notification
             return

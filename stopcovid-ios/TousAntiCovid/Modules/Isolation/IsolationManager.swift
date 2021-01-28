@@ -41,7 +41,7 @@ final class IsolationManager {
     
     private var storageManager: StorageManager!
     private var canTriggerUpdateNotif: Bool = true
-        
+    
     // MARK: - Primary values -
     private var isolationState: String? {
         get { storageManager.isolationState() }
@@ -148,7 +148,7 @@ final class IsolationManager {
     }
     
     var stillHavingFeverNotificationTriggerDate: Date {
-        return currentIsolationEndDate ?? Date()
+        currentIsolationEndDate ?? Date()
     }
     
     // MARK: - Contact case dates calculated values -

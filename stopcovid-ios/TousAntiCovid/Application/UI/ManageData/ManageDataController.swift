@@ -53,7 +53,7 @@ final class ManageDataController: CVTableViewController {
         }
         rows.append(contentsOf: attestationRows)
         rows.append(blockSeparatorRow())
-        if ConfigManager.shared.venuesFeaturedWasActivatedAtLeastOneTime {
+        if ConfigManager.shared.venuesFeaturedWasActivatedAtLeastOneTime || !VenuesManager.shared.venuesQrCodes.isEmpty {
             let venuesRows: [CVRow] = rowsBlock(textPrefix: "manageDataController.venuesData") { [weak self] in
                 self?.eraseVenuesDataButtonPressed()
             }

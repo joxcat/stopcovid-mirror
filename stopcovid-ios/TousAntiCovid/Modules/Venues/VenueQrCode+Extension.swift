@@ -33,7 +33,7 @@ extension VenueQrCode {
         type = type.isEmpty ? "venueType.default".localized : type
         
         let date: Date = Date(timeIntervalSince1900: ntpTimestamp)
-        let dateString: String = date.relativelyFormatted(prefixStringKey: "")
+        let dateString: String = date.relativelyFormatted(prefixStringKey: "", displayYear: true)
         
         return String(format: "venuesHistoryController.entry".localized, type, dateString)
     }

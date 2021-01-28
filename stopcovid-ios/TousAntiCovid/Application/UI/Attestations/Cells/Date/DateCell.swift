@@ -16,6 +16,10 @@ final class DateCell: TextFieldCell {
     let datePicker: UIDatePicker = UIDatePicker()
     let toolbar: UIToolbar = UIToolbar()
     
+    deinit {
+        print("\(type(of: self)) deallocated")
+    }
+    
     override func setup(with row: CVRow) {
         super.setup(with: row)
         setupUI(row: row)
