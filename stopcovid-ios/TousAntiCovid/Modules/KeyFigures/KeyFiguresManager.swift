@@ -13,6 +13,7 @@ import ServerSDK
 
 protocol KeyFiguresChangesObserver: class {
     
+    func postalCodeDidUpdate(_ postalCode: String?)
     func keyFiguresDidUpdate()
     
 }
@@ -44,7 +45,7 @@ final class KeyFiguresManager: NSObject {
     var currentPostalCode: String? {
         didSet {
             currentDepartmentName = departmentNameForPostalCode(currentPostalCode)
-            notifyObservers()
+            notifyPostalCodeUpdate(currentPostalCode)
         }
     }
     
@@ -94,15 +95,22 @@ final class KeyFiguresManager: NSObject {
     func generateChartData(from keyFigure: KeyFigure) -> [KeyFigureChartData] {
         var chartDatas: [KeyFigureChartData] = []
         if let series = keyFigure.ascendingSeries, !series.isEmpty {
+            var color: UIColor = keyFigure.color
+            if keyFigure.currentDepartmentSpecificKeyFigure?.ascendingSeries?.isEmpty == false {
+                color = keyFigure.color.add(overlay: UIColor.white.withAlphaComponent(0.6))
+            }
             let legend: KeyFigureChartLegend = KeyFigureChartLegend(title: "common.country.france".localized,
                                                                     image: Asset.Images.chartLegend.image,
-                                                                    color: chartDatas.isEmpty ? keyFigure.color : keyFigure.color.add(overlay: UIColor.white.withAlphaComponent(0.5)))
+                                                                    color: color)
             let lastDate: Date = Date(timeIntervalSince1970: series.last!.date)
             let globalFigureToDisplay: String = keyFigure.valueGlobalToDisplay.formattingValueWithThousandsSeparatorIfPossible()
             chartDatas.append(KeyFigureChartData(legend: legend,
                                                  series: series,
                                                  currentValueToDisplay: keyFigure.valueGlobalToDisplay,
-                                                 footer: String(format: "keyFigureDetailController.section.evolution.subtitle".localized, keyFigure.label, lastDate.dayMonthFormatted(), globalFigureToDisplay)))
+                                                 footer: String(format: "keyFigureDetailController.section.evolution.subtitle".localized, keyFigure.label, lastDate.dayMonthFormatted(), globalFigureToDisplay),
+                                                 limitLineValue: keyFigure.limitLine,
+                                                 limitLineLabel: keyFigure.limitLineLabel,
+                                                 chartKind: keyFigure.displayOnSameChart ? .line : keyFigure.chartKind))
         }
         if let departmentKeyFigure = keyFigure.currentDepartmentSpecificKeyFigure, let departmentSeries = departmentKeyFigure.ascendingSeries, !departmentSeries.isEmpty {
             let departmentLegend: KeyFigureChartLegend = KeyFigureChartLegend(title: departmentKeyFigure.label,
@@ -120,8 +128,28 @@ final class KeyFiguresManager: NSObject {
             chartDatas.insert(KeyFigureChartData(legend: departmentLegend,
                                                  series: departmentSeries,
                                                  currentValueToDisplay: departmentKeyFigure.valueToDisplay,
-                                                 footer: footer),
+                                                 footer: footer,
+                                                 limitLineValue: keyFigure.displayOnSameChart ? nil : keyFigure.limitLine,
+                                                 limitLineLabel: keyFigure.displayOnSameChart ? nil : keyFigure.limitLineLabel,
+                                                 chartKind: keyFigure.displayOnSameChart ? .line : keyFigure.chartKind),
                               at: 0)
+        }
+        if let averageSeries = keyFigure.avgSeries, !averageSeries.isEmpty {
+            var color: UIColor = keyFigure.color
+            if keyFigure.currentDepartmentSpecificKeyFigure?.ascendingSeries?.isEmpty == false {
+                color = keyFigure.color.add(overlay: UIColor.white.withAlphaComponent(0.6))
+            }
+            let legend: KeyFigureChartLegend = KeyFigureChartLegend(title: String(format: "keyFigureDetailController.section.evolutionAvg.legendWithLocation".localized, "common.country.france".localized),
+                                                                    image: Asset.Images.chartLegend.image,
+                                                                    color: color)
+            chartDatas.append(KeyFigureChartData(legend: legend,
+                                                 series: averageSeries,
+                                                 currentValueToDisplay: keyFigure.valueGlobalToDisplay,
+                                                 footer: String(format: "keyFigureDetailController.section.evolutionAvg.subtitle".localized, keyFigure.label),
+                                                 isAverage: true,
+                                                 limitLineValue: keyFigure.limitLine,
+                                                 limitLineLabel: keyFigure.limitLineLabel,
+                                                 chartKind: .line))
         }
         return chartDatas
     }
@@ -174,7 +202,7 @@ extension KeyFiguresManager {
     private func fetchAllFiles() {
         fetchKeyFiguresFile {
             DispatchQueue.main.async {
-                self.notifyObservers()
+                self.notifyKeyFiguresUpdate()
             }
         }
     }
@@ -183,7 +211,10 @@ extension KeyFiguresManager {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
         session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: KeyFiguresConstant.jsonUrl) { data, response, error in
-            guard let data = data else { return }
+            guard let data = data else {
+                completion()
+                return
+            }
             do {
                 self.keyFigures = try JSONDecoder().decode([KeyFigure].self, from: data)
                 try data.write(to: self.localKeyFiguresUrl())
@@ -242,7 +273,11 @@ extension KeyFiguresManager {
         observers.first { $0.observer === observer }
     }
     
-    private func notifyObservers() {
+    private func notifyPostalCodeUpdate(_ postalCode: String?) {
+        observers.forEach { $0.observer?.postalCodeDidUpdate(postalCode) }
+    }
+    
+    private func notifyKeyFiguresUpdate() {
         observers.forEach { $0.observer?.keyFiguresDidUpdate() }
     }
     

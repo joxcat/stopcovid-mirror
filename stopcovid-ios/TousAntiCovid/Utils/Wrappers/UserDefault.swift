@@ -63,6 +63,9 @@ extension UserDefault {
         case privateEventQrCodeString
         case privateEventQrCodeData
         case privateEventQrCodeDate
+        case currentVaccinationReferenceDepartmentCode
+        case currentVaccinationReferenceLatitude
+        case currentVaccinationReferenceLongitude
         
         case lastNotificationTimestamp
         case showNewInfoNotification

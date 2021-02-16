@@ -25,11 +25,16 @@ final class VaccinationCoordinator: Coordinator {
     }
 
     private func start() {
-        let navigationController: CVNavigationController = CVNavigationController(rootViewController: VaccinationController(deinitBlock: { [weak self] in
+        let navigationController: CVNavigationController = CVNavigationController(rootViewController: VaccinationController(didTouchWebVaccination: { [weak self] in
+            self?.openWebVaccination()
+        }, deinitBlock: { [weak self] in
             self?.didDeinit()
         }))
         self.navigationController = navigationController
         presentingController?.present(navigationController, animated: true)
     }
 
+    private func openWebVaccination() {
+        URL(string: "vaccinationController.vaccinationLocation.url".localized)?.openInSafari()
+    }
 }

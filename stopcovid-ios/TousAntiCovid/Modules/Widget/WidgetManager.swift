@@ -173,7 +173,6 @@ final class WidgetManager {
             RBManager.shared.startProximityDetection()
         }
     }
-    
     #endif
     
     func start() {

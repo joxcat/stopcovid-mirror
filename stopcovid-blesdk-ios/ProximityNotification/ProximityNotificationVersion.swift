@@ -17,10 +17,10 @@ public struct ProximityNotificationVersion {
     public static let major = 1
     
     /// The minor version number. Should be incremented when adding functionality in a backward compatible manner.
-    public static let minor = 1
+    public static let minor = 2
     
     /// The patch version number. Should be incremented when making backward compatible bug fixes.
-    public static let patch = 1
+    public static let patch = 0
     
     /// A textual description of the current version.
     public static var current: String {

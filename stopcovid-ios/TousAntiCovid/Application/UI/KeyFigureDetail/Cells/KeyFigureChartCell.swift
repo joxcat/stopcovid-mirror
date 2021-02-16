@@ -14,7 +14,7 @@ import Charts
 final class KeyFigureChartCell: CVTableViewCell {
 
     @IBOutlet private var containerView: UIView!
-    @IBOutlet private var lineChartView: LineChartView!
+    @IBOutlet private var chartContainerView: UIView!
     @IBOutlet private var legendStackView: UIStackView!
     @IBOutlet private var footerLabel: UILabel!
     @IBOutlet private var sharingImageView: UIImageView!
@@ -47,32 +47,13 @@ final class KeyFigureChartCell: CVTableViewCell {
     }
     
     private func setupChart(chartDatas: [KeyFigureChartData]) {
-        let dataSets: [LineChartDataSet] = chartDatas.map {
-            let entries: [ChartDataEntry] = $0.series.map { ChartDataEntry(x: $0.date, y: $0.value) }
-            let dataSet: LineChartDataSet = LineChartDataSet(entries: entries)
-            dataSet.setupStyle(color: $0.legend.color)
-            return dataSet
+        guard let chartData = chartDatas.first else { return }
+        switch chartData.chartKind {
+        case .line:
+            setupLineChart(chartDatas: chartDatas)
+        case .bars:
+            setupBarChart(chartDatas: chartDatas)
         }
-        lineChartView.data = LineChartData(dataSets: dataSets)
-        lineChartView.setupStyle()
-        lineChartView.leftAxis.setupStyle()
-        lineChartView.leftAxis.valueFormatter = ChartsValueFormatter()
-        
-        let minTodayValue: Double = chartDatas.min { $0.minValue < $1.minValue }?.minValue ?? 0.0
-        let maxTodayValue: Double = chartDatas.max { $0.maxValue < $1.maxValue }?.maxValue ?? 0.0
-        
-        lineChartView.leftAxis.axisMinimum = max(0.0, minTodayValue - (maxTodayValue - minTodayValue) * 0.1)
-        lineChartView.leftAxis.removeAllLimitLines()
-        
-        lineChartView.xAxis.setupStyle()
-        lineChartView.xAxis.valueFormatter = ChartsDateFormatter()
-        
-        let yAxisRenderer: YAxisCustomRenderer = YAxisCustomRenderer(
-           viewPortHandler: lineChartView.viewPortHandler,
-           yAxis: lineChartView.leftAxis,
-           transformer: lineChartView.getTransformer(forAxis: .left)
-        )
-        lineChartView.leftYAxisRenderer = yAxisRenderer
     }
     
     override func capture() -> UIImage? {
@@ -82,8 +63,7 @@ final class KeyFigureChartCell: CVTableViewCell {
         let captureImageView: UIImageView = UIImageView(image: image)
         captureImageView.frame.size = CGSize(width: image.size.width / UIScreen.main.scale, height: image.size.height / UIScreen.main.scale)
         captureImageView.backgroundColor = Appearance.Cell.cardBackgroundColor
-        let finalImage: UIImage? = captureImageView.screenshot()
-        return finalImage
+        return captureImageView.screenshot()
     }
     
     @IBAction private func didTouchSharingButton(_ sender: Any) {
@@ -91,7 +71,7 @@ final class KeyFigureChartCell: CVTableViewCell {
     }
     
     private func limiteLine(chartData: KeyFigureChartData, position: ChartLimitLine.LabelPosition) -> ChartLimitLine {
-        let limiteLine: ChartLimitLine = ChartLimitLine(limit: chartData.lastValue, label: chartData.currentValueToDisplay?.formattingValueWithThousandsSeparatorIfPossible() ?? "")
+        let limiteLine: ChartLimitLine = ChartLimitLine(limit: chartData.limitLineValue ?? 0.0, label: chartData.limitLineLabel?.formattingValueWithThousandsSeparatorIfPossible() ?? "")
         limiteLine.labelPosition = position
         limiteLine.lineColor = chartData.legend.color
         limiteLine.valueTextColor = chartData.legend.color
@@ -103,4 +83,91 @@ final class KeyFigureChartCell: CVTableViewCell {
         return limiteLine
     }
 
+}
+
+extension KeyFigureChartCell {
+    
+    private func setupLineChart(chartDatas: [KeyFigureChartData]) {
+        let dataSets: [LineChartDataSet] = chartDatas.map {
+            let entries: [ChartDataEntry] = $0.series.map { ChartDataEntry(x: $0.date, y: $0.value) }
+            let dataSet: LineChartDataSet = LineChartDataSet(entries: entries)
+            dataSet.setupStyle(color: $0.legend.color, entriesCount: entries.count)
+            return dataSet
+        }
+        let lineChartView: LineChartView = LineChartView()
+        lineChartView.data = LineChartData(dataSets: dataSets)
+        lineChartView.setupStyle()
+        lineChartView.leftAxis.setupStyle()
+        lineChartView.leftAxis.valueFormatter = ChartsValueFormatter()
+        
+        let minTodayValue: Double = chartDatas.min { $0.minValue < $1.minValue }?.minValue ?? 0.0
+        let maxTodayValue: Double = chartDatas.max { $0.maxValue < $1.maxValue }?.maxValue ?? 0.0
+        
+        lineChartView.leftAxis.axisMinimum = max(0.0, minTodayValue - (maxTodayValue - minTodayValue) * 0.1)
+        
+        lineChartView.xAxis.setupStyle()
+        lineChartView.xAxis.valueFormatter = ChartsDateFormatter()
+        
+        chartDatas.forEach {
+            guard $0.limitLineValue != nil else { return }
+            lineChartView.leftAxis.addLimitLine(limiteLine(chartData: $0, position: .topLeft))
+        }
+        
+        let yAxisRenderer: YAxisCustomRenderer = YAxisCustomRenderer(
+           viewPortHandler: lineChartView.viewPortHandler,
+           yAxis: lineChartView.leftAxis,
+           transformer: lineChartView.getTransformer(forAxis: .left)
+        )
+        lineChartView.leftYAxisRenderer = yAxisRenderer
+        
+        chartContainerView.subviews.forEach { $0.removeFromSuperview() }
+        chartContainerView.addSubview(lineChartView)
+        lineChartView.translatesAutoresizingMaskIntoConstraints = false
+        lineChartView.leadingAnchor.constraint(equalTo: chartContainerView.leadingAnchor, constant: 0.0).isActive = true
+        lineChartView.trailingAnchor.constraint(equalTo: chartContainerView.trailingAnchor, constant: 0.0).isActive = true
+        lineChartView.topAnchor.constraint(equalTo: chartContainerView.topAnchor, constant: 0.0).isActive = true
+        lineChartView.bottomAnchor.constraint(equalTo: chartContainerView.bottomAnchor, constant: 0.0).isActive = true
+    }
+    
+    private func setupBarChart(chartDatas: [KeyFigureChartData]) {
+        let dataSets: [BarChartDataSet] = chartDatas.map {
+            let entries: [BarChartDataEntry] = $0.series.map { BarChartDataEntry(x: $0.date, y: $0.value) }
+            let dataSet: BarChartDataSet = BarChartDataSet(entries: entries)
+            dataSet.setupStyle(color: $0.legend.color, entriesCount: entries.count)
+            return dataSet
+        }
+        let barChartView: BarChartView = BarChartView()
+        let data: BarChartData = BarChartData(dataSets: dataSets)
+        data.setupStyle(entriesCount: dataSets.first?.entries.count ?? 0)
+        barChartView.data = data
+        barChartView.setupStyle()
+        barChartView.leftAxis.setupStyle()
+        barChartView.leftAxis.valueFormatter = ChartsValueFormatter()
+        
+        barChartView.leftAxis.axisMinimum = 0.0
+        barChartView.xAxis.setupStyle()
+        barChartView.xAxis.valueFormatter = ChartsDateFormatter()
+        
+        chartDatas.forEach {
+            guard $0.limitLineValue != nil else { return }
+            barChartView.leftAxis.addLimitLine(limiteLine(chartData: $0, position: .topLeft))
+        }
+        
+        let yAxisRenderer: YAxisCustomRenderer = YAxisCustomRenderer(
+           viewPortHandler: barChartView.viewPortHandler,
+           yAxis: barChartView.leftAxis,
+           transformer: barChartView.getTransformer(forAxis: .left)
+        )
+        barChartView.leftYAxisRenderer = yAxisRenderer
+        barChartView.fitBars = true
+        
+        chartContainerView.subviews.forEach { $0.removeFromSuperview() }
+        chartContainerView.addSubview(barChartView)
+        barChartView.translatesAutoresizingMaskIntoConstraints = false
+        barChartView.leadingAnchor.constraint(equalTo: chartContainerView.leadingAnchor, constant: 0.0).isActive = true
+        barChartView.trailingAnchor.constraint(equalTo: chartContainerView.trailingAnchor, constant: 0.0).isActive = true
+        barChartView.topAnchor.constraint(equalTo: chartContainerView.topAnchor, constant: 0.0).isActive = true
+        barChartView.bottomAnchor.constraint(equalTo: chartContainerView.bottomAnchor, constant: 0.0).isActive = true
+    }
+    
 }

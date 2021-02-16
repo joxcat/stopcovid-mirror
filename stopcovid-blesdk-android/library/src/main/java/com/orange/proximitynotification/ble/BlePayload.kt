@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble
@@ -14,11 +14,14 @@ import com.orange.proximitynotification.ProximityPayload
 
 data class BlePayload(
     val proximityPayload: ProximityPayload,
-    val version: Int,
-    val txPowerLevel: Int
+    val version: Int = VERSION,
+    val txPowerLevel: Int,
+    val calibratedRssi: Int? = null
 ) {
 
     companion object {
+
+        const val VERSION = 2
 
         private const val PROXIMITY_PAYLOAD_OFFSET = 0
         private const val PROXIMITY_PAYLOAD_SIZE = ProximityPayload.SIZE
@@ -26,6 +29,8 @@ data class BlePayload(
         private const val VERSION_SIZE = 1
         private const val TX_POWER_LEVEL_OFFSET = VERSION_OFFSET + 1
         private const val TX_POWER_LEVEL_SIZE = 1
+        private const val CALIBRATED_RSSI_OFFSET = TX_POWER_LEVEL_OFFSET + 1
+        private const val CALIBRATED_RSSI_SIZE = 1
 
         private const val SIZE = PROXIMITY_PAYLOAD_SIZE + VERSION_SIZE + TX_POWER_LEVEL_SIZE
 
@@ -42,7 +47,8 @@ data class BlePayload(
                     )
                 ),
                 version = data[VERSION_OFFSET].toInt(),
-                txPowerLevel = data[TX_POWER_LEVEL_OFFSET].toInt()
+                txPowerLevel = data[TX_POWER_LEVEL_OFFSET].toInt(),
+                calibratedRssi = data.getOrNull(CALIBRATED_RSSI_OFFSET)?.toInt()
             )
         }
 
@@ -56,11 +62,18 @@ data class BlePayload(
     }
 
     fun toByteArray(): ByteArray {
-        val result = ByteArray(SIZE)
+
+        val size = SIZE + if (calibratedRssi != null) CALIBRATED_RSSI_SIZE else 0
+        val result = ByteArray(size)
 
         proximityPayload.data.copyInto(result, PROXIMITY_PAYLOAD_OFFSET)
         result[VERSION_OFFSET] = version.toByte()
         result[TX_POWER_LEVEL_OFFSET] = txPowerLevel.toByte()
+
+        calibratedRssi?.let {
+            result[CALIBRATED_RSSI_OFFSET] = it.toByte()
+        }
+
         return result
     }
 }

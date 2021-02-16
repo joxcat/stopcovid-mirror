@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble.scanner
@@ -21,17 +21,19 @@ import com.nhaarman.mockitokotlin2.whenever
 import no.nordicsemi.android.support.v18.scanner.ScanRecord
 import no.nordicsemi.android.support.v18.scanner.ScanResult
 import org.junit.runner.RunWith
-import java.util.*
+import java.util.UUID
 
 @RunWith(ZohhakRunner::class)
 class ScanResultExtKtTest {
 
-    @TestWith(value = [
-        "data",
-        "null"])
+    @TestWith(
+        value = [
+            "data",
+            "null"]
+    )
     fun toBleScannedDevice_should_create_BLEScannedDevice(data: String?) {
         // Given
-        val uuid = UUID.randomUUID()
+        val uuid = ParcelUuid(UUID.randomUUID())
         val device = mock<BluetoothDevice>()
         val rssi = -65
         val expected = BleScannedDevice(
@@ -60,7 +62,7 @@ class ScanResultExtKtTest {
         device: BluetoothDevice = mock(),
         rssi: Int = 0,
         scanRecord: ScanRecord? = null,
-        timestampNanos : Long = 0L
+        timestampNanos: Long = 0L
     ): ScanResult {
 
         val scanResult = mock<ScanResult>()

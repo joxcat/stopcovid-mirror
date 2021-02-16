@@ -30,6 +30,9 @@ final class FlashVenueCodeController: FlashCodeController {
         if navigationController?.viewControllers.first === self {
             navigationItem.leftBarButtonItem = UIBarButtonItem(title: "common.close".localized, style: .plain, target: self, action: #selector(didTouchCloseButton))
         }
+        #if targetEnvironment(simulator)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Flash", style: .plain, target: self, action: #selector(didTouchFlashButton))
+        #endif
     }
 
     override func processScannedQRCode(code: String?) {
@@ -45,6 +48,16 @@ final class FlashVenueCodeController: FlashCodeController {
                     self.restartScanning()
                   })
     }
+    
+    #if targetEnvironment(simulator)
+    @objc private func didTouchFlashButton() {
+        scanView.stopScanning()
+        let values: (uuid: String, venueType: String) = [("491ab3ae-ad35-4301-8dd9-414ecf210713", "L"), ("491ab3ae-ad35-4301-8dd9-414ecf210714", "N")].randomElement()!
+        if didFlash?("https://tac.gouv.fr/0/\(values.uuid)/\(values.venueType)/4/200/") == false {
+            showErrorAlert()
+        }
+    }
+    #endif
     
     @objc private func didTouchCloseButton() {
         dismiss(animated: true, completion: nil)

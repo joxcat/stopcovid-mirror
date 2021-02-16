@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/17 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/17 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble.gatt
@@ -26,7 +26,7 @@ class BleGattClientImplTest {
     @get:Rule
     val testCoroutineRule = CoroutineTestRule()
 
-    private val context : Context = mock()
+    private val context: Context = mock()
 
     @Test
     fun close_given_open_not_called_should_not_fail() = testCoroutineRule.runBlockingTest {

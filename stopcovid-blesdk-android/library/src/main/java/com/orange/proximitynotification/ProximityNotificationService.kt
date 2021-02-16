@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification
@@ -20,33 +20,54 @@ import com.orange.proximitynotification.ble.BleProximityNotification
 import com.orange.proximitynotification.ble.BleProximityNotificationFactory
 import com.orange.proximitynotification.ble.BleSettings
 import com.orange.proximitynotification.tools.BluetoothStateBroadcastReceiver
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import timber.log.Timber
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 
 /**
  * ProximityNotification foreground service.
  */
 abstract class ProximityNotificationService : Service(),
-    ProximityNotificationCallback, ProximityPayloadProvider, CoroutineScope {
+    ProximityNotificationCallback, ProximityPayloadProvider, ProximityPayloadIdProvider,
+    ProximityNotificationLogger.Listener,
+    CoroutineScope {
 
     private var bleProximityNotification: BleProximityNotification? = null
     private var bluetoothStateBroadcastReceiver: BluetoothStateBroadcastReceiver? = null
 
+    private val bluetoothRestartInProgress = AtomicBoolean(false)
+    val isBluetoothRestartInProgress: Boolean
+        get() = bluetoothRestartInProgress.get()
+
+    private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Default + SupervisorJob()
+        get() = Dispatchers.Default + job
 
     abstract val foregroundNotificationId: Int
     abstract val bleSettings: BleSettings
+    abstract val exceptionHandler: CoroutineExceptionHandler
+
+    private val bluetoothAdapter: BluetoothAdapter
+        get() = BluetoothAdapter.getDefaultAdapter()
+
+    override fun onCreate() {
+        super.onCreate()
+        ProximityNotificationLogger.registerListener(this)
+    }
 
     override fun onDestroy() {
         stop()
+        ProximityNotificationLogger.unregisterListener()
         super.onDestroy()
 
-        cancel()
+        job.cancel()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -56,10 +77,15 @@ abstract class ProximityNotificationService : Service(),
     /**
      * Starts ProximityNotification and foreground service.
      *
-     * It registers a BluetoothStateBroadcastReceiver in order to be notified of state changes
+     * It registers a [BluetoothStateBroadcastReceiver] in order to be notified of state changes
      * @see BluetoothStateBroadcastReceiver
      */
     fun start() {
+        ProximityNotificationLogger.info(
+            ProximityNotificationEventId.PROXIMITY_NOTIFICATION_START,
+            "Start Proximity Notification"
+        )
+
         registerBluetoothBroadcastReceiver()
         doStart()
     }
@@ -67,31 +93,66 @@ abstract class ProximityNotificationService : Service(),
     /**
      * Stops ProximityNotification and foreground service.
      *
-     * It unregisters a BluetoothStateBroadcastReceiver in order to be notified of state changes
+     * It unregisters [BluetoothStateBroadcastReceiver] if any registered
      * @see BluetoothStateBroadcastReceiver
      */
     fun stop() {
+        ProximityNotificationLogger.info(
+            ProximityNotificationEventId.PROXIMITY_NOTIFICATION_STOP,
+            "Stop Proximity Notification"
+        )
+
         doStop()
         unregisterBluetoothBroadcastReceiver()
     }
 
     /**
-     * Notify ProximityPayload provided by ProximityPayloadProvider has changed.
+     * Notify that [ProximityPayload] provided by [ProximityPayloadProvider] has changed.
      *
+     * @param proximityPayload Updated ProximityPayload
      * @see ProximityPayloadProvider
      */
-    fun notifyProximityPayloadUpdated() {
-        bleProximityNotification?.notifyPayloadUpdated()
+    suspend fun notifyProximityPayloadUpdated(proximityPayload: ProximityPayload) {
+        ProximityNotificationLogger.info(
+            ProximityNotificationEventId.PROXIMITY_NOTIFICATION_PAYLOAD_UPDATED,
+            "Proximity payload updated"
+        )
+
+        bleProximityNotification?.notifyPayloadUpdated(proximityPayload)
     }
 
     /**
-     * Notify that [BleSettings] have changed
-     * It will restart [BleProximityNotification]
+     * Notify that [BleSettings] have changed.
+     * It will restart [BleProximityNotification] if it is running
+     *
      */
-    fun notifyBleSettingsUpdate() {
+    suspend fun notifyBleSettingsUpdate() {
+        ProximityNotificationLogger.info(
+            ProximityNotificationEventId.PROXIMITY_NOTIFICATION_BLE_SETTINGS_UPDATED,
+            "BLE settings updated"
+        )
+
         if (isRunning()) {
             stopBleProximityNotification()
             startBleProximityNotification()
+        }
+    }
+
+
+    /**
+     * Force [BleProximityNotification] to restart.
+     *
+     * If will restart Bluetooth stack if needed by [BleProximityNotification].
+     * Otherwise it will restart [BleProximityNotification] by calling notifyBleSettingsUpdate
+     */
+    suspend fun restart() {
+
+        if (isRunning()) {
+            if (bleProximityNotification?.shouldRestartBluetooth == true) {
+                restartBluetooth()
+            } else {
+                notifyBleSettingsUpdate()
+            }
         }
     }
 
@@ -101,16 +162,28 @@ abstract class ProximityNotificationService : Service(),
     fun isRunning() = bleProximityNotification?.isRunning == true
 
     protected open fun doStart() {
-        startForeground(foregroundNotificationId, buildForegroundServiceNotification())
-        startBleProximityNotification()
+        launch(Dispatchers.Main.immediate + NonCancellable + exceptionHandler) {
+
+            if (!isBluetoothRestartInProgress) {
+                startForeground(foregroundNotificationId, buildForegroundServiceNotification())
+            }
+
+            startBleProximityNotification()
+        }
     }
 
     protected open fun doStop() {
-        stopBleProximityNotification()
-        stopForeground(true)
+        launch(Dispatchers.Main.immediate + NonCancellable + exceptionHandler) {
+            stopBleProximityNotification()
+
+            if (!isBluetoothRestartInProgress) {
+                stopForeground(true)
+            }
+        }
     }
 
     private fun registerBluetoothBroadcastReceiver() {
+        bluetoothRestartInProgress.set(false)
         bluetoothStateBroadcastReceiver = BluetoothStateBroadcastReceiver(
             onBluetoothDisabled = { onBluetoothDisabled() },
             onBluetoothEnabled = { onBluetoothEnabled() })
@@ -127,34 +200,77 @@ abstract class ProximityNotificationService : Service(),
             applicationContext.unregisterReceiver(it)
         }
         bluetoothStateBroadcastReceiver = null
+        bluetoothRestartInProgress.set(false)
     }
 
-    private fun startBleProximityNotification() {
+    private suspend fun startBleProximityNotification() {
         if (bleProximityNotification != null) {
             stopBleProximityNotification()
         }
 
-        BleProximityNotificationFactory.build(this, bleSettings, this)?.run {
-            bleProximityNotification = this
-            setUp(
-                this@ProximityNotificationService,
-                this@ProximityNotificationService
-            )
-        } ?: run {
-            onError(
-                ProximityNotificationError(
-                    ProximityNotificationError.Type.BLE_PROXIMITY_NOTIFICATION,
-                    cause = "Failed to initialize bluetooth"
-                )
-            )
-        }
+        ProximityNotificationLogger.info(
+            ProximityNotificationEventId.PROXIMITY_NOTIFICATION_START_BLE,
+            "Start BLE Proximity Notification"
+        )
 
-        bleProximityNotification?.start()
+        bleProximityNotification =
+            BleProximityNotificationFactory.build(this, bleSettings, this).apply {
+                setUp(
+                    this@ProximityNotificationService,
+                    this@ProximityNotificationService,
+                    this@ProximityNotificationService
+                )
+                start()
+            }
     }
 
-    private fun stopBleProximityNotification() {
+    private suspend fun stopBleProximityNotification() {
+        ProximityNotificationLogger.info(
+            ProximityNotificationEventId.PROXIMITY_NOTIFICATION_STOP_BLE,
+            "Stop BLE Proximity Notification"
+        )
+
         bleProximityNotification?.stop()
         bleProximityNotification = null
+    }
+
+    /**
+     * To restart the Bluetooth stack.
+     * Beware, on some devices it could show a confirmation popup while disabling / enabling
+     * Bluetooth.
+     */
+    protected suspend fun restartBluetooth() {
+
+        withContext(Dispatchers.Main) {
+
+            if (bluetoothRestartInProgress.getAndSet(true)) {
+                ProximityNotificationLogger.info(
+                    ProximityNotificationEventId.PROXIMITY_NOTIFICATION_RESTART_BLUETOOTH,
+                    "Restart Bluetooth - already in progress"
+                )
+            }
+
+            when {
+                !bluetoothAdapter.isEnabled -> {
+                    val status = bluetoothAdapter.enable()
+                    bluetoothRestartInProgress.set(status)
+
+                    ProximityNotificationLogger.info(
+                        ProximityNotificationEventId.PROXIMITY_NOTIFICATION_RESTART_BLUETOOTH,
+                        "Restart Bluetooth - enabling (status=$status)"
+                    )
+                }
+                else -> {
+                    val status = bluetoothAdapter.disable()
+                    bluetoothRestartInProgress.set(status)
+
+                    ProximityNotificationLogger.info(
+                        ProximityNotificationEventId.PROXIMITY_NOTIFICATION_RESTART_BLUETOOTH,
+                        "Restart Bluetooth - disabling (status=$status)"
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -164,9 +280,29 @@ abstract class ProximityNotificationService : Service(),
      * @see ProximityNotification#stop
      */
     protected open fun onBluetoothDisabled() {
-        Timber.d("Bluetooth disabled")
+        ProximityNotificationLogger.info(
+            ProximityNotificationEventId.PROXIMITY_NOTIFICATION_BLUETOOTH_DISABLED,
+            "Bluetooth disabled"
+        )
 
         doStop()
+
+        if (isBluetoothRestartInProgress) {
+            launch {
+                delay(1000)
+                withContext(Dispatchers.Main) {
+                    val status = bluetoothAdapter.enable()
+                    bluetoothAdapter.cancelDiscovery()
+
+                    ProximityNotificationLogger.info(
+                        ProximityNotificationEventId.PROXIMITY_NOTIFICATION_RESTART_BLUETOOTH,
+                        "Restart Bluetooth - enabling on Bluetooth disabled (status=$status)"
+                    )
+
+                    bluetoothRestartInProgress.set(status)
+                }
+            }
+        }
     }
 
     /**
@@ -176,11 +312,25 @@ abstract class ProximityNotificationService : Service(),
      * @see ProximityNotification#start
      */
     protected open fun onBluetoothEnabled() {
-        Timber.d("Bluetooth enabled")
+        ProximityNotificationLogger.info(
+            ProximityNotificationEventId.PROXIMITY_NOTIFICATION_BLUETOOTH_ENABLED,
+            "Bluetooth enabled"
+        )
 
         doStart()
+
+        if (bluetoothRestartInProgress.getAndSet(false)) {
+            ProximityNotificationLogger.info(
+                ProximityNotificationEventId.PROXIMITY_NOTIFICATION_RESTART_BLUETOOTH,
+                "Restart Bluetooth - restart bluetooth done"
+            )
+        }
+
     }
 
+
+    override fun onEvent(event: ProximityNotificationEvent) {
+    }
 
     /**
      * Create the Notification to display once this foreground service is running

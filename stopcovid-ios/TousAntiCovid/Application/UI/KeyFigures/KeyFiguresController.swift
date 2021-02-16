@@ -182,6 +182,14 @@ final class KeyFiguresController: CVTableViewController {
 extension KeyFiguresController: KeyFiguresChangesObserver {
 
     func keyFiguresDidUpdate() {
+        reloadNextToKeyFiguresUpdate()
+    }
+    
+    func postalCodeDidUpdate(_ postalCode: String?) {
+        reloadNextToKeyFiguresUpdate()
+    }
+    
+    private func reloadNextToKeyFiguresUpdate() {
         updateRightBarButtonItem()
         reloadUI(animated: true)
     }

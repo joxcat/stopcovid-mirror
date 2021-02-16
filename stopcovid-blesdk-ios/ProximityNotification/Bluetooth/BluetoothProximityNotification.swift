@@ -22,7 +22,7 @@ final class BluetoothProximityNotification: ProximityNotification {
     
     private var identifierFromProximityPayload: IdentifierFromProximityPayload?
     
-    private var scannedPeripheralForPeripheralIdentifier: Cache<UUID, BluetoothScannedPeripheral>
+    private var scannedPeripheralForPeripheralIdentifier: Cache<UUID, BluetoothPeripheral>
     
     private var bluetoothProximityPayloadForPeripheralIdentifier: Cache<UUID, BluetoothProximityPayload>
     
@@ -31,6 +31,8 @@ final class BluetoothProximityNotification: ProximityNotification {
     private var cacheExpirationTimer: Timer?
     
     private let dispatchQueue: DispatchQueue
+
+    private let rssiCalibrator: BluetoothRSSICalibrator
     
     let stateChangedHandler: StateChangedHandler
     
@@ -49,9 +51,11 @@ final class BluetoothProximityNotification: ProximityNotification {
         self.centralManager = centralManager
         self.peripheralManager = peripheralManager
         connectionDateForPayloadIdentifier = Cache(expirationDelay: settings.connectionTimeInterval)
-        scannedPeripheralForPeripheralIdentifier = Cache<UUID, BluetoothScannedPeripheral>(expirationDelay: settings.cacheExpirationDelay)
+        scannedPeripheralForPeripheralIdentifier = Cache<UUID, BluetoothPeripheral>(expirationDelay: settings.cacheExpirationDelay)
         bluetoothProximityPayloadForPeripheralIdentifier = Cache<UUID, BluetoothProximityPayload>(expirationDelay: settings.cacheExpirationDelay)
+        rssiCalibrator = BluetoothRSSICalibrator(settings: settings)
         self.centralManager.delegate = self
+        self.peripheralManager.delegate = self
     }
     
     func start(proximityPayloadProvider: @escaping ProximityPayloadProvider,
@@ -73,18 +77,17 @@ final class BluetoothProximityNotification: ProximityNotification {
         connectionDateForPayloadIdentifier.removeAllValues()
     }
     
-    private func proximityInfo(for bluetoothProximityPayload: BluetoothProximityPayload,
-                               from scannedPeripheral: BluetoothScannedPeripheral) -> ProximityInfo? {
-        guard let rssi = scannedPeripheral.rssi else {
-            return nil
-        }
-        
-        let calibratedRSSI = rssi - Int(bluetoothProximityPayload.txPowerLevel) - Int(settings.rxCompensationGain)
-        let metadata = BluetoothProximityMetadata(rawRSSI: rssi,
+    private func proximityInfo(for bluetoothPeripheral: BluetoothPeripheral,
+                               from bluetoothProximityPayload: BluetoothProximityPayload) -> ProximityInfo? {
+        guard let rawRSSI = bluetoothPeripheral.rssi,
+              let calibratedRSSI = rssiCalibrator.calibrateRSSI(for: bluetoothPeripheral,
+                                                                from: bluetoothProximityPayload) else { return nil }
+
+        let metadata = BluetoothProximityMetadata(rawRSSI: rawRSSI,
                                                   calibratedRSSI: calibratedRSSI,
                                                   txPowerLevel: Int(bluetoothProximityPayload.txPowerLevel))
         return ProximityInfo(payload: bluetoothProximityPayload.payload,
-                             timestamp: scannedPeripheral.timestamp,
+                             timestamp: bluetoothPeripheral.timestamp,
                              metadata: metadata)
     }
     
@@ -106,6 +109,10 @@ final class BluetoothProximityNotification: ProximityNotification {
         cacheExpirationTimer?.invalidate()
         cacheExpirationTimer = nil
     }
+
+    private func updateConnectionDate(for identifier: ProximityPayloadIdentifier) {
+        connectionDateForPayloadIdentifier[identifier] = Date()
+    }
 }
 
 extension BluetoothProximityNotification: BluetoothCentralManagerDelegate {
@@ -117,7 +124,7 @@ extension BluetoothProximityNotification: BluetoothCentralManagerDelegate {
     }
     
     func bluetoothCentralManager(_ centralManager: BluetoothCentralManagerProtocol,
-                                 didScan peripheral: BluetoothScannedPeripheral,
+                                 didScan peripheral: BluetoothPeripheral,
                                  bluetoothProximityPayload: BluetoothProximityPayload?) -> Bool {
         let peripheralIdentifier = peripheral.peripheralIdentifier
         scannedPeripheralForPeripheralIdentifier[peripheralIdentifier] = peripheral
@@ -128,10 +135,10 @@ extension BluetoothProximityNotification: BluetoothCentralManagerDelegate {
             
             let shouldConnect = connectionDateForPayloadIdentifier[identifier] == nil
             if shouldConnect {
-                connectionDateForPayloadIdentifier[identifier] = Date()
+                updateConnectionDate(for: identifier)
             }
             
-            if let proximityInfo = self.proximityInfo(for: bluetoothProximityPayload, from: peripheral) {
+            if let proximityInfo = self.proximityInfo(for: peripheral, from: bluetoothProximityPayload) {
                 proximityInfoUpdateHandler?(proximityInfo)
             }
             
@@ -149,9 +156,9 @@ extension BluetoothProximityNotification: BluetoothCentralManagerDelegate {
         if let peripheral = scannedPeripheralForPeripheralIdentifier[peripheralIdentifier],
             let identifier = identifierFromProximityPayload?(bluetoothProximityPayload.payload) {
             
-            connectionDateForPayloadIdentifier[identifier] = Date()
+            updateConnectionDate(for: identifier)
             
-            if let proximityInfo = self.proximityInfo(for: bluetoothProximityPayload, from: peripheral) {
+            if let proximityInfo = self.proximityInfo(for: peripheral, from: bluetoothProximityPayload) {
                 proximityInfoUpdateHandler?(proximityInfo)
             }
         }
@@ -161,5 +168,16 @@ extension BluetoothProximityNotification: BluetoothCentralManagerDelegate {
                                  didNotFindServiceForPeripheralIdentifier peripheralIdentifier: UUID) {
         scannedPeripheralForPeripheralIdentifier.removeValue(forKey: peripheralIdentifier)
         bluetoothProximityPayloadForPeripheralIdentifier.removeValue(forKey: peripheralIdentifier)
+    }
+}
+
+extension BluetoothProximityNotification: BluetoothPeripheralManagerDelegate {
+
+    func bluetoothPeripheralManager(_ peripheralManager: BluetoothPeripheralManagerProtocol,
+                                    didReceiveWriteFrom peripheral: BluetoothPeripheral,
+                                    bluetoothProximityPayload: BluetoothProximityPayload) {
+        if let proximityInfo = self.proximityInfo(for: peripheral, from: bluetoothProximityPayload) {
+            proximityInfoUpdateHandler?(proximityInfo)
+        }
     }
 }

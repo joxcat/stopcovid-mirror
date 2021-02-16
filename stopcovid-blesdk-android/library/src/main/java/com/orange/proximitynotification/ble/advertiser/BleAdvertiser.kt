@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble.advertiser
@@ -13,12 +13,12 @@ package com.orange.proximitynotification.ble.advertiser
 import com.orange.proximitynotification.ble.BleSettings
 
 interface BleAdvertiser {
-    val settings : BleSettings
+    val settings: BleSettings
 
     interface Callback {
         fun onError(errorCode: Int)
     }
 
-    fun start(data : ByteArray, callback: Callback): Boolean
+    fun start(data: ByteArray, callback: Callback): Boolean
     fun stop()
 }

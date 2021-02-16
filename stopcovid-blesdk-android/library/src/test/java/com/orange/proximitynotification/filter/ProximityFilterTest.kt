@@ -5,14 +5,14 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/28 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/28 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.filter
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
-import java.util.*
+import java.util.Date
 
 class ProximityFilterTest {
 
@@ -29,7 +29,8 @@ class ProximityFilterTest {
         val timestampRssis = emptyList<TimestampedRssi>()
 
         // When
-        val output = proximityFilter.filter(timestampRssis, Date(0), 2 * 60, ProximityFilter.Mode.FULL)
+        val output =
+            proximityFilter.filter(timestampRssis, Date(0), 2 * 60, ProximityFilter.Mode.FULL)
 
         // Then
         assertThat(output).isEqualTo(ProximityFilter.Output.Rejected)
@@ -45,7 +46,8 @@ class ProximityFilterTest {
         )
 
         // When
-        val output = proximityFilter.filter(timestampRssis, Date(0), 2 * 60, ProximityFilter.Mode.FULL)
+        val output =
+            proximityFilter.filter(timestampRssis, Date(0), 2 * 60, ProximityFilter.Mode.FULL)
 
         // Then
         assertThat(output).isEqualTo(ProximityFilter.Output.Rejected)

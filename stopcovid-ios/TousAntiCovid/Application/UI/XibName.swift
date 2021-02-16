@@ -61,4 +61,6 @@ enum XibName: String {
     case venueHistoryCell = "VenueHistoryCell"
     case vaccinationCell = "VaccinationCell"
     case keyFigureChartCell = "KeyFigureChartCell"
+    case loadingCardCell = "LoadingCardCell"
+    case vaccinationCenterCell = "VaccinationCenterCell"
 }

@@ -5,13 +5,13 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/06/30 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/06/30 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.tools
 
 import android.os.SystemClock
-import java.util.*
+import java.util.Date
 
 internal fun Long.nanosTimestampToDate(): Date =
     Date(System.currentTimeMillis() - SystemClock.elapsedRealtime() + (this / 1000000))

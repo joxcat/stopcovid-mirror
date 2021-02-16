@@ -62,6 +62,7 @@ import com.lunabeestudio.stopcovid.manager.LinksManager
 import com.lunabeestudio.stopcovid.manager.MoreKeyFiguresManager
 import com.lunabeestudio.stopcovid.manager.PrivacyManager
 import com.lunabeestudio.stopcovid.manager.ProximityManager
+import com.lunabeestudio.stopcovid.manager.VaccinationCenterManager
 import com.lunabeestudio.stopcovid.manager.VenuesManager
 import com.lunabeestudio.stopcovid.model.DeviceSetup
 import com.lunabeestudio.stopcovid.service.ProximityService
@@ -169,6 +170,9 @@ class StopCovid : Application(), LifecycleObserver, RobertApplication, Isolation
             FormManager.initialize(this@StopCovid)
         }
         appCoroutineScope.launch {
+            VaccinationCenterManager.initialize(this@StopCovid, sharedPrefs)
+        }
+        appCoroutineScope.launch {
             AppMaintenanceManager.initialize(
                 this@StopCovid,
                 R.drawable.maintenance,
@@ -214,6 +218,9 @@ class StopCovid : Application(), LifecycleObserver, RobertApplication, Isolation
             FormManager.onAppForeground(this@StopCovid)
         }
         appCoroutineScope.launch {
+            VaccinationCenterManager.onAppForeground(this@StopCovid, sharedPrefs)
+        }
+        appCoroutineScope.launch {
             robertManager.refreshConfig(this@StopCovid)
         }
 
@@ -232,7 +239,7 @@ class StopCovid : Application(), LifecycleObserver, RobertApplication, Isolation
     }
 
     override fun refreshProximityService() {
-        if (robertManager.isProximityActive && ProximityManager.getDeviceSetup(this) == DeviceSetup.BLE) {
+        if (robertManager.isProximityActive && ProximityManager.getDeviceSetup(this, robertManager) == DeviceSetup.BLE) {
             ProximityService.start(this)
         } else {
             ProximityService.stop(this)
@@ -244,8 +251,10 @@ class StopCovid : Application(), LifecycleObserver, RobertApplication, Isolation
             .putString(AtRiskNotificationWorker.INPUT_DATA_TITLE_KEY, "notification.atRisk.title")
             .putString(AtRiskNotificationWorker.INPUT_DATA_MESSAGE_KEY, "notification.atRisk.message")
             .build()
-        sendAtRiskNotification(OneTimeWorkRequestBuilder<AtRiskNotificationWorker>().setInputData(inputData),
-            Constants.WorkerNames.AT_RISK_NOTIFICATION)
+        sendAtRiskNotification(
+            OneTimeWorkRequestBuilder<AtRiskNotificationWorker>().setInputData(inputData),
+            Constants.WorkerNames.AT_RISK_NOTIFICATION
+        )
     }
 
     override fun warningAtRiskDetected() {
@@ -253,8 +262,10 @@ class StopCovid : Application(), LifecycleObserver, RobertApplication, Isolation
             .putString(AtRiskNotificationWorker.INPUT_DATA_TITLE_KEY, "notification.atWarning.title")
             .putString(AtRiskNotificationWorker.INPUT_DATA_MESSAGE_KEY, "notification.atWarning.message")
             .build()
-        sendAtRiskNotification(OneTimeWorkRequestBuilder<AtRiskNotificationWorker>().setInputData(inputData),
-            Constants.WorkerNames.WARNING_NOTIFICATION)
+        sendAtRiskNotification(
+            OneTimeWorkRequestBuilder<AtRiskNotificationWorker>().setInputData(inputData),
+            Constants.WorkerNames.WARNING_NOTIFICATION
+        )
     }
 
     private fun sendAtRiskNotification(oneTimeWorkRequestBuilder: OneTimeWorkRequest.Builder, workerId: String) {
@@ -339,8 +350,10 @@ class StopCovid : Application(), LifecycleObserver, RobertApplication, Isolation
         }
     }
 
-    override fun getVenueQrCodeList(startTime: Long?): List<VenueQrCode>? = VenuesManager.getVenuesQrCode(secureKeystoreDataSource,
-        startTime)
+    override fun getVenueQrCodeList(startTime: Long?): List<VenueQrCode>? = VenuesManager.getVenuesQrCode(
+        secureKeystoreDataSource,
+        startTime
+    )
 
     override fun clearVenueQrCodeList() {
         VenuesManager.clearAllData(sharedPrefs, secureKeystoreDataSource)
@@ -461,9 +474,11 @@ class StopCovid : Application(), LifecycleObserver, RobertApplication, Isolation
 
     @OptIn(ExperimentalTime::class)
     private fun deleteOldAttestations() {
-        val expiredMilliSeconds = System.currentTimeMillis() - Duration.convert(robertManager.configuration.qrCodeDeletionHours.toDouble(),
+        val expiredMilliSeconds = System.currentTimeMillis() - Duration.convert(
+            robertManager.configuration.qrCodeDeletionHours.toDouble(),
             DurationUnit.HOURS,
-            DurationUnit.MILLISECONDS)
+            DurationUnit.MILLISECONDS
+        )
         secureKeystoreDataSource.attestations = secureKeystoreDataSource.attestations?.filter { attestation ->
             (attestation["datetime"]?.value?.toLongOrNull() ?: 0L) > expiredMilliSeconds
         }

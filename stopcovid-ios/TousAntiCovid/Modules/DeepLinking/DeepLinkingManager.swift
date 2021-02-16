@@ -83,6 +83,12 @@ final class DeepLinkingManager {
     }
     
     private func processVenueUrl(_ url: URL) {
+        guard VenuesManager.shared.isVenueUrlValid(url) else {
+            UIApplication.shared.keyWindow?.rootViewController?.topPresentedController.showAlert(title: "enterCodeController.alert.invalidCode.title".localized,
+                                                                                                 message: "enterCodeController.alert.invalidCode.message".localized,
+                                                                                                 okTitle: "common.ok".localized)
+            return
+        }
         guard !VenuesManager.shared.isVenueUrlExpired(url) else {
             UIApplication.shared.keyWindow?.rootViewController?.topPresentedController.showAlert(title: "enterCodeController.alert.expiredCode.title".localized,
                                                                                                  message: "enterCodeController.alert.expiredCode.message".localized,

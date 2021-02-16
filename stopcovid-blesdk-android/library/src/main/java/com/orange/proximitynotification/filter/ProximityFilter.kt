@@ -5,12 +5,12 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/28 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/28 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.filter
 
-import java.util.*
+import java.util.Date
 import kotlin.math.ln
 
 /**
@@ -34,7 +34,18 @@ class ProximityFilter(private val config: Config) {
     data class Config(
         val durationThreshold: Long = 5 * 60,
         val rssiThreshold: Int = 0,
-        val deltas: List<Double> = listOf(39.0, 27.0, 23.0, 21.0, 20.0, 19.0, 18.0, 17.0, 16.0, 15.0),
+        val deltas: List<Double> = listOf(
+            39.0,
+            27.0,
+            23.0,
+            21.0,
+            20.0,
+            19.0,
+            18.0,
+            17.0,
+            16.0,
+            15.0
+        ),
         val p0: Double = -66.0,
         val a: Double = 10 / ln(10.0),
         val b: Double = 0.1,

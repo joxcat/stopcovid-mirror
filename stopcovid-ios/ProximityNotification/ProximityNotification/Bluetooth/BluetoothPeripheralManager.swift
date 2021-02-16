@@ -12,7 +12,9 @@ import CoreBluetooth
 import Foundation
 
 class BluetoothPeripheralManager: NSObject, BluetoothPeripheralManagerProtocol {
-    
+
+    weak var delegate: BluetoothPeripheralManagerDelegate?
+
     private let settings: BluetoothSettings
     
     private let dispatchQueue: DispatchQueue
@@ -81,7 +83,7 @@ extension BluetoothPeripheralManager: CBPeripheralManagerDelegate {
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         logger.info(message: "peripheral manager did update state \(peripheral.state.rawValue)",
-            source: ProximityNotificationEvent.bluetoothPeripheralManagerDidUpdateState.rawValue)
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerDidUpdateState.rawValue)
         
         stopPeripheralManager()
         
@@ -90,9 +92,9 @@ extension BluetoothPeripheralManager: CBPeripheralManagerDelegate {
             let service = CBMutableService(type: serviceUUID,
                                            primary: true)
             let characteristic = CBMutableCharacteristic(type: CBUUID(string: settings.serviceCharacteristicUniqueIdentifier),
-                                                         properties: [.read],
+                                                         properties: [.read, .write],
                                                          value: nil,
-                                                         permissions: [.readable])
+                                                         permissions: [.readable, .writeable])
             service.characteristics = [characteristic]
             peripheral.add(service)
         default:
@@ -102,7 +104,7 @@ extension BluetoothPeripheralManager: CBPeripheralManagerDelegate {
     
     func peripheralManager(_ peripheral: CBPeripheralManager, willRestoreState dict: [String: Any]) {
         logger.info(message: "peripheral manager will restore state \(dict)",
-            source: ProximityNotificationEvent.bluetoothPeripheralManagerWillRestoreState.rawValue)
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerWillRestoreState.rawValue)
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
@@ -134,6 +136,36 @@ extension BluetoothPeripheralManager: CBPeripheralManagerDelegate {
             logger.error(message: "peripheral manager did respond read with error",
                          source: ProximityNotificationEvent.bluetoothPeripheralManagerDidRespondToReadWithError.rawValue)
             peripheral.respond(to: request, withResult: .unlikelyError)
+        }
+    }
+
+    func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+        logger.info(message: "peripheral manager did receive write",
+                    source: ProximityNotificationEvent.bluetoothPeripheralManagerDidReceiveWrite.rawValue)
+        
+        for request in requests {
+            if let receivedValue = request.value,
+               let bluetoothProximityPayload = BluetoothProximityPayload(data: receivedValue),
+               let rssi = bluetoothProximityPayload.rssi {
+                let bluetoothPeripheral = BluetoothPeripheral(peripheralIdentifier: request.central.identifier,
+                                                              timestamp: Date(),
+                                                              rssi: Int(rssi),
+                                                              isRSSIFromPayload: true)
+                delegate?.bluetoothPeripheralManager(self,
+                                                     didReceiveWriteFrom: bluetoothPeripheral,
+                                                     bluetoothProximityPayload: bluetoothProximityPayload)
+            } else {
+                logger.error(message: "peripheral manager did respond write with error",
+                             source: ProximityNotificationEvent.bluetoothPeripheralManagerDidRespondToWriteWithError.rawValue)
+                peripheral.respond(to: request, withResult: .invalidPdu)
+                return
+            }
+        }
+        
+        if let firstRequest = requests.first {
+            logger.info(message: "peripheral manager did respond write with success",
+                        source: ProximityNotificationEvent.bluetoothPeripheralManagerDidRespondToWriteWithSuccess.rawValue)
+            peripheral.respond(to: firstRequest, withResult: .success)
         }
     }
 }

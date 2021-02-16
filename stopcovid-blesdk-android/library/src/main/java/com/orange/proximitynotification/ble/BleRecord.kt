@@ -5,17 +5,18 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/07 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/07 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble
 
-import java.util.*
+import java.util.Date
 
 internal data class BleRecord(
     val payload: BlePayload,
     val rssi: Int,
-    val timestamp: Date
+    val timestamp: Date,
+    val isRssiCalibrated: Boolean = false
 ) {
     val txPowerLevel: Int
         get() = payload.txPowerLevel

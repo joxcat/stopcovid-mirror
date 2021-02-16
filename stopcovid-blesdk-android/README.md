@@ -33,6 +33,7 @@ override val bleSettings : BleSettings by lazy { BleSettings (
     backgroundServiceManufacturerDataIOS = byteArrayOf(), // Byte array of manufacturer data advertised by iOS in background. It depends on your service UUID
     txCompensationGain = 0, // Calibrated TxPowerLevel of your device
     rxCompensationGain = 0, // RSSI compensation gain of your device
+    scanReportDelay = 1_000L // Scanner delay before reporting results. By default it is set to 1s
     )
 }
 
@@ -48,6 +49,12 @@ override suspend fun current(): ProximityPayload {
         }
     }
 
+override suspend fun fromProximityPayload(proximityPayload: ProximityPayload): ProximityPayloadId {
+        return withContext(Dispatchers.Default) {
+            // Extract proximity unique ID from ProximityPayload
+        }
+    }
+
 ```
 
 To start the service just call start()
@@ -60,7 +67,13 @@ To stop the service just call stop()
 service.stop()
 ```
 
-In case of proximity payload renewal notify the Proximity Notification service calling
+In case of proximity payload renewal notify the Proximity Notification service calling with updated ProximityPayload
 ```kotlin
-service.notifyProximityPayloadUpdated()
+service.notifyProximityPayloadUpdated(updatedProximityPayload)
 ```
+
+In case of BLESettings renewal notify the Proximity Notification service calling 
+```kotlin
+service.notifyBleSettingsUpdate()
+```
+This will restart internal BLE components with updated BLESettings

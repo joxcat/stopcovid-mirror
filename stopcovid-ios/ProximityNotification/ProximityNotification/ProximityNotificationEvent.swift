@@ -23,6 +23,9 @@ enum ProximityNotificationEvent: String {
     case bluetoothPeripheralManagerDidReceiveRead
     case bluetoothPeripheralManagerDidRespondToReadWithSuccess
     case bluetoothPeripheralManagerDidRespondToReadWithError
+    case bluetoothPeripheralManagerDidReceiveWrite
+    case bluetoothPeripheralManagerDidRespondToWriteWithSuccess
+    case bluetoothPeripheralManagerDidRespondToWriteWithError
     
     case bluetoothCentralManagerStart
     case bluetoothCentralManagerStop

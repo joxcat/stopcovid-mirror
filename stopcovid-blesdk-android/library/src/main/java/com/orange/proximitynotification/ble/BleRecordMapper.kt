@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/08 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/08 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble
@@ -23,11 +23,13 @@ internal class BleRecordMapper(private val settings: BleSettings) {
 
     private fun BleRecord.toProximityMetadata() = BleProximityMetadata(
         rawRssi = rssi,
-        calibratedRssi = BleRssiCalibration.calibrate(
-            rssi = rssi,
-            txCompensationGain = txPowerLevel,
-            rxCompensationGain = settings.rxCompensationGain
-        ),
+        calibratedRssi = if (isRssiCalibrated) rssi else {
+            BleRssiCalibration.calibrate(
+                rssi = rssi,
+                txCompensationGain = txPowerLevel,
+                rxCompensationGain = settings.rxCompensationGain
+            )
+        },
         txPowerLevel = txPowerLevel
     )
 }

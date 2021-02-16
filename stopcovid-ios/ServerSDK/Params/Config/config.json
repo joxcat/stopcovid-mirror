@@ -29,6 +29,10 @@
       "value": true
     },
     {
+      "name": "app.vaccinationCentersCount",
+      "value": 5
+    },
+    {
       "name": "app.isolation.duration",
       "value": 691200
     },

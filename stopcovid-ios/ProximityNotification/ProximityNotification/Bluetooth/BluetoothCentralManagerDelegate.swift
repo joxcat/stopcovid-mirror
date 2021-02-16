@@ -14,7 +14,7 @@ protocol BluetoothCentralManagerDelegate: class {
     
     func bluetoothCentralManager(_ centralManager: BluetoothCentralManagerProtocol, stateDidChange state: ProximityNotificationState)
     
-    func bluetoothCentralManager(_ centralManager: BluetoothCentralManagerProtocol, didScan peripheral: BluetoothScannedPeripheral, bluetoothProximityPayload: BluetoothProximityPayload?) -> Bool
+    func bluetoothCentralManager(_ centralManager: BluetoothCentralManagerProtocol, didScan peripheral: BluetoothPeripheral, bluetoothProximityPayload: BluetoothProximityPayload?) -> Bool
     
     func bluetoothCentralManager(_ centralManager: BluetoothCentralManagerProtocol, didReadCharacteristicForPeripheralIdentifier peripheralIdentifier: UUID, bluetoothProximityPayload: BluetoothProximityPayload)
     

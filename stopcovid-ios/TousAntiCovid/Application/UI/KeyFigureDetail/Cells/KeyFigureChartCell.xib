@@ -43,7 +43,7 @@
                                                     <constraint firstItem="jzD-7F-nLm" firstAttribute="width" secondItem="jzD-7F-nLm" secondAttribute="height" multiplier="1:1" id="rAl-92-Uaz"/>
                                                 </constraints>
                                             </stackView>
-                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dPe-m1-VMR" customClass="LineChartView" customModule="Charts">
+                                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dPe-m1-VMR">
                                                 <rect key="frame" x="0.0" y="53.5" width="423" height="220"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
@@ -93,11 +93,11 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
                 <outlet property="bottomConstraint" destination="1PH-Id-IkF" id="S1a-DV-TLR"/>
+                <outlet property="chartContainerView" destination="dPe-m1-VMR" id="mOm-Pq-RcQ"/>
                 <outlet property="containerView" destination="faZ-Oj-qsR" id="2BS-bW-I2K"/>
                 <outlet property="footerLabel" destination="a1S-UM-ygH" id="JDr-T8-oCz"/>
                 <outlet property="leadingConstraint" destination="my4-No-q6a" id="dlV-ZI-6VV"/>
                 <outlet property="legendStackView" destination="XNL-Qv-nMV" id="ChF-Uq-Cj0"/>
-                <outlet property="lineChartView" destination="dPe-m1-VMR" id="sMq-MZ-JBx"/>
                 <outlet property="sharingImageView" destination="jzD-7F-nLm" id="fn6-k2-ha6"/>
                 <outlet property="topConstraint" destination="9WR-Xo-meM" id="1B5-IX-0Uw"/>
                 <outlet property="trailingConstraint" destination="LrM-nr-AY1" id="cDx-Sf-5Z5"/>

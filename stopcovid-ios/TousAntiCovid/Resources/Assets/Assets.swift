@@ -97,6 +97,7 @@ internal enum Asset {
     internal static let pause = ImageAsset(name: "pause")
     internal static let phone = ImageAsset(name: "phone")
     internal static let play = ImageAsset(name: "play")
+    internal static let refresh = ImageAsset(name: "refresh")
     internal static let shareIcon = ImageAsset(name: "shareIcon")
     internal static let trash = ImageAsset(name: "trash")
     internal static let trendDown = ImageAsset(name: "trendDown")

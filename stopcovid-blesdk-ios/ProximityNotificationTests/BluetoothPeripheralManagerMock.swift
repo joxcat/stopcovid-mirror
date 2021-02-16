@@ -12,8 +12,26 @@ import Foundation
 @testable import ProximityNotification
 
 class BluetoothPeripheralManagerMock: BluetoothPeripheralManagerProtocol {
+
+    weak var delegate: BluetoothPeripheralManagerDelegate?
+
+    private let dispatchQueue: DispatchQueue
+
+    init(dispatchQueue: DispatchQueue) {
+        self.dispatchQueue = dispatchQueue
+    }
     
     func start(proximityPayloadProvider: @escaping ProximityPayloadProvider) {}
     
     func stop() {}
+
+    func scheduleIncomingWriteRequest(from bluetoothPeripheral: BluetoothPeripheral,
+                                      payload: BluetoothProximityPayload,
+                                      after delay: TimeInterval) {
+        dispatchQueue.asyncAfter(deadline: .now() + delay) {
+            self.delegate?.bluetoothPeripheralManager(self,
+                                                      didReceiveWriteFrom: bluetoothPeripheral,
+                                                      bluetoothProximityPayload: payload)
+        }
+    }
 }

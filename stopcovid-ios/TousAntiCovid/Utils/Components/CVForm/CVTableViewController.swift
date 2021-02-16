@@ -13,6 +13,7 @@ import UIKit
 class CVTableViewController: UITableViewController {
 
     var rows: [CVRow] = []
+    private var cellHeights: [IndexPath: CGFloat] = [:]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,6 +68,7 @@ class CVTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cellHeights[indexPath] = cell.frame.size.height
         guard let cell = cell as? CVTableViewCell else { return }
         let row: CVRow = rowObject(at: indexPath)
         row.willDisplay?(cell)
@@ -76,6 +78,10 @@ class CVTableViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         let row: CVRow = rowObject(at: indexPath)
         row.selectionAction?()
+    }
+    
+    override func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        cellHeights[indexPath] ?? UITableView.automaticDimension
     }
     
 }

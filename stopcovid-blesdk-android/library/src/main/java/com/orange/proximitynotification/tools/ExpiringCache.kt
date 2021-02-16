@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.tools
@@ -16,7 +16,7 @@ import android.util.LruCache
 private data class ExpiringValue<V>(val value: V, val expireTime: Long)
 
 /**
- * ExpiringCache uses LruCache to store values and keeping them depending on 2 conditions:
+ * ExpiringCache uses [LruCache] to store values and keeping them depending on 2 conditions:
  * - max size is not exceeded
  * - expireTime for a value is expired
  */

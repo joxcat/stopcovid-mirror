@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/08 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/08 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble
@@ -17,7 +17,7 @@ import com.orange.proximitynotification.ProximityInfo
 import com.orange.proximitynotification.ProximityMetadata
 import com.orange.proximitynotification.ProximityPayload
 import com.orange.proximitynotification.ble.scanner.BleScannedDevice
-import java.util.*
+import java.util.Date
 
 internal fun proximityPayload() = ProximityPayload((1..16).map { it.toByte() }.toByteArray())
 
@@ -29,17 +29,25 @@ internal fun record(
 internal fun record(
     payload: BlePayload = payload(),
     rssi: Int = 0,
-    timestamp: Date = Date()
-) = BleRecord(payload = payload, rssi = rssi, timestamp = timestamp)
+    timestamp: Date = Date(),
+    isRssiCalibrated: Boolean = false
+) = BleRecord(
+    payload = payload,
+    rssi = rssi,
+    timestamp = timestamp,
+    isRssiCalibrated = isRssiCalibrated
+)
 
 internal fun payload(
     proximityPayload: ProximityPayload = ProximityPayload(ByteArray(ProximityPayload.SIZE)),
     version: Int = 1,
-    txPowerLevel: Int = 0
+    txPowerLevel: Int = 0,
+    calibratedRssi: Int? = null
 ) = BlePayload(
     proximityPayload = proximityPayload,
     version = version,
-    txPowerLevel = txPowerLevel
+    txPowerLevel = txPowerLevel,
+    calibratedRssi = calibratedRssi
 )
 
 internal fun bleScannedDevice(
@@ -79,3 +87,6 @@ internal fun bleProximityMetadata(
     calibratedRssi = calibratedRssi,
     txPowerLevel = txPowerLevel
 )
+
+internal fun Date.minus(millis: Long) = Date(time - millis)
+internal fun Date.plus(millis: Long) = Date(time + millis)

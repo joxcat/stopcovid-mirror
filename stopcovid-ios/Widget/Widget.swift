@@ -13,7 +13,7 @@ import WidgetKit
 
 @main
 struct TousAntiCovidWidget: Widget {
-    
+
     private let kind: String = "TousAntiCovidWidget"
 
     public var body: some WidgetConfiguration {
@@ -21,6 +21,7 @@ struct TousAntiCovidWidget: Widget {
             WidgetView(entry: entry)
         }
         .configurationDisplayName("TousAntiCovid")
+        .description("Soyez alertés et alertez les autres en cas d’exposition à la COVID-19")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

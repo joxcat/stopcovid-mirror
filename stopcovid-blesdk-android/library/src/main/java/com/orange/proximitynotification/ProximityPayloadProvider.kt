@@ -5,22 +5,22 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification
 
 /**
- * Provides the ProximityPayload to exchange
+ * Provides the [ProximityPayload] to exchange
  *
  * @see ProximityPayload
  */
 interface ProximityPayloadProvider {
 
     /**
-     * Return the current ProximityPayload
+     * Return the current [ProximityPayload]
      *
-     * @return ProximityPayload to exchange
+     * @return [ProximityPayload] to exchange
      */
     suspend fun current(): ProximityPayload
 }

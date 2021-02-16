@@ -36,7 +36,7 @@ class BluetoothCentralManagerMock: BluetoothCentralManagerProtocol {
     
     func stop() {}
     
-    func scheduleScan(peripheral: BluetoothScannedPeripheral,
+    func scheduleScan(peripheral: BluetoothPeripheral,
                       payload: BluetoothProximityPayload,
                       isPayloadAdvertised: Bool,
                       after delay: TimeInterval) {

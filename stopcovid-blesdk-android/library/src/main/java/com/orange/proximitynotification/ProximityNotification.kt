@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification
@@ -15,12 +15,12 @@ interface ProximityNotification {
 
     fun setUp(
         proximityPayloadProvider: ProximityPayloadProvider,
+        proximityPayloadIdProvider: ProximityPayloadIdProvider,
         callback: ProximityNotificationCallback
     )
 
-    fun start()
+    suspend fun start()
+    suspend fun stop()
 
-    fun stop()
-
-    fun notifyPayloadUpdated()
+    suspend fun notifyPayloadUpdated(proximityPayload: ProximityPayload)
 }

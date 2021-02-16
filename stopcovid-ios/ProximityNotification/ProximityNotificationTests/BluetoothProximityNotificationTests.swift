@@ -15,18 +15,19 @@ class BluetoothProximityNotificationTests: XCTestCase {
     
     private let settings = BluetoothSettings(serviceUniqueIdentifier: UUID().uuidString,
                                              serviceCharacteristicUniqueIdentifier: UUID().uuidString,
-                                             txCompensationGain: 0,
-                                             rxCompensationGain: 0,
+                                             txCompensationGain: 10,
+                                             rxCompensationGain: 20,
                                              connectionTimeInterval: 3)
     
     private func makeBluetoothProximityNotification(stateChangedHandler: @escaping StateChangedHandler = { state in },
                                                     dispatchQueue: DispatchQueue,
-                                                    centralManagerMock: BluetoothCentralManagerMock) -> BluetoothProximityNotification {
+                                                    centralManagerMock: BluetoothCentralManagerMock,
+                                                    peripheralManagerMock: BluetoothPeripheralManagerMock) -> BluetoothProximityNotification {
         return BluetoothProximityNotification(settings: settings,
                                               stateChangedHandler: stateChangedHandler,
                                               dispatchQueue: dispatchQueue,
                                               centralManager: centralManagerMock,
-                                              peripheralManager: BluetoothPeripheralManagerMock() )
+                                              peripheralManager: peripheralManagerMock)
     }
     
     func testStartCallsStateChangedHandler() {
@@ -39,9 +40,11 @@ class BluetoothProximityNotificationTests: XCTestCase {
         
         let dispatchQueue = DispatchQueue(label: UUID().uuidString)
         let centralManagerMock = BluetoothCentralManagerMock(dispatchQueue: dispatchQueue)
+        let peripheralManagerMock = BluetoothPeripheralManagerMock(dispatchQueue: dispatchQueue)
         let bluetoothProximityNotification = makeBluetoothProximityNotification(stateChangedHandler: stateChangedHandler,
                                                                                 dispatchQueue: dispatchQueue,
-                                                                                centralManagerMock: centralManagerMock)
+                                                                                centralManagerMock: centralManagerMock,
+                                                                                peripheralManagerMock: peripheralManagerMock)
         
         // When
         bluetoothProximityNotification.start(proximityPayloadProvider: { return ProximityPayload(data: Data(Array(0..<16))) },
@@ -62,8 +65,10 @@ class BluetoothProximityNotificationTests: XCTestCase {
         
         let dispatchQueue = DispatchQueue(label: UUID().uuidString)
         let centralManagerMock = BluetoothCentralManagerMock(dispatchQueue: dispatchQueue)
+        let peripheralManagerMock = BluetoothPeripheralManagerMock(dispatchQueue: dispatchQueue)
         let bluetoothProximityNotification = makeBluetoothProximityNotification(dispatchQueue: dispatchQueue,
-                                                                                centralManagerMock: centralManagerMock)
+                                                                                centralManagerMock: centralManagerMock,
+                                                                                peripheralManagerMock: peripheralManagerMock)
         
         let timestamp = Date()
         let rssi = -60
@@ -79,6 +84,7 @@ class BluetoothProximityNotificationTests: XCTestCase {
             if let metadata = metadata {
                 XCTAssertEqual(Int(txPowerLevel), metadata.txPowerLevel)
                 XCTAssertEqual(rssi, metadata.rawRSSI)
+                XCTAssertEqual(rssi - Int(txPowerLevel) - Int(self.settings.rxCompensationGain), metadata.calibratedRSSI)
             }
             expectation.fulfill()
         }
@@ -87,7 +93,10 @@ class BluetoothProximityNotificationTests: XCTestCase {
         bluetoothProximityNotification.start(proximityPayloadProvider: { return proximityPayload },
                                              proximityInfoUpdateHandler: proximityInfoUpdateHandler,
                                              identifierFromProximityPayload: { _ in return Data() })
-        centralManagerMock.scheduleScan(peripheral: BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: timestamp, rssi: rssi),
+        centralManagerMock.scheduleScan(peripheral: BluetoothPeripheral(peripheralIdentifier: UUID(),
+                                                                        timestamp: timestamp,
+                                                                        rssi: rssi,
+                                                                        isRSSIFromPayload: false),
                                         payload: BluetoothProximityPayload(payload: proximityPayload, txPowerLevel: txPowerLevel),
                                         isPayloadAdvertised: true,
                                         after: 1.0)
@@ -106,11 +115,13 @@ class BluetoothProximityNotificationTests: XCTestCase {
         
         let dispatchQueue = DispatchQueue(label: UUID().uuidString)
         let centralManagerMock = BluetoothCentralManagerMock(dispatchQueue: dispatchQueue)
+        let peripheralManagerMock = BluetoothPeripheralManagerMock(dispatchQueue: dispatchQueue)
         let bluetoothProximityNotification = makeBluetoothProximityNotification(dispatchQueue: dispatchQueue,
-                                                                                centralManagerMock: centralManagerMock)
+                                                                                centralManagerMock: centralManagerMock,
+                                                                                peripheralManagerMock: peripheralManagerMock)
         
         let payload = BluetoothProximityPayload(payload: proximityPayload, txPowerLevel: 8)
-        let peripheral = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 0)
+        let peripheral = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 0, isRSSIFromPayload: false)
         
         let expectation = XCTestExpectation(description: "proximityInfoUpdateHandler is called exactly three times")
         expectation.assertForOverFulfill = true
@@ -142,8 +153,10 @@ class BluetoothProximityNotificationTests: XCTestCase {
         
         let dispatchQueue = DispatchQueue(label: UUID().uuidString)
         let centralManagerMock = BluetoothCentralManagerMock(dispatchQueue: dispatchQueue)
+        let peripheralManagerMock = BluetoothPeripheralManagerMock(dispatchQueue: dispatchQueue)
         let bluetoothProximityNotification = makeBluetoothProximityNotification(dispatchQueue: dispatchQueue,
-                                                                                centralManagerMock: centralManagerMock)
+                                                                                centralManagerMock: centralManagerMock,
+                                                                                peripheralManagerMock: peripheralManagerMock)
         
         let timestamp = Date()
         let rssi = -60
@@ -159,6 +172,7 @@ class BluetoothProximityNotificationTests: XCTestCase {
             if let metadata = metadata {
                 XCTAssertEqual(Int(txPowerLevel), metadata.txPowerLevel)
                 XCTAssertEqual(rssi, metadata.rawRSSI)
+                XCTAssertEqual(rssi - Int(txPowerLevel) - Int(self.settings.rxCompensationGain), metadata.calibratedRSSI)
             }
             expectation.fulfill()
         }
@@ -167,7 +181,10 @@ class BluetoothProximityNotificationTests: XCTestCase {
         bluetoothProximityNotification.start(proximityPayloadProvider: { return proximityPayload },
                                              proximityInfoUpdateHandler: proximityInfoUpdateHandler,
                                              identifierFromProximityPayload: { _ in return Data() })
-        centralManagerMock.scheduleScan(peripheral: BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: timestamp, rssi: rssi),
+        centralManagerMock.scheduleScan(peripheral: BluetoothPeripheral(peripheralIdentifier: UUID(),
+                                                                        timestamp: timestamp,
+                                                                        rssi: rssi,
+                                                                        isRSSIFromPayload: false),
                                         payload: BluetoothProximityPayload(payload: proximityPayload, txPowerLevel: txPowerLevel),
                                         isPayloadAdvertised: false,
                                         after: 1.0)
@@ -186,11 +203,13 @@ class BluetoothProximityNotificationTests: XCTestCase {
         
         let dispatchQueue = DispatchQueue(label: UUID().uuidString)
         let centralManagerMock = BluetoothCentralManagerMock(dispatchQueue: dispatchQueue)
+        let peripheralManagerMock = BluetoothPeripheralManagerMock(dispatchQueue: dispatchQueue)
         let bluetoothProximityNotification = makeBluetoothProximityNotification(dispatchQueue: dispatchQueue,
-                                                                                centralManagerMock: centralManagerMock)
+                                                                                centralManagerMock: centralManagerMock,
+                                                                                peripheralManagerMock: peripheralManagerMock)
         
         let payload = BluetoothProximityPayload(payload: proximityPayload, txPowerLevel: 8)
-        let peripheral = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 0)
+        let peripheral = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 0, isRSSIFromPayload: false)
         
         let expectation = XCTestExpectation(description: "proximityInfoUpdateHandler is called exactly four times")
         expectation.assertForOverFulfill = true
@@ -212,5 +231,51 @@ class BluetoothProximityNotificationTests: XCTestCase {
         // Then
         wait(for: [expectation], timeout: 10.0)
         sleep(5) // Wait a few seconds to check that expectation is not fulfilled again
+    }
+
+    func testIncomingWriteRequestFromPeripheralWithoutAdvertiserCallsProximityInfoUpdateHandler() {
+        // Given
+        guard let proximityPayload = ProximityPayload(data: Data(Array(0..<16))) else {
+            XCTFail("Could not initialize ProximityPayload")
+            return
+        }
+
+        let dispatchQueue = DispatchQueue(label: UUID().uuidString)
+        let centralManagerMock = BluetoothCentralManagerMock(dispatchQueue: dispatchQueue)
+        let peripheralManagerMock = BluetoothPeripheralManagerMock(dispatchQueue: dispatchQueue)
+        let bluetoothProximityNotification = makeBluetoothProximityNotification(dispatchQueue: dispatchQueue,
+                                                                                centralManagerMock: centralManagerMock,
+                                                                                peripheralManagerMock: peripheralManagerMock)
+        let timestamp = Date()
+        let rssi = -60
+        let txPowerLevel = Int8(14)
+        let payload = BluetoothProximityPayload(payload: proximityPayload, txPowerLevel: txPowerLevel)
+        let peripheral = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: timestamp, rssi: rssi, isRSSIFromPayload: true)
+
+        let expectation = XCTestExpectation(description: "proximityInfoUpdateHandler is called exactly once")
+        expectation.assertForOverFulfill = true
+        let proximityInfoUpdateHandler: ProximityInfoUpdateHandler = { proximity in
+            XCTAssertEqual(proximityPayload, proximity.payload)
+            XCTAssertEqual(timestamp, proximity.timestamp)
+            let metadata = proximity.metadata as? BluetoothProximityMetadata
+            XCTAssertNotNil(metadata)
+            if let metadata = metadata {
+                XCTAssertEqual(Int(txPowerLevel), metadata.txPowerLevel)
+                XCTAssertEqual(rssi, metadata.rawRSSI)
+                XCTAssertEqual(rssi - Int(self.settings.txCompensationGain), metadata.calibratedRSSI)
+            }
+            expectation.fulfill()
+        }
+
+        // When
+        bluetoothProximityNotification.start(proximityPayloadProvider: { return proximityPayload },
+                                             proximityInfoUpdateHandler: proximityInfoUpdateHandler,
+                                             identifierFromProximityPayload: { _ in return Data() })
+        peripheralManagerMock.scheduleIncomingWriteRequest(from: peripheral,
+                                                           payload: payload,
+                                                           after: 1.0)
+
+        // Then
+        wait(for: [expectation], timeout: 10.0)
     }
 }

@@ -15,11 +15,11 @@ class CacheTests: XCTestCase {
     
     func testSetValueSucceeds() {
         // Given
-        let cache = Cache<UUID, BluetoothScannedPeripheral>()
+        let cache = Cache<UUID, BluetoothPeripheral>()
         let firstKey = UUID()
         let secondKey = UUID()
-        let firstValue = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 12)
-        let secondValue = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 34)
+        let firstValue = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 12, isRSSIFromPayload: false)
+        let secondValue = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 34, isRSSIFromPayload: false)
         
         // When
         cache[firstKey] = firstValue
@@ -34,11 +34,11 @@ class CacheTests: XCTestCase {
     
     func testRemoveValueSucceeds() {
         // Given
-        let cache = Cache<UUID, BluetoothScannedPeripheral>()
+        let cache = Cache<UUID, BluetoothPeripheral>()
         let firstKey = UUID()
         let secondKey = UUID()
-        let firstValue = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 12)
-        let secondValue = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 34)
+        let firstValue = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 12, isRSSIFromPayload: false)
+        let secondValue = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 34, isRSSIFromPayload: false)
         cache[firstKey] = firstValue
         cache[secondKey] = secondValue
         
@@ -53,11 +53,11 @@ class CacheTests: XCTestCase {
     
     func testRemoveAllValuesSucceeds() {
         // Given
-        let cache = Cache<UUID, BluetoothScannedPeripheral>()
+        let cache = Cache<UUID, BluetoothPeripheral>()
         let firstKey = UUID()
         let secondKey = UUID()
-        let firstValue = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 12)
-        let secondValue = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 34)
+        let firstValue = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 12, isRSSIFromPayload: false)
+        let secondValue = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 34, isRSSIFromPayload: false)
         cache[firstKey] = firstValue
         cache[secondKey] = secondValue
         
@@ -71,11 +71,11 @@ class CacheTests: XCTestCase {
     
     func testExpiredValueReturnsNil() {
         // Given
-        let cache = Cache<UUID, BluetoothScannedPeripheral>(expirationDelay: 5)
+        let cache = Cache<UUID, BluetoothPeripheral>(expirationDelay: 5)
         let expiredKey = UUID()
         let validKey = UUID()
-        let expiredValue = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 12)
-        let validValue = BluetoothScannedPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 34)
+        let expiredValue = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 12, isRSSIFromPayload: false)
+        let validValue = BluetoothPeripheral(peripheralIdentifier: UUID(), timestamp: Date(), rssi: 34, isRSSIFromPayload: false)
         cache[expiredKey] = expiredValue
         
         // When

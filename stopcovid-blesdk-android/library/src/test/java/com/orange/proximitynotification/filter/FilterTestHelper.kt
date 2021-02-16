@@ -5,12 +5,12 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/28 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/28 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.filter
 
-import java.util.*
+import java.util.Date
 
 internal fun timestampedRssi(timestamp: Date = Date(), rssi: Int = 0) = TimestampedRssi(
     id = "any",

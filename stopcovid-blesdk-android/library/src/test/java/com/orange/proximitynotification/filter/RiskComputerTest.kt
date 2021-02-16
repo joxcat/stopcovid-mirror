@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.filter
@@ -14,7 +14,7 @@ import com.google.common.truth.Truth.assertThat
 import com.googlecode.zohhak.api.runners.ZohhakRunner
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.*
+import java.util.Date
 import kotlin.math.ln
 
 @RunWith(ZohhakRunner::class)

@@ -35,6 +35,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         LocalizationsManager.shared.start()
         InfoCenterManager.shared.start()
         KeyFiguresManager.shared.start()
+        VaccinationCenterManager.shared.start()
         let storageManager: StorageManager = StorageManager()
         AttestationsManager.shared.start(storageManager: storageManager)
         VenuesManager.shared.start(storageManager: storageManager)
@@ -76,8 +77,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             NotificationsManager.shared.triggerRestartNotification()
         }, didReceiveProximityHandler: {
             self.triggerStatusRequestIfNeeded()
-        }, didSaveProximity: { proximity in
-        })
+        }, didSaveProximity: { _ in })
         ParametersManager.shared.start()
         isAppAlreadyInstalled = true
         rootCoordinator.start()

@@ -16,6 +16,7 @@ final class ChartsValueFormatter: IAxisValueFormatter {
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
         let formatter: NumberFormatter = NumberFormatter()
         formatter.maximumFractionDigits = 2
+        formatter.minimumIntegerDigits = 1
         let string: String
         if value < 1_000.0 {
             string = formatter.string(from: NSNumber(value: value.shrinkedValue()))!

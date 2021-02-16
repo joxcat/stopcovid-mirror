@@ -45,6 +45,7 @@ public final class ParametersManager: NSObject {
     
     public var displayIsolation: Bool { valueFor(name: "app.displayIsolation") as? Bool ?? false }
     public var displayVaccination: Bool { valueFor(name: "app.displayVaccination") as? Bool ?? false }
+    public var vaccinationCentersCount: Int { valueFor(name: "app.vaccinationCentersCount") as? Int ?? 5 }
     public var isolationDuration: Double { valueFor(name: "app.isolation.duration") as? Double ?? 604800.0 }
     public var postIsolationDuration: Double { valueFor(name: "app.postIsolation.duration") as? Double ?? 604800.0 }
     
@@ -183,7 +184,9 @@ public final class ParametersManager: NSObject {
         RBManager.shared.positiveSampleSpan = positiveSampleSpan
         if RBManager.shared.isProximityActivated {
             RBManager.shared.stopProximityDetection()
-            RBManager.shared.startProximityDetection()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                RBManager.shared.startProximityDetection()
+            }
         }
         refreshBackgroundFetchInterval()
     }

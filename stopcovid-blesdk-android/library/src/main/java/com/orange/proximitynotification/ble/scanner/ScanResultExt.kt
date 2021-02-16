@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble.scanner
@@ -13,15 +13,14 @@ package com.orange.proximitynotification.ble.scanner
 import android.os.ParcelUuid
 import com.orange.proximitynotification.tools.nanosTimestampToDate
 import no.nordicsemi.android.support.v18.scanner.ScanResult
-import java.util.*
 
-internal fun ScanResult.toBleScannedDevice(serviceUuid: UUID): BleScannedDevice =
+internal fun ScanResult.toBleScannedDevice(serviceUuid: ParcelUuid): BleScannedDevice =
     BleScannedDevice(
         device = device,
         rssi = rssi,
-        serviceData = scanRecord?.serviceData?.get(ParcelUuid(serviceUuid)),
+        serviceData = scanRecord?.serviceData?.get(serviceUuid),
         timestamp = timestampNanos.nanosTimestampToDate()
     )
 
-internal fun List<ScanResult>.toBleScannedDevices(serviceUuid: UUID): List<BleScannedDevice> =
+internal fun List<ScanResult>.toBleScannedDevices(serviceUuid: ParcelUuid): List<BleScannedDevice> =
     map { it.toBleScannedDevice(serviceUuid) }

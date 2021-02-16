@@ -71,28 +71,24 @@ final class KeyFigureDetailController: CVTableViewController {
         KeyFiguresManager.shared.removeObserver(self)
     }
     
-    override func reloadUI(animated: Bool = false, completion: (() -> ())? = nil) {
-        super.reloadUI(animated: animated, completion: completion)
-    }
-    
     override func createRows() -> [CVRow] {
         var rows: [CVRow] = []
         rows.append(createKeyFigureRow())
         rows.append(contentsOf: createChartRows())
         guard !keyFigure.learnMore.isEmpty else { return rows }
-        let learnMoreSectionRow: CVRow =  CVRow(title: "keyFigureDetailController.section.learnmore.title".localized,
-                                          xibName: .textCell,
-                                          theme: CVRow.Theme(topInset: 30.0,
-                                                             bottomInset: 12.0,
-                                                             textAlignment: .natural,
-                                                             titleFont: { Appearance.Cell.Text.valueFont }))
+        let learnMoreSectionRow: CVRow = CVRow(title: "keyFigureDetailController.section.learnmore.title".localized,
+                                               xibName: .textCell,
+                                               theme: CVRow.Theme(topInset: 30.0,
+                                                                  bottomInset: 12.0,
+                                                                  textAlignment: .natural,
+                                                                  titleFont: { Appearance.Cell.Text.valueFont }))
         rows.append(learnMoreSectionRow)
         let learnMoreRow: CVRow = CVRow(subtitle: keyFigure.learnMore,
                                         xibName: .standardCardCell,
-                                        theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
-                                                            topInset: 0.0,
-                                                            bottomInset: 20.0,
-                                                            textAlignment: .natural))
+                                        theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                                           topInset: 0.0,
+                                                           bottomInset: 20.0,
+                                                           textAlignment: .natural))
         rows.append(learnMoreRow)
         return rows
     }
@@ -125,28 +121,40 @@ final class KeyFigureDetailController: CVTableViewController {
         let chartDatas: [KeyFigureChartData] = KeyFiguresManager.shared.generateChartData(from: keyFigure)
         if keyFigure.displayOnSameChart {
             let chartsRow: CVRow = CVRow(xibName: .keyFigureChartCell,
-                                        theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                         theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
                                                             topInset: 0.0,
                                                             bottomInset: 20.0,
                                                             textAlignment: .natural),
-                                        associatedValue: chartDatas,
-                                        selectionActionWithCell: { [weak self] cell in
-                                          self?.didTouchSharingFor(cell: cell)
-                                        })
+                                         associatedValue: [KeyFigureChartData](chartDatas.prefix(2)),
+                                         selectionActionWithCell: { [weak self] cell in
+                                            self?.didTouchSharingFor(cell: cell)
+                                         })
             rows.append(chartsRow)
         } else {
-            let chartRows: [CVRow] = chartDatas.map {
+            let chartRows: [CVRow] = chartDatas.filter { !$0.isAverage }.map {
                 CVRow(xibName: .keyFigureChartCell,
-                      theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
-                                          topInset: 0.0,
-                                          bottomInset: 20.0,
-                                          textAlignment: .natural),
+                      theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                         topInset: 0.0,
+                                         bottomInset: 20.0,
+                                         textAlignment: .natural),
                       associatedValue: [$0],
                       selectionActionWithCell: { [weak self] cell in
                         self?.didTouchSharingFor(cell: cell)
                       })
             }
             rows.append(contentsOf: chartRows)
+        }
+        if let chartData = chartDatas.filter({ $0.isAverage }).first {
+            let chartRow: CVRow = CVRow(xibName: .keyFigureChartCell,
+                                        theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                                           topInset: 0.0,
+                                                           bottomInset: 20.0,
+                                                           textAlignment: .natural),
+                                        associatedValue: [chartData],
+                                        selectionActionWithCell: { [weak self] cell in
+                                            self?.didTouchSharingFor(cell: cell)
+                                        })
+            rows.append(chartRow)
         }
         
         return rows
@@ -187,6 +195,14 @@ final class KeyFigureDetailController: CVTableViewController {
 extension KeyFigureDetailController: KeyFiguresChangesObserver {
 
     func keyFiguresDidUpdate() {
+        reloadNextToKeyFiguresUpdate()
+    }
+    
+    func postalCodeDidUpdate(_ postalCode: String?) {
+        reloadNextToKeyFiguresUpdate()
+    }
+    
+    private func reloadNextToKeyFiguresUpdate() {
         updateRightBarButtonItem()
         reloadUI(animated: true)
     }

@@ -5,12 +5,12 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/05/26 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/05/26 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.filter
 
-import java.util.*
+import java.util.Date
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.min

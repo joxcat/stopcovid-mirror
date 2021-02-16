@@ -5,13 +5,15 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/06/04 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/06/04 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.tools
 
-class CSVReader(private val fileName: String,
-                private val delimiter: String = ";") {
+class CSVReader(
+    private val fileName: String,
+    private val delimiter: String = ";"
+) {
 
     fun readLines(valuesAction: (List<String>) -> Unit) {
 

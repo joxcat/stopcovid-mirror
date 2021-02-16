@@ -1052,6 +1052,10 @@ extension HomeViewController: KeyFiguresChangesObserver {
     func keyFiguresDidUpdate() {
         reloadUI(animated: true)
     }
+    
+    func postalCodeDidUpdate(_ postalCode: String?) {
+        reloadUI(animated: true)
+    }
 
 }
 

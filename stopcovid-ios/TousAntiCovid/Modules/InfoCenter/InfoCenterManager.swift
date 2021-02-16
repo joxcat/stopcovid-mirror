@@ -122,7 +122,12 @@ extension InfoCenterManager {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
         session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: InfoCenterConstant.lastUpdatedAtUrl) { data, response, error in
-            guard let data = data else { return }
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    completion(false, false, 0, false)
+                }
+                return
+            }
             do {
                 let lastUpdatedAtJson: InfoLastUpdatedAt = try JSONDecoder().decode(InfoLastUpdatedAt.self, from: data)
                 let areJsonUpdatesAvailable: Bool = self.lastUpdatedAt < lastUpdatedAtJson.lastUpdatedAt
@@ -145,7 +150,10 @@ extension InfoCenterManager {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
         session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: InfoCenterConstant.tagsUrl) { data, response, error in
-            guard let data = data else { return }
+            guard let data = data else {
+                completion()
+                return
+            }
             do {
                 self.tags = try JSONDecoder().decode([InfoTag].self, from: data)
                 try data.write(to: self.localTagsUrl())
@@ -165,7 +173,10 @@ extension InfoCenterManager {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
         session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: InfoCenterConstant.infoCenterUrl) { data, response, error in
-            guard let data = data else { return }
+            guard let data = data else {
+                completion()
+                return
+            }
             do {
                 self.rawInfo = try JSONDecoder().decode([Info].self, from: data)
                 try data.write(to: self.localInfoCenterUrl())
@@ -186,7 +197,10 @@ extension InfoCenterManager {
         let session: URLSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
         session.configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         let dataTask: URLSessionDataTask = session.dataTask(with: url) { data, response, error in
-            guard let data = data else { return }
+            guard let data = data else {
+                completion()
+                return
+            }
             do {
                 let localUrl: URL = self.localLabelsUrl(for: languageCode)
                 guard let labelsDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String] else { return }

@@ -35,9 +35,7 @@ final class IsolationManager {
     
     // MARK: - Public workable values -
     var currentState: State? { State(rawValue: isolationState ?? "") }
-    var currentRecommendationState: RecommendationState {
-        return calculateRecommendationState()
-    }
+    var currentRecommendationState: RecommendationState { calculateRecommendationState() }
     
     private var storageManager: StorageManager!
     private var canTriggerUpdateNotif: Bool = true
@@ -147,9 +145,7 @@ final class IsolationManager {
         return date?.roundingToBeginningOfDay()
     }
     
-    var stillHavingFeverNotificationTriggerDate: Date {
-        currentIsolationEndDate ?? Date()
-    }
+    var stillHavingFeverNotificationTriggerDate: Date { currentIsolationEndDate ?? Date() }
     
     // MARK: - Contact case dates calculated values -
     private var contactCaseIsolationContactCalculatedDate: Date {

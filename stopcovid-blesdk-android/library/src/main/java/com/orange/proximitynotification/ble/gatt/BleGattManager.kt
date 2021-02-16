@@ -5,23 +5,44 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/04/27 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/04/27 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble.gatt
 
 import android.bluetooth.BluetoothDevice
 import com.orange.proximitynotification.ble.BleSettings
+import com.orange.proximitynotification.tools.Result
 
-interface BleGattManager {
+internal class RemoteRssiAndPayload(
+    val rssi: Int,
+    val payload: ByteArray
+)
+
+internal data class BleGattConnectionException(
+    override val cause: Throwable? = null
+) : Exception(cause)
+
+internal interface BleGattManager {
     val settings: BleSettings
 
     interface Callback {
-        suspend fun onWritePayloadRequest(device: BluetoothDevice, value: ByteArray)
+        enum class PayloadReceivedStatus {
+            INVALID_PAYLOAD,
+            UNKNOWN_DEVICE_REQUEST_RSSI_NEEDED,
+            PAYLOAD_HANDLED
+        }
+
+        fun onPayloadReceived(device: BluetoothDevice, payload: ByteArray): PayloadReceivedStatus
     }
 
     fun start(callback: Callback): Boolean
     fun stop()
 
-    suspend fun requestRemoteRssi(device: BluetoothDevice, close: Boolean): Int?
+    suspend fun requestRemoteRssi(device: BluetoothDevice): Result<Int>
+    suspend fun exchangePayload(
+        device: BluetoothDevice,
+        value: ByteArray,
+        shouldReadRemotePayload: Boolean
+    ): Result<RemoteRssiAndPayload?>
 }

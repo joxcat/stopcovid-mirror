@@ -47,6 +47,11 @@ struct KeyFigure: Codable {
         
     }
     
+    enum ChartKind: String, Codable {
+        case bars
+        case line
+    }
+    
     let labelKey: String
     let category: Category
     let valueGlobalToDisplay: String
@@ -56,19 +61,25 @@ struct KeyFigure: Codable {
     let extractDate: Int
     let trend: Trend?
     let valuesDepartments: [KeyFigureDepartment]?
-    let series: [KeyFigureSeriesItem]?
     let displayOnSameChart: Bool
+    let avgSeries: [KeyFigureSeriesItem]?
+    let limitLine: Double?
+    
+    private let series: [KeyFigureSeriesItem]?
+    private let chartType: ChartKind?
     
     var label: String { "\(labelKey).label".localized.trimmingCharacters(in: .whitespaces) }
     var shortLabel: String { "\(labelKey).shortLabel".localized.trimmingCharacters(in: .whitespaces) }
     var description: String { "\(labelKey).description".localized.trimmingCharacters(in: .whitespaces) }
     var learnMore: String { "\(labelKey).learnMore".localizedOrEmpty.trimmingCharacters(in: .whitespaces) }
+    var limitLineLabel: String { "\(labelKey).limitLine".localizedOrEmpty.trimmingCharacters(in: .whitespaces) }
     var color: UIColor {
         let colorCode: String = UIColor.isDarkMode ? "\(labelKey).colorCode.dark".localized : "\(labelKey).colorCode.light".localized
         return UIColor(hexString: colorCode)
     }
     var currentTrend: Trend { trend ?? .same }
     var ascendingSeries: [KeyFigureSeriesItem]? { series?.sorted { $0.date < $1.date } }
+    var chartKind: ChartKind { chartType ?? .line }
     
     var formattedDate: String {
         switch category {

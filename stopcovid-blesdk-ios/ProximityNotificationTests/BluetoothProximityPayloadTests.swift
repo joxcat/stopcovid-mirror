@@ -35,7 +35,7 @@ class BluetoothProximityPayloadTests: XCTestCase {
     
     func testInitWithDataSucceeds() {
         // Given
-        let data = Data(Array(0..<24))
+        let data = Data(Array(0..<18))
         
         // When
         let bluetoothProximityPayload = BluetoothProximityPayload(data: data)
@@ -43,10 +43,29 @@ class BluetoothProximityPayloadTests: XCTestCase {
         // Then
         XCTAssertNotNil(bluetoothProximityPayload)
         if let bluetoothProximityPayload = bluetoothProximityPayload {
-            XCTAssertEqual(18, bluetoothProximityPayload.data.count)
+            XCTAssertEqual(data, bluetoothProximityPayload.data)
             XCTAssertEqual(data.prefix(16), bluetoothProximityPayload.payload.data)
             XCTAssertEqual(16, bluetoothProximityPayload.version)
             XCTAssertEqual(17, bluetoothProximityPayload.txPowerLevel)
+            XCTAssertNil(bluetoothProximityPayload.rssi)
+        }
+    }
+
+    func testInitWithDataContainingRSSISucceeds() {
+        // Given
+        let data = Data(Array(0..<19))
+
+        // When
+        let bluetoothProximityPayload = BluetoothProximityPayload(data: data)
+
+        // Then
+        XCTAssertNotNil(bluetoothProximityPayload)
+        if let bluetoothProximityPayload = bluetoothProximityPayload {
+            XCTAssertEqual(data, bluetoothProximityPayload.data)
+            XCTAssertEqual(data.prefix(16), bluetoothProximityPayload.payload.data)
+            XCTAssertEqual(16, bluetoothProximityPayload.version)
+            XCTAssertEqual(17, bluetoothProximityPayload.txPowerLevel)
+            XCTAssertEqual(18, bluetoothProximityPayload.rssi)
         }
     }
     

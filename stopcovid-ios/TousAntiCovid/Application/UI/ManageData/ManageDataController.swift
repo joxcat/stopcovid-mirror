@@ -287,6 +287,7 @@ final class ManageDataController: CVTableViewController {
             KeyFiguresManager.shared.currentPostalCode = nil
             AttestationsManager.shared.clearAllData()
             VenuesManager.shared.clearAllData()
+            VaccinationCenterManager.shared.clearAllData()
             NotificationCenter.default.post(name: .changeAppState, object: RootCoordinator.State.onboarding, userInfo: nil)
         }
     }

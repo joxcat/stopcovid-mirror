@@ -33,12 +33,8 @@ final class VenuesManager: NSObject {
     
     static let shared: VenuesManager = VenuesManager()
     
-    var isVenuesRecordingActivated: Bool {
-        ParametersManager.shared.displayRecordVenues
-    }
-    var isPrivateEventsActivated: Bool {
-        ParametersManager.shared.displayPrivateEvent
-    }
+    var isVenuesRecordingActivated: Bool { ParametersManager.shared.displayRecordVenues }
+    var isPrivateEventsActivated: Bool { ParametersManager.shared.displayPrivateEvent }
     var venuesQrCodes: [VenueQrCode] { storageManager?.venuesQrCodes() ?? [] }
     var isAtWarningRisk: Bool { lastWarningRiskReceivedDate != nil }
     var lastWarningRiskReceivedDate: Date? {
@@ -143,72 +139,40 @@ extension VenuesManager {
 // MARK: - Deeplinking -
 extension VenuesManager {
 
+    func isVenueUrlValid(_ url: URL) -> Bool { parseUrlComponents(url) != nil }
+    
     func isVenueUrlExpired(_ url: URL) -> Bool {
-        guard url.host == "tac.gouv.fr" else { return true }
-        let path: String = String(url.path.dropFirst(1))
-        let info: [String] = path.components(separatedBy: "/")
-
-        // Values
-        guard let qrType = Int(info.item(at: 0) ?? "") else { return true }
-        guard let uuid = info.item(at: 1) else { return true }
-        guard let venueType = info.item(at: 2)?.uppercased() else { return true }
-        let venueCategory: Int = Int(info.item(at: 3) ?? "") ?? 0
-        let venueCapacity: Int = Int(info.item(at: 4) ?? "") ?? 0
-        let timestamp: Double = Double(info.item(at: 5) ?? "") ?? Date().timeIntervalSince1970
-
-        // Conditions
-        guard [0, 1].contains(qrType) else { return true }
-        guard uuid.isUuidCode else { return true }
-        guard (1...3).contains(venueType.count) else { return true }
-        guard (0...5).contains(venueCategory) else { return true }
-        guard (0...).contains(venueCapacity) else { return true }
+        guard let urlComponents = parseUrlComponents(url) else { return true }
         
         let validityDuration: Double = Double(ParametersManager.shared.venuesRetentionPeriod) * 24.0 * 3600.0
-        return Date().timeIntervalSince1970 - timestamp >= validityDuration
+        return Date().timeIntervalSince1970 - urlComponents.timestamp >= validityDuration
     }
     
     @discardableResult
     func processVenueUrl(_ url: URL) -> Bool {
-        guard url.host == "tac.gouv.fr" else { return false }
-        let path: String = String(url.path.dropFirst(1))
-        let info: [String] = path.components(separatedBy: "/")
-
-        // Values
-        guard let qrType = Int(info.item(at: 0) ?? "") else { return false }
-        guard let uuid = info.item(at: 1) else { return false }
-        guard let venueType = info.item(at: 2)?.uppercased() else { return false }
-        let venueCategory: Int = Int(info.item(at: 3) ?? "") ?? 0
-        let venueCapacity: Int = Int(info.item(at: 4) ?? "") ?? 0
-        let timestamp: Double = Double(info.item(at: 5) ?? "") ?? Date().timeIntervalSince1970
-
-        // Conditions
-        guard [0, 1].contains(qrType) else { return false }
-        guard uuid.isUuidCode else { return false }
-        guard (1...3).contains(venueType.count) else { return false }
-        guard (0...5).contains(venueCategory) else { return false }
-        guard (0...).contains(venueCapacity) else { return false }
+        guard let urlComponents = parseUrlComponents(url) else { return false }
         
-        let date: Date = Date(timeIntervalSince1970: timestamp)
+        let date: Date = Date(timeIntervalSince1970: urlComponents.timestamp)
         let nowRoundedNtpTimestamp: Int = date.roundedTimeIntervalSince1900(interval: ParametersManager.shared.venuesTimestampRoundingInterval)
         
         let id: String
-        if venueType == ParametersManager.shared.privateEventVenueType {
-            id = "\(uuid)"
+        if urlComponents.venueType == ParametersManager.shared.privateEventVenueType {
+            id = "\(urlComponents.uuid)"
         } else {
-            id = "\(uuid)\(nowRoundedNtpTimestamp)"
+            id = "\(urlComponents.uuid)\(nowRoundedNtpTimestamp)"
         }
 
         let maxSalt: Int = ParametersManager.shared.venuesSalt
         let salt: Int = (1...maxSalt).randomElement() ?? 0
-        let payload: String = "\(salt)\(uuid)".sha256()
+        let payload: String = "\(salt)\(urlComponents.uuid)".sha256()
 
         let venueQrCode: VenueQrCode = VenueQrCode(id: id,
-                                                   uuid: uuid,
-                                                   qrType: qrType,
-                                                   venueType: venueType,
+                                                   uuid: urlComponents.uuid,
+                                                   qrType: urlComponents.qrType,
+                                                   venueType: urlComponents.venueType,
                                                    ntpTimestamp: nowRoundedNtpTimestamp,
-                                                   venueCategory: venueCategory > 0 ? venueCategory : nil,
-                                                   venueCapacity: venueCapacity > 0 ? venueCapacity : nil,
+                                                   venueCategory: urlComponents.venueCategory > 0 ? urlComponents.venueCategory : nil,
+                                                   venueCapacity: urlComponents.venueCapacity > 0 ? urlComponents.venueCapacity : nil,
                                                    payload: payload)
         storageManager.saveVenueQrCode(venueQrCode)
         return true
@@ -233,6 +197,29 @@ extension VenuesManager {
         currentQrCodeDate = date
         guard let url = URL(string: urlString) else { return }
         processVenueUrl(url)
+    }
+    
+    private func parseUrlComponents(_ url: URL) -> (qrType: Int, uuid: String, venueType: String, venueCategory: Int, venueCapacity: Int, timestamp: Double)? {
+        guard url.host == "tac.gouv.fr" else { return nil }
+        let path: String = String(url.path.dropFirst(1))
+        let info: [String] = path.components(separatedBy: "/")
+
+        // Values
+        guard let qrType = Int(info.item(at: 0) ?? "") else { return nil }
+        guard let uuid = info.item(at: 1) else { return nil }
+        guard let venueType = info.item(at: 2)?.uppercased() else { return nil }
+        let rawVenueCategory: Int? = info.item(at: 3) == "-" ? 0 : Int(info.item(at: 3) ?? "")
+        let rawVenueCapacity: Int? = info.item(at: 4) == "-" ? 0 : Int(info.item(at: 4) ?? "")
+        let timestamp: Double = Double(info.item(at: 5) ?? "") ?? Date().timeIntervalSince1970
+
+        // Conditions
+        guard [0, 1].contains(qrType) else { return nil }
+        guard uuid.isUuidCode else { return nil }
+        guard (1...3).contains(venueType.count) else { return nil }
+        guard let venueCategory = rawVenueCategory, (0...5).contains(venueCategory) else { return nil }
+        guard let venueCapacity = rawVenueCapacity, (0...).contains(venueCapacity) else { return nil }
+        guard "\(Int(timestamp))".count == "\(Int(Date().timeIntervalSince1970))".count else { return nil }
+        return (qrType, uuid, venueType, venueCategory, venueCapacity, timestamp)
     }
 
 }

@@ -5,7 +5,7 @@
  *
  * Authors
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Created by Orange / Date - 2020/06/04 - for the STOP-COVID project
+ * Created by Orange / Date - 2020/06/04 - for the TOUS-ANTI-COVID project
  */
 
 package com.orange.proximitynotification.ble.scanner
@@ -59,6 +59,31 @@ class BleScannerImplTest {
 
         // When
         val result = bleScanner.start(mock())
+
+        // Then
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun startForDevice_should_return_true() {
+
+        // Given
+
+        // When
+        val result = bleScanner.startForDevice("01:02:03:AB:CD:EF", mock())
+
+        // Then
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun startForDevice_given_exception_should_return_false() {
+
+        // Given
+        doThrow(RuntimeException::class).whenever(bluetoothScanner).startScan(any(), any(), any())
+
+        // When
+        val result = bleScanner.startForDevice("01:02:03:AB:CD:EF", mock())
 
         // Then
         assertThat(result).isFalse()

@@ -23,8 +23,12 @@ struct BluetoothProximityPayload {
     var txPowerLevel: Int8 {
         return Int8(bitPattern: data[17])
     }
-    
-    static let byteCount = ProximityPayload.byteCount + 2
+
+    var rssi: Int8? {
+        return data.count >= BluetoothProximityPayload.minimumByteCount + 1 ? Int8(bitPattern: data[18]) : nil
+    }
+
+    static let minimumByteCount = ProximityPayload.byteCount + 2
     
     static let currentVersion = Int8(1)
     
@@ -36,12 +40,12 @@ struct BluetoothProximityPayload {
     }
     
     init?(data: Data) {
-        guard data.count >= BluetoothProximityPayload.byteCount,
+        guard data.count >= BluetoothProximityPayload.minimumByteCount,
             let payload = ProximityPayload(data: data.prefix(ProximityPayload.byteCount)) else {
                 return nil
         }
         
-        self.data = data.prefix(BluetoothProximityPayload.byteCount)
+        self.data = data
         self.payload = payload
     }
 }
