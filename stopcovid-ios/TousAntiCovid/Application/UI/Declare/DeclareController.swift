@@ -61,12 +61,13 @@ final class DeclareController: CVTableViewController {
     private func commonRows() -> [CVRow] {
         var rows: [CVRow] = []
         if RBManager.shared.isRegistered {
-            let textRow: CVRow = CVRow(title: "sickController.message.testedPositive.title".localized,
-                                       subtitle: "sickController.message.testedPositive.subtitle".localized,
+            let textRow: CVRow = CVRow(title: "declareController.message.testedPositive.title".localized,
+                                       subtitle: "declareController.message.testedPositive.subtitle".localized,
                                        xibName: .cardTextCell,
                                        theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
                                                           topInset: 0.0,
-                                                          bottomInset: 0.0))
+                                                          bottomInset: 0.0,
+                                                          titleFont: { Appearance.Cell.Text.smallHeadTitleFont }))
             rows.append(textRow)
             let codeNotReceivedButtonRow: CVRow = CVRow(title: "declareController.codeNotReceived.buttonTitle".localized,
                                                         xibName: .buttonCell,
@@ -75,7 +76,7 @@ final class DeclareController: CVTableViewController {
                                                             self?.didTouchCodeNotReceivedButton()
                                                         })
             rows.append(codeNotReceivedButtonRow)
-            let flashButtonRow: CVRow = CVRow(title: "sickController.button.flash".localized,
+            let flashButtonRow: CVRow = CVRow(title: "declareController.button.flash".localized,
                                               xibName: .buttonCell,
                                               theme: CVRow.Theme(topInset: 0.0, bottomInset: 0.0),
                                               selectionAction: { [weak self] in
@@ -84,7 +85,7 @@ final class DeclareController: CVTableViewController {
                 (cell as? ButtonCell)?.button.accessibilityHint = "accessibility.hint.sick.qrCode.enterCodeOnNextButton".localized
             })
             rows.append(flashButtonRow)
-            let tapButtonRow: CVRow = CVRow(title: "sickController.button.tap".localized,
+            let tapButtonRow: CVRow = CVRow(title: "declareController.button.tap".localized,
                                             xibName: .buttonCell,
                                             theme: CVRow.Theme(topInset: 20.0, bottomInset: 0.0, buttonStyle: .secondary),
                                             selectionAction: { [weak self] in

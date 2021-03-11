@@ -81,7 +81,7 @@ final class KeyFigureDetailController: CVTableViewController {
                                                theme: CVRow.Theme(topInset: 30.0,
                                                                   bottomInset: 12.0,
                                                                   textAlignment: .natural,
-                                                                  titleFont: { Appearance.Cell.Text.valueFont }))
+                                                                  titleFont: { Appearance.Cell.Text.headTitleFont }))
         rows.append(learnMoreSectionRow)
         let learnMoreRow: CVRow = CVRow(subtitle: keyFigure.learnMore,
                                         xibName: .standardCardCell,
@@ -100,14 +100,13 @@ final class KeyFigureDetailController: CVTableViewController {
               theme: CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
                                  topInset: 10.0,
                                  bottomInset: 0.0,
-                                 textAlignment: .natural,
-                                 titleFont: { Appearance.Cell.Text.titleFont }),
+                                 textAlignment: .natural),
               associatedValue: keyFigure,
               selectionActionWithCell: { [weak self] cell in
                 self?.didTouchSharingFor(cell: cell)
               })
     }
-    
+
     private func createChartRows() -> [CVRow] {
         var rows: [CVRow] = []
         let chartSectionRow: CVRow =  CVRow(title: "keyFigureDetailController.section.evolution.title".localized,
@@ -115,7 +114,7 @@ final class KeyFigureDetailController: CVTableViewController {
                                           theme: CVRow.Theme(topInset: 30.0,
                                                              bottomInset: 12.0,
                                                              textAlignment: .natural,
-                                                             titleFont: { Appearance.Cell.Text.valueFont }))
+                                                             titleFont: { Appearance.Cell.Text.headTitleFont }))
         rows.append(chartSectionRow)
         
         let chartDatas: [KeyFigureChartData] = KeyFiguresManager.shared.generateChartData(from: keyFigure)

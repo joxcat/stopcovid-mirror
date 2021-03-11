@@ -49,6 +49,7 @@ struct CVRow {
     var subtitle: String?
     var placeholder: String?
     var accessoryText: String?
+    var footerText: String?
     var titleHighlightText: String?
     var image: UIImage?
     var animation: Animation?

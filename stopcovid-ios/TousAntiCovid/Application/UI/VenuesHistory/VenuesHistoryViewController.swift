@@ -76,7 +76,6 @@ final class VenuesHistoryViewController: CVTableViewController {
                                      rightInset: 8.0,
                                      textAlignment: .natural,
                                      titleFont: { Appearance.Cell.Text.standardFont },
-                                     subtitleFont: { Appearance.Cell.Text.subtitleFont },
                                      subtitleColor: Appearance.Cell.Text.subtitleColor.withAlphaComponent(0.5),
                                      separatorLeftInset: Appearance.Cell.leftMargin),
                   secondarySelectionAction: { [weak self] in

@@ -14,8 +14,14 @@ import WidgetKit
 struct WidgetContent: TimelineEntry, Codable {
     var date: Date = Date()
     var isProximityActivated: Bool
-    var isAtRisk: Bool
     var isSick: Bool
-    var isAtWarningRisk: Bool
     var lastStatusReceivedDate: Date?
+    var currentRiskLevel: Double?
+
+    var didReceiveStatus: Bool {
+        lastStatusReceivedDate != nil
+    }
+    var currentRiskLevelIsNotZero: Bool {
+        (currentRiskLevel ?? 0.0) > 0.0
+    }
 }

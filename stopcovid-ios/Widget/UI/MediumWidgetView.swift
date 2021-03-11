@@ -28,41 +28,22 @@ struct MediumWidgetView: View {
             VStack(spacing: 0) {
                 MediumStatusView()
                 SeparatorView()
-                if !WidgetManager.shared.areStringsAvailableToWidget {
+                if !WidgetManager.shared.areStringsAvailable() {
                     Spacer()
                     Link(destination: WidgetManager.activationDeeplink) {
                         ButtonView(title: "TousAntiCovid")
                     }
                     Spacer()
-                } else if entry.lastStatusReceivedDate != nil {
-                    if entry.isSick {
+                } else if entry.didReceiveStatus {
+                    if entry.isSick || entry.currentRiskLevelIsNotZero {
                         Link(destination: WidgetManager.moreInformationsDeeplink) {
-                            MediumInformationsView(isAtRisk: false,
-                                                   isSick: true,
-                                                   isAtWarningRisk: false)
-                        }
-                    } else if entry.isAtRisk {
-                        Link(destination: WidgetManager.moreInformationsDeeplink) {
-                            MediumInformationsView(isAtRisk: true,
-                                                   isSick: false,
-                                                   isAtWarningRisk: false)
-                        }
-                    } else if entry.isAtWarningRisk {
-                        Link(destination: WidgetManager.moreInformationsDeeplink) {
-                            MediumInformationsView(isAtRisk: false,
-                                                   isSick: false,
-                                                   isAtWarningRisk: true)
+                            MediumInformationsView(content: entry)
                         }
                     } else {
-                        MediumInformationsView(isAtRisk: false,
-                                               isSick: false,
-                                               isAtWarningRisk: false)
+                        MediumInformationsView(content: entry)
                     }
                 } else if WidgetManager.shared.isRegistered {
-                    MediumInformationsView(isAtRisk: false,
-                                           isSick: false,
-                                           isAtWarningRisk: false,
-                                           didReceiveStatus: false)
+                    MediumInformationsView(content: entry)
                 } else {
                     Spacer()
                     Link(destination: WidgetManager.activationDeeplink) {
@@ -76,10 +57,10 @@ struct MediumWidgetView: View {
 }
 
 private struct PreviewData {
-    static let activatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: false, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
-    static let activatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: true, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
-    static let notActivatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: false, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
-    static let notActivatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: true, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
+    static let activatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 0.0)
+    static let activatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 4.0)
+    static let notActivatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 0.0)
+    static let notActivatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 4.0)
 }
 
 struct MediumLightWidgetView_Previews: PreviewProvider {

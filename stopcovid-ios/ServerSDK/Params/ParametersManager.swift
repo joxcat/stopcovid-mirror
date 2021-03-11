@@ -17,12 +17,11 @@ public final class ParametersManager: NSObject {
     typealias RequestCompletion = (_ result: Result<Double, Error>) -> ()
     
     public enum ApiVersion: String {
-        case v3
-        case v4
+        case v5
     }
     
     public enum WarningApiVersion: String {
-        case v1
+        case v2
     }
     
     public static let shared: ParametersManager = ParametersManager()
@@ -34,9 +33,9 @@ public final class ParametersManager: NSObject {
         return Int(hour)
     }
     public var maxHourContactNotif: Int? {
-           guard let hour = valueFor(name: "app.maxHourContactNotif") as? Double else { return nil }
-           return Int(hour)
-       }
+        guard let hour = valueFor(name: "app.maxHourContactNotif") as? Double else { return nil }
+        return Int(hour)
+    }
     
     public var displayRecordVenues: Bool { valueFor(name: "app.displayRecordVenues") as? Bool ?? false }
     public var displayPrivateEvent: Bool { valueFor(name: "app.displayPrivateEvent") as? Bool ?? false }
@@ -44,9 +43,12 @@ public final class ParametersManager: NSObject {
     public var displayAttestation: Bool { valueFor(name: "app.displayAttestation") as? Bool ?? false }
     
     public var displayIsolation: Bool { valueFor(name: "app.displayIsolation") as? Bool ?? false }
+    public var isolationMinRiskLevel: Double { valueFor(name: "app.isolationMinRiskLevel") as? Double ?? 4.0 }
+    public var ameliUrl: String { valueFor(name: "app.ameliUrl") as? String ?? "https://declare.ameli.fr/tousanticovid/t/%@/" }
     public var displayVaccination: Bool { valueFor(name: "app.displayVaccination") as? Bool ?? false }
     public var vaccinationCentersCount: Int { valueFor(name: "app.vaccinationCentersCount") as? Int ?? 5 }
     public var isolationDuration: Double { valueFor(name: "app.isolation.duration") as? Double ?? 604800.0 }
+    public var isolationCovidDuration: Double { valueFor(name: "app.isolation.durationCovid") as? Double ?? 864000.0 }
     public var postIsolationDuration: Double { valueFor(name: "app.postIsolation.duration") as? Double ?? 604800.0 }
     
     var appAvailability: Bool? { valueFor(name: "app.appAvailability") as? Bool }
@@ -92,8 +94,8 @@ public final class ParametersManager: NSObject {
         let interval: Double = (self.checkStatusFrequency ?? 0.0) * 3600.0 + (randomStatusHour == 0.0 ? 0.0 : Double.random(in: 0..<randomStatusHour * 3600.0))
         return interval
     }
-    public var quarantinePeriod: Int? {
-        guard let period = valueFor(name: "app.quarantinePeriod") as? Double else { return nil }
+    public var quarantinePeriod: Int {
+        guard let period = valueFor(name: "app.quarantinePeriod") as? Double else { return 7 }
         return Int(period)
     }
     public var venuesTimestampRoundingInterval: Int {
@@ -119,8 +121,8 @@ public final class ParametersManager: NSObject {
     public var bleFilteringConfig: String? { valueFor(name: "ble.filterConfig") as? String }
     public var bleFilteringMode: String? { valueFor(name: "ble.filterMode") as? String }
     
-    public var apiVersion: ApiVersion { ApiVersion(rawValue: valueFor(name: "app.apiVersion") as? String ?? "") ?? .v3 }
-    public var warningApiVersion: WarningApiVersion { WarningApiVersion(rawValue: valueFor(name: "app.warningApiVersion") as? String ?? "") ?? .v1 }
+    public var apiVersion: ApiVersion { ApiVersion(rawValue: valueFor(name: "app.apiVersion") as? String ?? "") ?? .v5 }
+    public var warningApiVersion: WarningApiVersion { WarningApiVersion(rawValue: valueFor(name: "app.warningApiVersion") as? String ?? "") ?? .v2 }
     
     private var config: [[String: Any]] = [] {
         didSet { distributeUpdatedConfig() }

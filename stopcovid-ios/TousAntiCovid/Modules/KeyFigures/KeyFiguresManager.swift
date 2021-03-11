@@ -96,7 +96,7 @@ final class KeyFiguresManager: NSObject {
         var chartDatas: [KeyFigureChartData] = []
         if let series = keyFigure.ascendingSeries, !series.isEmpty {
             var color: UIColor = keyFigure.color
-            if keyFigure.currentDepartmentSpecificKeyFigure?.ascendingSeries?.isEmpty == false {
+            if keyFigure.currentDepartmentSpecificKeyFigure?.ascendingSeries?.isEmpty == false && keyFigure.displayOnSameChart {
                 color = keyFigure.color.add(overlay: UIColor.white.withAlphaComponent(0.6))
             }
             let legend: KeyFigureChartLegend = KeyFigureChartLegend(title: "common.country.france".localized,
@@ -135,10 +135,7 @@ final class KeyFiguresManager: NSObject {
                               at: 0)
         }
         if let averageSeries = keyFigure.avgSeries, !averageSeries.isEmpty {
-            var color: UIColor = keyFigure.color
-            if keyFigure.currentDepartmentSpecificKeyFigure?.ascendingSeries?.isEmpty == false {
-                color = keyFigure.color.add(overlay: UIColor.white.withAlphaComponent(0.6))
-            }
+            let color: UIColor = keyFigure.color
             let legend: KeyFigureChartLegend = KeyFigureChartLegend(title: String(format: "keyFigureDetailController.section.evolutionAvg.legendWithLocation".localized, "common.country.france".localized),
                                                                     image: Asset.Images.chartLegend.image,
                                                                     color: color)

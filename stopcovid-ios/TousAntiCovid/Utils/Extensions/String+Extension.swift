@@ -61,6 +61,10 @@ extension String {
         replacingOccurrences(of: ",", with: commaReplacement)
     }
     
+    func cleaningEscapedCharacters() -> String {
+        return replacingOccurrences(of: "\\n", with: "\n").replacingOccurrences(of: "\\r", with: "\r").replacingOccurrences(of: "\\\"", with: "\"")
+    }
+    
     func share(from controller: UIViewController, fromButton: UIButton? = nil) {
         let activityController: UIActivityViewController = UIActivityViewController(activityItems: [self], applicationActivities: nil)
         if let button = fromButton {

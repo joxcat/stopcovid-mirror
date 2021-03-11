@@ -74,13 +74,15 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
             NotificationCenter.default.post(name: .didTouchProximityReactivationNotification, object: nil)
         }
     }
-    
-    func scheduleAtRiskNotification(minHour: Int?, maxHour: Int?, triggerDate: Date = Date(), textPrefix: String = "notification.atRisk", identifier: String = NotificationsContant.Identifier.atRisk) {
+
+    func scheduleNotification(minHour: Int?, maxHour: Int?, triggerDate: Date = Date(), title: String, body: String, identifier: String, badge: Int? = nil) {
         let content = UNMutableNotificationContent()
-        content.title = "\(textPrefix).title".localized
-        content.body = "\(textPrefix).message".localized
+        content.title = title
+        content.body = body
         content.sound = .default
-        content.badge = 1
+        if let badge = badge {
+            content.badge = NSNumber(integerLiteral: badge)
+        }
         var triggerDate: Date = triggerDate
         if let minHour = minHour, let maxHour = maxHour {
             var components: DateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: triggerDate)
@@ -191,12 +193,8 @@ final class NotificationsManager: NSObject, UNUserNotificationCenterDelegate {
         }
     }
     
-    func scheduleAtWarningRiskNotification(minHour: Int?, maxHour: Int?) {
-        scheduleAtRiskNotification(minHour: minHour, maxHour: maxHour, textPrefix: "notification.atWarning")
-    }
-    
     func scheduleStillHavingFeverNotification(minHour: Int?, maxHour: Int?, triggerDate: Date) {
-        scheduleAtRiskNotification(minHour: minHour, maxHour: maxHour, triggerDate: triggerDate, textPrefix: "notification.stillHavingFever", identifier: NotificationsContant.Identifier.stillHavingFever)
+        scheduleNotification(minHour: minHour, maxHour: maxHour, triggerDate: triggerDate, title: "notification.stillHavingFever.title".localized, body: "notification.stillHavingFever.message".localized, identifier: NotificationsContant.Identifier.stillHavingFever)
     }
     
     func scheduleUltimateNotification(minHour: Int?, maxHour: Int?) {

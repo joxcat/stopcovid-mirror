@@ -42,7 +42,13 @@ extension Date {
         formatter.setLocalizedDateFormatFromTemplate("dMMM")
         return formatter.string(from: self)
     }
-    
+
+    func dayShortMonthYearFormatted() -> String {
+        let formatter: DateFormatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("dMMMyyyy")
+        return formatter.string(from: self)
+    }
+
     func fullDayMonthFormatted() -> String {
         let formatter: DateFormatter = DateFormatter()
         formatter.dateFormat = "EEEE d MMMM"

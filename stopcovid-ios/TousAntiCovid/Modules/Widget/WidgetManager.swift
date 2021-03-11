@@ -28,35 +28,19 @@ final class WidgetManager {
         case activation
         case moreInformations
     }
-    
-    @WidgetUserDefault(key: .isAtRisk)
-    var isAtRisk: Bool = false {
+
+    @OptionalWidgetUserDefault(key: .currentRiskLevel)
+    var currentRiskLevel: Double? {
         didSet {
-            guard oldValue != isAtRisk else { return }
+            guard oldValue != currentRiskLevel else { return }
             WidgetCenter.shared.reloadAllTimelines()
         }
     }
-    
-    @WidgetUserDefault(key: .isAtWarningRisk)
-    var isAtWarningRisk: Bool = false {
-        didSet {
-            guard oldValue != isAtWarningRisk else { return }
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-    }
-    
+
     @OptionalWidgetUserDefault(key: .lastStatusReceivedDate)
     var lastStatusReceivedDate: Date? {
         didSet {
             guard oldValue != lastStatusReceivedDate else { return }
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-    }
-    
-    @OptionalWidgetUserDefault(key: .lastRiskReceivedDate)
-    var lastRiskReceivedDate: Date? {
-        didSet {
-            guard oldValue != lastRiskReceivedDate else { return }
             WidgetCenter.shared.reloadAllTimelines()
         }
     }
@@ -97,9 +81,7 @@ final class WidgetManager {
             WidgetCenter.shared.reloadAllTimelines()
         }
     }
-    
-    var areStringsAvailableToWidget: Bool { !appName.isEmpty }
-    
+
     @WidgetUserDefault(key: .widgetAppName)
     var appName: String = ""
     @WidgetUserDefault(key: .widgetWelcomeTitle)
@@ -112,16 +94,8 @@ final class WidgetManager {
     var widgetDeactivated: String = ""
     @WidgetUserDefault(key: .widgetActivateProximityButtonTitle)
     var widgetActivateProximityButtonTitle: String = ""
-    @WidgetUserDefault(key: .widgetSmallTitleNoContact)
-    var widgetSmallTitleNoContact: String = ""
-    @WidgetUserDefault(key: .widgetSmallTitleAtRisk)
-    var widgetSmallTitleAtRisk: String = ""
     @WidgetUserDefault(key: .widgetFullTitleDate)
     var widgetFullTitleDate: String = ""
-    @WidgetUserDefault(key: .widgetFullTitleNoContact)
-    var widgetFullTitleNoContact: String = ""
-    @WidgetUserDefault(key: .widgetFullTitleAtRisk)
-    var widgetFullTitleAtRisk: String = ""
     @WidgetUserDefault(key: .widgetMoreInfo)
     var widgetMoreInfo: String = ""
     @WidgetUserDefault(key: .widgetOpenTheApp)
@@ -132,11 +106,15 @@ final class WidgetManager {
     var widgetSickFullTitle: String = ""
     @WidgetUserDefault(key: .widgetNoStatusInfo)
     var widgetNoStatusInfo: String = ""
-    @WidgetUserDefault(key: .widgetWarningSmallTitle)
-    var widgetWarningSmallTitle: String = ""
-    @WidgetUserDefault(key: .widgetWarningFullTitle)
-    var widgetWarningFullTitle: String = ""
-    
+    @WidgetUserDefault(key: .widgetSmallTitle)
+    var widgetSmallTitle: String = ""
+    @WidgetUserDefault(key: .widgetFullTitle)
+    var widgetFullTitle: String = ""
+    @WidgetUserDefault(key: .widgetGradientStartColor)
+    var widgetGradientStartColor: String = ""
+    @WidgetUserDefault(key: .widgetGradientEndColor)
+    var widgetGradientEndColor: String = ""
+
     private init() {}
     
     #if !WIDGET
@@ -159,7 +137,6 @@ final class WidgetManager {
     func processUserActivity(_ userActivity: NSUserActivity) {
         let widgetKinds: [String] = ["TousAntiCovidWidget"]
         guard widgetKinds.contains(userActivity.activityType) && isOnboardingDone && !isSick else { return }
-        guard !RBManager.shared.isAtRisk else { return }
         guard !RBManager.shared.isRegistered else { return }
         NotificationCenter.default.post(name: .widgetDidRequestRegister, object: nil)
     }
@@ -173,6 +150,7 @@ final class WidgetManager {
             RBManager.shared.startProximityDetection()
         }
     }
+    
     #endif
     
     func start() {
@@ -189,12 +167,12 @@ final class WidgetManager {
     @objc private func statusDataChanged() {
         isProximityActivated = RBManager.shared.isProximityActivated
         lastStatusReceivedDate = RBManager.shared.lastStatusReceivedDate
-        lastRiskReceivedDate = RBManager.shared.lastRiskReceivedDate
-        isAtRisk = RBManager.shared.isAtRisk
-        isAtWarningRisk = VenuesManager.shared.lastWarningRiskReceivedDate != nil
+        currentRiskLevel = RisksUIManager.shared.currentLevel?.riskLevel
         isSick = RBManager.shared.isSick
         isRegistered = RBManager.shared.isRegistered
         isOnboardingDone = isAppOnboardingDone
+        widgetGradientStartColor = RisksUIManager.shared.currentLevel?.color.from ?? ""
+        widgetGradientEndColor = RisksUIManager.shared.currentLevel?.color.to ?? ""
         reloadStrings()
     }
     
@@ -204,6 +182,11 @@ final class WidgetManager {
         triggerProximityActivation()
     }
     #endif
+
+    func areStringsAvailable() -> Bool {
+        let strings: [String] = [appName, widgetWelcomeTitle, widgetWelcomeButtonTitle, widgetActivated, widgetDeactivated, widgetActivateProximityButtonTitle, widgetMoreInfo, widgetOpenTheApp, widgetSickSmallTitle, widgetSickFullTitle, widgetSmallTitle, widgetFullTitle]
+        return strings.allSatisfy { !$0.isEmpty }
+    }
     
 }
 
@@ -214,29 +197,21 @@ extension WidgetManager: LocalizationsChangesObserver {
     func localizationsChanged() {
         reloadStrings()
     }
-    
-    func areStringsAvailable() -> Bool {
-        let strings: [String] = [appName, widgetWelcomeTitle, widgetWelcomeButtonTitle, widgetActivated, widgetDeactivated, widgetActivateProximityButtonTitle, widgetSmallTitleNoContact, widgetSmallTitleAtRisk, widgetFullTitleNoContact, widgetFullTitleAtRisk, widgetMoreInfo, widgetOpenTheApp, widgetSickSmallTitle, widgetSickFullTitle]
-        return strings.allSatisfy { !$0.isEmpty }
-    }
-    
+
     private func reloadStrings() {
+        guard RBManager.shared.isInitialized else { return }
+        widgetSmallTitle = RisksUIManager.shared.currentLevel?.labels.widgetShort.localizedOrEmpty ?? ""
+        widgetFullTitle = RisksUIManager.shared.currentLevel?.labels.widgetLong.localizedOrEmpty ?? ""
         appName = "app.name".localizedOrEmpty
         widgetWelcomeTitle = "onboarding.welcomeController.title".localizedOrEmpty
         widgetWelcomeButtonTitle = "onboarding.welcomeController.howDoesItWork".localizedOrEmpty
         widgetActivated = "widget.title.activated".localizedOrEmpty
         widgetDeactivated = "widget.title.deactivated".localizedOrEmpty
         widgetActivateProximityButtonTitle = "proximityController.button.activateProximity".localizedOrEmpty
-        widgetSmallTitleNoContact = "widget.info.small.title.noContact".localizedOrEmpty
-        widgetSmallTitleAtRisk = "widget.info.small.title.atRisk".localizedOrEmpty
-        widgetFullTitleNoContact = "sickController.state.nothing.title".localizedOrEmpty
-        widgetFullTitleAtRisk = "sickController.state.contact.title".localizedOrEmpty
         widgetMoreInfo = "widget.info.moreInfo".localizedOrEmpty
         widgetOpenTheApp = "widget.openTheApp".localizedOrEmpty
         widgetSickSmallTitle = "widget.isSick.small.title".localizedOrEmpty
         widgetSickFullTitle = "home.healthSection.isSick.standaloneTitle".localizedOrEmpty
-        widgetWarningSmallTitle = "home.healthSection.warningContact.cellTitle".localizedOrEmpty
-        widgetWarningFullTitle = "sickController.state.warning.title".localizedOrEmpty
         widgetNoStatusInfo = "widget.noStatus.info".localizedOrEmpty
         let date: Date = lastStatusReceivedDate ?? Date()
         widgetFullTitleDate = date.relativelyFormattedForWidget()

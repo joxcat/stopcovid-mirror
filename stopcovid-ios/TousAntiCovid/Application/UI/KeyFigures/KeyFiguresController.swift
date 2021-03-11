@@ -87,7 +87,7 @@ final class KeyFiguresController: CVTableViewController {
                                              theme: CVRow.Theme(topInset: 30.0,
                                                                 bottomInset: 12.0,
                                                                 textAlignment: .natural,
-                                                                titleFont: { Appearance.Cell.Text.valueFont }))
+                                                                titleFont: { Appearance.Cell.Text.headTitleFont }))
         rows.append(healthSectionRow)
         let readNowRow: CVRow = CVRow(buttonTitle: "keyFiguresController.section.health.button".localized,
                                              xibName: .linkButtonCell,
@@ -105,7 +105,6 @@ final class KeyFiguresController: CVTableViewController {
                                      topInset: 10.0,
                                      bottomInset: 10.0,
                                      textAlignment: .natural,
-                                     titleFont: { Appearance.Cell.Text.titleFont },
                                      subtitleLinesCount: 2),
                   associatedValue: keyFigure,
                   selectionActionWithCell: { [weak self] cell in
@@ -125,7 +124,7 @@ final class KeyFiguresController: CVTableViewController {
                                           theme: CVRow.Theme(topInset: 30.0,
                                                              bottomInset: 12.0,
                                                              textAlignment: .natural,
-                                                             titleFont: { Appearance.Cell.Text.valueFont }))
+                                                             titleFont: { Appearance.Cell.Text.headTitleFont }))
         rows.append(appSectionRow)
         let keyFiguresAppRows: [CVRow] = KeyFiguresManager.shared.keyFigures.filter { $0.category == .app }.map { keyFigure in
             CVRow(title: keyFigure.label,
@@ -135,7 +134,6 @@ final class KeyFiguresController: CVTableViewController {
                                      topInset: 10.0,
                                      bottomInset: 10.0,
                                      textAlignment: .natural,
-                                     titleFont: { Appearance.Cell.Text.titleFont },
                                      subtitleLinesCount: 2),
                   associatedValue: keyFigure,
                   selectionActionWithCell: { [weak self] cell in

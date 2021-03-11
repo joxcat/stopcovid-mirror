@@ -13,59 +13,45 @@ import WidgetKit
 
 struct SmallInformationsView: View {
     
-    var date: Date?
-    var isAtRisk: Bool
-    var isSick: Bool
-    var isAtWarningRisk: Bool
-    var didReceiveStatus: Bool = true
+    var content: WidgetContent
     
     private var statusDateString: String? {
-        if WidgetManager.shared.areStringsAvailableToWidget {
-            if didReceiveStatus {
-                let date: String
-                let time: String
-                let formatter: DateFormatter = DateFormatter()
-                formatter.setLocalizedDateFormatFromTemplate("ddMM")
-                date = formatter.string(from:self.date ?? Date())
-                formatter.dateStyle = .none
-                formatter.timeStyle = .short
-                time = formatter.string(from: self.date ?? Date())
-                return "\(date) - \(time)"
-            } else {
-                return nil
-            }
-        } else {
-            return nil
-        }
+        guard WidgetManager.shared.areStringsAvailable() else { return nil }
+        guard let lastStatusReceivedDate = content.lastStatusReceivedDate else { return nil }
+        let date: String
+        let time: String
+        let formatter: DateFormatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("ddMM")
+        date = formatter.string(from: lastStatusReceivedDate)
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        time = formatter.string(from: lastStatusReceivedDate)
+        return "\(date) - \(time)"
     }
     private var informations: String {
-        if !WidgetManager.shared.areStringsAvailableToWidget {
+        if !WidgetManager.shared.areStringsAvailable() {
             return "AntiCovid"
-        } else if isSick {
+        } else if content.isSick {
             return WidgetManager.shared.widgetSickSmallTitle
-        } else if !didReceiveStatus {
+        } else if !content.didReceiveStatus {
             return WidgetManager.shared.widgetNoStatusInfo
         } else {
-            return isAtRisk ? WidgetManager.shared.widgetSmallTitleAtRisk : (isAtWarningRisk ? WidgetManager.shared.widgetWarningSmallTitle : WidgetManager.shared.widgetSmallTitleNoContact)
+            return WidgetManager.shared.widgetSmallTitle
         }
     }
     
     var body: some View {
         ZStack {
-            if isSick {
+            if content.isSick {
                 SickGradientView()
-            } else if isAtRisk {
-                AtRiskGradientView()
-            } else if isAtWarningRisk {
-                WarningRiskGradientView()
-            } else if didReceiveStatus {
-                NoContactGradientView()
+            } else if content.didReceiveStatus {
+                GradientView()
             }
             VStack(spacing: 4) {
-                if isSick { Spacer() }
-                InformationsContentView(title: informations, subtitle: isSick ? nil : statusDateString, isAtRisk: isAtRisk, isSick: isSick, didReceiveStatus: didReceiveStatus)
-                if isAtRisk { MoreInformationsView() }
-                if !isAtRisk { Spacer() }
+                if content.isSick { Spacer() }
+                InformationsContentView(title: informations, subtitle: content.isSick ? nil : statusDateString, content: content)
+                if content.currentRiskLevelIsNotZero { MoreInformationsView() }
+                if !content.currentRiskLevelIsNotZero { Spacer() }
                 Spacer()
             }
             .padding(EdgeInsets(top: 12, leading: 12, bottom: 0, trailing: 12))
@@ -74,19 +60,9 @@ struct SmallInformationsView: View {
 }
 
 struct SmallInformationsView_Previews: PreviewProvider {
+    static let content: WidgetContent = WidgetContent(isProximityActivated: true, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 0.0)
     static var previews: some View {
-        SmallInformationsView(date: Date(), isAtRisk: true, isSick: false, isAtWarningRisk: false)
+        SmallInformationsView(content: content)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
-        SmallInformationsView(date: Date(), isAtRisk: false, isSick: false, isAtWarningRisk: false)
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
-        
-        SmallInformationsView(date: Date(), isAtRisk: true, isSick: false, isAtWarningRisk: false)
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
-            .background(Color.black)
-            .environment(\.colorScheme, .dark)
-        SmallInformationsView(date: Date(), isAtRisk: false, isSick: false, isAtWarningRisk: false)
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
-            .background(Color.black)
-            .environment(\.colorScheme, .dark)
     }
 }

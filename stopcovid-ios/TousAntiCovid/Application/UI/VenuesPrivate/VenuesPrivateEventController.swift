@@ -59,7 +59,7 @@ final class VenuesPrivateEventController: CVTableViewController {
         rows.append(textRow)
         let shareRow: CVRow = CVRow(title: "venuesPrivateEventController.button.sharedCode".localized,
                                         xibName: .buttonCell,
-                                        theme: CVRow.Theme(topInset: 30.0, bottomInset: 0.0, buttonStyle: .primary),
+                                        theme: CVRow.Theme(topInset: 30.0, bottomInset: 0.0),
                                         selectionAction: { [weak self] in
                                             self?.didTouchShareCode()
         })

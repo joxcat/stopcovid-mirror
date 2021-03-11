@@ -45,12 +45,14 @@ extension UserDefault {
         case lastStringsUpdateDate
         case lastPrivacyUpdateDate
         case lastLinksUpdateDate
+        case lastRiskLevelsUpdateDate
         case lastKeyFiguresExplanationsUpdateDate
         case lastRemoteFileLanguageCode
         case lastInitialStringsBuildNumber
         case lastInitialPrivacyBuildNumber
         case lastInitialLinksBuildNumber
         case lastInitialKeyFiguresExplanationsBuildNumber
+        case lastInitialRiskLevelsBuildNumber
         case lastMaintenanceUpdateDate
         case infoCenterLastUpdatedAt
         case infoCenterDidReceiveNewInfo
@@ -69,6 +71,9 @@ extension UserDefault {
         
         case lastNotificationTimestamp
         case showNewInfoNotification
+        case hideStatus
+        case currentStatusModelVersion
+        case migrationDone
     }
     
 }

@@ -33,7 +33,8 @@ final class OnboardingVenuesController: OnboardingController {
         let textRow: CVRow = CVRow(title: "onboarding.venuesController.mainMessage.title".localized,
                                    subtitle: "onboarding.venuesController.mainMessage.subtitle".localized,
                                    xibName: .textCell,
-                                   theme: CVRow.Theme(topInset: 30.0))
+                                   theme: CVRow.Theme(topInset: 30.0,
+                                                      titleFont: { Appearance.Cell.Text.smallHeadTitleFont }))
         rows.append(textRow)
         return rows
     }

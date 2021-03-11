@@ -12,7 +12,7 @@ import Foundation
 
 struct RBServerStandardResponse: RBServerResponse {
 
-    var success: Bool?
-    var message: String?
+    let success: Bool?
+    let message: String?
     
 }

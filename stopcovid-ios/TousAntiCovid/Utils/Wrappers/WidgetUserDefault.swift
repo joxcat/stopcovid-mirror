@@ -39,29 +39,25 @@ extension WidgetUserDefault {
     enum Key: String {
         case isOnboardingDone
         case isProximityActivated
+        case currentRiskLevel
+        case widgetSmallTitle
+        case widgetFullTitle
+        case widgetGradientStartColor
+        case widgetGradientEndColor
         case isSick
         case isRegistered
-        case isAtRisk
-        case isAtWarningRisk
         case lastStatusReceivedDate
-        case lastRiskReceivedDate
         case widgetAppName
         case widgetWelcomeTitle
         case widgetWelcomeButtonTitle
         case widgetActivated
         case widgetDeactivated
         case widgetActivateProximityButtonTitle
-        case widgetSmallTitleNoContact
-        case widgetSmallTitleAtRisk
         case widgetFullTitleDate
-        case widgetFullTitleNoContact
-        case widgetFullTitleAtRisk
         case widgetMoreInfo
         case widgetOpenTheApp
         case widgetSickSmallTitle
         case widgetSickFullTitle
-        case widgetWarningSmallTitle
-        case widgetWarningFullTitle
         case widgetNoStatusInfo
     }
     

@@ -19,4 +19,8 @@ extension Date {
         return formatter.string(from: self)
     }
     
+    func svDateByAddingDays(_ days: Int) -> Date {
+        addingTimeInterval(Double(days) * 24.0 * 3600.0)
+    }
+    
 }

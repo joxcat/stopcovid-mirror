@@ -28,43 +28,20 @@ struct SmallWidgetView: View {
             VStack(spacing: 0) {
                 SmallStatusView()
                 SeparatorView()
-                
-                if !WidgetManager.shared.areStringsAvailableToWidget {
+                if !WidgetManager.shared.areStringsAvailable() {
                     Link(destination: WidgetManager.activationDeeplink) {
-                        ButtonView(title: "TousAntiCovid")
+                        ButtonView(title: "AntiCovid")
                     }
-                } else if let date = entry.lastStatusReceivedDate {
-                    if entry.isSick {
-                        SmallInformationsView(date: date,
-                                              isAtRisk: false,
-                                              isSick: true,
-                                              isAtWarningRisk: false)
-                    } else if entry.isAtRisk {
+                } else if entry.didReceiveStatus {
+                    if entry.isSick || entry.currentRiskLevelIsNotZero {
                         Link(destination: WidgetManager.moreInformationsDeeplink) {
-                            SmallInformationsView(date: date,
-                                                  isAtRisk: true,
-                                                  isSick: false,
-                                                  isAtWarningRisk: false)
-                        }
-                    } else if entry.isAtWarningRisk {
-                        Link(destination: WidgetManager.moreInformationsDeeplink) {
-                            SmallInformationsView(date: date,
-                                                  isAtRisk: false,
-                                                  isSick: false,
-                                                  isAtWarningRisk: true)
+                            SmallInformationsView(content: entry)
                         }
                     } else {
-                        SmallInformationsView(date: date,
-                                              isAtRisk: entry.isAtRisk,
-                                              isSick: false,
-                                              isAtWarningRisk: false)
+                        SmallInformationsView(content: entry)
                     }
                 } else if WidgetManager.shared.isRegistered {
-                    SmallInformationsView(date: nil,
-                                          isAtRisk: false,
-                                          isSick: false,
-                                          isAtWarningRisk: false,
-                                          didReceiveStatus: false)
+                    SmallInformationsView(content: entry)
                 } else {
                     Link(destination: WidgetManager.activationDeeplink) {
                         ButtonView(title: activateButtonText)
@@ -76,10 +53,10 @@ struct SmallWidgetView: View {
 }
 
 private struct PreviewData {
-    static let activatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: false, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
-    static let activatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isAtRisk: true, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
-    static let notActivatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: false, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
-    static let notActivatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isAtRisk: true, isSick: false, isAtWarningRisk: false, lastStatusReceivedDate: Date())
+    static let activatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 0.0)
+    static let activatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: true, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 4.0)
+    static let notActivatedNotAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 0.0)
+    static let notActivatedAtRisk: WidgetContent = WidgetContent(isProximityActivated: false, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 4.0)
 }
 
 struct SmallLightWidgetView_Previews: PreviewProvider {

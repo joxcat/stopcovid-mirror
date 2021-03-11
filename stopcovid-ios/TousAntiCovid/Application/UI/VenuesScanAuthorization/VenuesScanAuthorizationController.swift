@@ -69,7 +69,7 @@ final class VenuesScanAuthorizationController: CVTableViewController {
         rows.append(questionRow)
         let acceptRow: CVRow = CVRow(title: "confirmVenueQrCodeController.confirm".localized,
                                         xibName: .buttonCell,
-                                        theme: CVRow.Theme(topInset: 20.0, bottomInset: 10.0, buttonStyle: .primary),
+                                        theme: CVRow.Theme(topInset: 20.0, bottomInset: 10.0),
                                         selectionAction: { [weak self] in
                                             self?.didAnswer(true)
         })

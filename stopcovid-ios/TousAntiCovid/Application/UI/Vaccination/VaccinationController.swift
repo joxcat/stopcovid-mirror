@@ -112,7 +112,7 @@ final class VaccinationController: CVTableViewController {
               theme: CVRow.Theme(topInset: 30.0,
                                  bottomInset: 10.0,
                                  textAlignment: .natural,
-                                 titleFont: { Appearance.Section.titleFont }))
+                                 titleFont: { Appearance.Cell.Text.headTitleFont }))
     }
 
     private func eligibilityRow() -> CVRow {
@@ -134,7 +134,7 @@ final class VaccinationController: CVTableViewController {
               theme: CVRow.Theme(topInset: 30.0,
                                  bottomInset: 10.0,
                                  textAlignment: .natural,
-                                 titleFont: { Appearance.Section.titleFont }))
+                                 titleFont: { Appearance.Cell.Text.headTitleFont }))
     }
     
     private func explanationRow() -> CVRow {
@@ -146,25 +146,34 @@ final class VaccinationController: CVTableViewController {
     }
 
     private func postalCodeRow(postalCode: String?) -> CVRow {
-        let title: String = postalCode == nil ? "vaccinationController.vaccinationLocation.newPostalCode".localized : "vaccinationController.vaccinationLocation.updatePostalCode".localized
-        let postalCodeRow: CVRow = CVRow(title: title,
-                                         image: Asset.Images.location.image,
-                                         xibName: .standardCardCell,
-                                         theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
-                                                             topInset: 10.0,
-                                                             bottomInset: Appearance.Cell.leftMargin,
-                                                             textAlignment: .natural,
-                                                             titleFont: { Appearance.Cell.Text.standardFont },
-                                                             titleColor: Appearance.Cell.Text.headerTitleColor,
-                                                             imageTintColor: Appearance.Cell.Text.headerTitleColor),
-                                         selectionAction: { [weak self] in
-                                            self?.didTouchUpdateLocation()
-                                         },
-                                         willDisplay: { cell in
-                                            cell.selectionStyle = .none
-                                            cell.accessoryType = .none
-                                         })
-        return postalCodeRow
+        let title: String
+        let subtitle: String?
+
+        if let currentPostalCode = postalCode {
+            title = String(format: "common.updatePostalCode".localized, currentPostalCode)
+            subtitle = "common.updatePostalCode.end".localized
+        } else {
+            title = "vaccinationController.vaccinationLocation.newPostalCode".localized
+            subtitle = nil
+        }
+        return CVRow(title: title,
+                     subtitle: subtitle,
+                     image: Asset.Images.location.image,
+                     xibName: postalCode == nil ? .standardCardCell : .standardCardHorizontalCell,
+                     theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                         topInset: 10.0,
+                                         bottomInset: Appearance.Cell.leftMargin,
+                                         textAlignment: .natural,
+                                         subtitleFont: { Appearance.Cell.Text.standardFont },
+                                         subtitleColor: Appearance.Cell.Text.headerTitleColor,
+                                         imageTintColor: Appearance.Cell.Text.headerTitleColor),
+                     selectionAction: { [weak self] in
+                        self?.didTouchUpdateLocation()
+                     },
+                     willDisplay: { cell in
+                        cell.selectionStyle = .none
+                        cell.accessoryType = .none
+                     })
     }
     
     private func refreshRow() -> CVRow {
@@ -196,9 +205,6 @@ final class VaccinationController: CVTableViewController {
                                  topInset: 0.0,
                                  bottomInset: Appearance.Cell.leftMargin,
                                  textAlignment: .natural,
-                                 titleFont: { Appearance.Cell.Text.titleFont },
-                                 titleColor: Appearance.Cell.Text.titleColor,
-                                 subtitleFont: { Appearance.Cell.Text.subtitleFont },
                                  subtitleColor: Appearance.Cell.Text.headerTitleColor),
               associatedValue: vaccinationCenter,
               selectionAction: { [weak self] in

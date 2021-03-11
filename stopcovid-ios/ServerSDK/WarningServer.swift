@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import RobertSDK
 
 public final class WarningServer: NSObject {
     
@@ -28,15 +29,17 @@ public final class WarningServer: NSObject {
     }()
     private var receivedData: [String: Data] = [:]
     private var completions: [String: Server.ProcessRequestCompletion] = [:]
+    private var requestLoggingHandler: Server.RequestLoggingHandler?
     
-    public func start(baseUrl: @escaping () -> URL?, certificateFile: Data) {
+    public func start(baseUrl: @escaping () -> URL?, certificateFile: Data, requestLoggingHandler: @escaping Server.RequestLoggingHandler) {
         self.baseUrl = baseUrl
         self.certificateFile = certificateFile
+        self.requestLoggingHandler = requestLoggingHandler
     }
     
-    public func wstatus(staticQrCodePayloads: [(payload: String, timestamp: Int)], dynamicQrCodePayloads: [(payload: String, timestamp: Int)], completion: @escaping (_ result: Result<Bool, Error>) -> ()) {
+    public func wstatus(staticQrCodePayloads: [(payload: String, timestamp: Int)], dynamicQrCodePayloads: [(payload: String, timestamp: Int)], completion: @escaping (_ result: Result<RBStatusRiskLevelInfo?, Error>) -> ()) {
         guard let baseUrl = self.baseUrl() else {
-            completion(.success(false))
+            completion(.success(nil))
             return
         }
         let staticTokens: [RBWarningServerVisitToken] = staticQrCodePayloads.map { RBWarningServerVisitToken(type: "STATIC", payload: $0.payload, timestamp: "\($0.timestamp)") }
@@ -47,7 +50,20 @@ public final class WarningServer: NSObject {
             case let .success(data):
                 do {
                     let response: RBWarningServerStatusResponse = try JSONDecoder().decode(RBWarningServerStatusResponse.self, from: data)
-                    completion(.success(response.atRisk))
+                    
+                    var lastRiskScoringDate: Date?
+                    var lastContactDate: Date?
+                    
+                    if let lastContactDateTimestampString = response.lastContactDate {
+                        lastRiskScoringDate = Date(timeIntervalSince1900: Int(lastContactDateTimestampString) ?? 0)
+                        lastContactDate = min(Date(timeIntervalSince1900: Int(lastContactDateTimestampString) ?? 0).svDateByAddingDays([-1, 1].randomElement() ?? 0), Date().svDateByAddingDays(-1))
+                    }
+                    
+                    let info: RBStatusRiskLevelInfo = RBStatusRiskLevelInfo(riskLevel: response.riskLevel,
+                                                                            lastContactDate: lastContactDate,
+                                                                            lastRiskScoringDate: lastRiskScoringDate)
+                    
+                    completion(.success(info))
                 } catch {
                     completion(.failure(error))
                 }
@@ -83,7 +99,9 @@ extension WarningServer {
             let bodyData: Data = try body.toData()
             let requestId: String = url.lastPathComponent
             guard completions[requestId] == nil else {
-                completion(.failure(NSError.svLocalizedError(message: "A request for \"\(requestId)\" is already being treated", code: 0)))
+                let error: Error = NSError.svLocalizedError(message: "A request for \"\(requestId)\" is already being treated", code: 0)
+                self.requestLoggingHandler?(nil, nil, error)
+                completion(.failure(error))
                 return
             }
             completions[requestId] = completion
@@ -98,6 +116,7 @@ extension WarningServer {
             task.taskDescription = requestId
             task.resume()
         } catch {
+            self.requestLoggingHandler?(nil, nil, error)
             completion(.failure(error))
         }
     }
@@ -111,14 +130,18 @@ extension WarningServer: URLSessionDelegate, URLSessionDownloadDelegate {
         guard let completion = completions[requestId] else { return }
         DispatchQueue.main.async {
             if let error = error {
+                self.requestLoggingHandler?(task, nil, error)
                 completion(.failure(error))
             } else {
                 let receivedData: Data = self.receivedData[requestId] ?? Data()
                 if task.response?.svIsError == true {
                     let statusCode: Int = task.response?.svStatusCode ?? 0
                     let message: String = receivedData.isEmpty ? "No data received from the server" : (String(data: receivedData, encoding: .utf8) ?? "Unknown error")
-                    completion(.failure(NSError.svLocalizedError(message: "Uknown error (\(statusCode)). (\(message))", code: statusCode)))
+                    let error: Error = NSError.svLocalizedError(message: "Uknown error (\(statusCode)). (\(message))", code: statusCode)
+                    self.requestLoggingHandler?(task, nil, error)
+                    completion(.failure(error))
                 } else {
+                    self.requestLoggingHandler?(task, receivedData, nil)
                     completion(.success(receivedData))
                 }
             }
@@ -135,7 +158,9 @@ extension WarningServer: URLSessionDelegate, URLSessionDownloadDelegate {
             if downloadTask.response?.svIsError == true {
                 let statusCode: Int = downloadTask.response?.svStatusCode ?? 0
                 let message: String? = data.isEmpty ? "No logs received from the server" : String(data: data, encoding: .utf8)
-                completion(.failure(NSError.svLocalizedError(message: "Uknown error (\(statusCode)). (\(message ?? "N/A"))", code: statusCode)))
+                let error: Error = NSError.svLocalizedError(message: "Uknown error (\(statusCode)). (\(message ?? "N/A"))", code: statusCode)
+                self.requestLoggingHandler?(downloadTask, nil, error)
+                completion(.failure(error))
                 self.completions[requestId] = nil
             } else {
                 self.receivedData[requestId] = data

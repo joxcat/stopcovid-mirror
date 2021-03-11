@@ -5,7 +5,7 @@
 //  RBServerRegisterBody.swift
 //  TousAntiCovid
 //
-//  Created by Lunabee Studio / Date - 23/04/2020 - for the TousAntiCovid project.
+//  Created by Lunabee Studio / Date - 12/06/2020 - for the TousAntiCovid project.
 //
 
 import Foundation
@@ -13,6 +13,8 @@ import Foundation
 struct RBServerRegisterBody: RBServerBody {
 
     var captcha: String
+    var captchaId: String
     var clientPublicECDHKey: String
+    var pushInfo: RBServerPushInfo
     
 }

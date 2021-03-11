@@ -16,5 +16,6 @@ struct RBServerUnregisterBody: RBServerBody {
     var ebid: String
     var time: String
     var mac: String
+    var pushToken: String
     
 }

@@ -28,7 +28,9 @@ final class OnboardingExplanationsController: OnboardingController {
                   subtitle: step.subtitle,
                   accessoryText: "\(index + 1)",
                   xibName: .onboardingWorkingStepCell,
-                  theme: CVRow.Theme(topInset: index == 0 ? 4.0 : 20.0))
+                  theme: CVRow.Theme(topInset: index == 0 ? 4.0 : 20.0,
+                                     titleFont: { Appearance.Cell.Text.smallHeadTitleFont })
+            )
         }
         return [titleRow] + stepsRows
     }

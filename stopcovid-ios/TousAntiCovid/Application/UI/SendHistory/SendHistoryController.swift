@@ -73,21 +73,14 @@ final class SendHistoryController: CVTableViewController {
     private func sendButtonPressed() {
         HUD.show(.progress)
         switch ParametersManager.shared.apiVersion {
-        case .v4:
-            RBManager.shared.reportV4(code: symptomsParams.code,
-                                      symptomsOrigin: symptomsParams.symptomsDate,
-                                      positiveTestDate: symptomsParams.positiveTestDate) { error in
+        case .v5:
+            RBManager.shared.report(code: symptomsParams.code,
+                                    symptomsOrigin: symptomsParams.symptomsDate,
+                                    positiveTestDate: symptomsParams.positiveTestDate) { error in
                 VenuesManager.shared.report { _ in
                     HUD.hide()
                     self.processPostReport(error: error)
                 }
-            }
-        default:
-            RBManager.shared.report(code: symptomsParams.code,
-                                    symptomsOrigin: symptomsParams.symptomsDate,
-                                    positiveTestDate: symptomsParams.positiveTestDate) { error in
-                HUD.hide()
-                self.processPostReport(error: error)
             }
         }
     }

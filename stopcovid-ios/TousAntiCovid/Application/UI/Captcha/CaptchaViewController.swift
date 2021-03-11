@@ -67,7 +67,9 @@ final class CaptchaViewController: CVTableViewController {
         let textRow: CVRow = CVRow(title: captcha.isImage ? "captchaController.mainMessage.image.title".localized : "captchaController.mainMessage.audio.title".localized,
                                    subtitle: captcha.isImage ? "captchaController.mainMessage.image.subtitle".localized : "captchaController.mainMessage.audio.subtitle".localized,
                                    xibName: .textCell,
-                                   theme: CVRow.Theme(topInset: 30.0, bottomInset: 30.0))
+                                   theme: CVRow.Theme(topInset: 30.0,
+                                                      bottomInset: 30.0,
+                                                      titleFont: { Appearance.Cell.Text.smallHeadTitleFont }))
         rows.append(textRow)
         
         let imageWidth: CGFloat = UIScreen.main.bounds.width - 2 * Appearance.Cell.leftMargin

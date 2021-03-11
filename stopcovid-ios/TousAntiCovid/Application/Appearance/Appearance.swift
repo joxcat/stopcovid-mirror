@@ -99,10 +99,6 @@ enum Appearance {
         
     }
     
-    enum Section {
-        static var titleFont: UIFont  { .marianneBold(size: 24.0) }
-    }
-    
     enum Cell {
         
         enum Onboarding {
@@ -125,7 +121,8 @@ enum Appearance {
             }
             static var captionTitleFont: UIFont { UIFontMetrics(forTextStyle: .caption2).scaledFont(for: .regular(size: 11.0)) }
             static var captionTitleFont2: UIFont { UIFontMetrics(forTextStyle: .caption2).scaledFont(for: .marianneMedium(size: 12.0)) }
-            static var headTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 25.0)) }
+            static var smallHeadTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 19.0)) }
+            static var headTitleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneExtraBold(size: 24.0)) }
             static var headTitleFont2: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneExtraBold(size: 50.0)) }
             static var headTitleFont3: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 50.0)) }
             static var titleFont: UIFont { UIFontMetrics(forTextStyle: .body).scaledFont(for: .marianneBold(size: 17.0)) }

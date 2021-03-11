@@ -22,7 +22,7 @@ final class FlashReportCodeController: FlashCodeController {
     }
     
     override func initUI() {
-        title = "sickController.button.flash".localized
+        title = "declareController.button.flash".localized
         explanationLabel.text = "scanCodeController.explanation".localized
         explanationLabel.font = Appearance.Cell.Text.standardFont
         explanationLabel.adjustsFontForContentSizeCategory = true

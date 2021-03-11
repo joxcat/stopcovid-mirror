@@ -59,7 +59,8 @@ final class OnboardingWelcomeController: OnboardingController {
         let textRow: CVRow = CVRow(title: "onboarding.welcomeController.mainMessage.title".localized,
                                    subtitle: "onboarding.welcomeController.mainMessage.subtitle".localized,
                                    xibName: .textCell,
-                                   theme: CVRow.Theme(topInset: 16.0))
+                                   theme: CVRow.Theme(topInset: 16.0,
+                                                      titleFont: { Appearance.Cell.Text.smallHeadTitleFont }))
         rows.append(textRow)
         return rows
     }

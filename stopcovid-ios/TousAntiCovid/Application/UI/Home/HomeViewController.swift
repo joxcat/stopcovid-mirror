@@ -237,7 +237,7 @@ final class HomeViewController: CVTableViewController {
         })
         rows.append(stateRow)
         rows.append(activationButtonRow(isRegistered: RBManager.shared.isRegistered))
-        rows.append(contentsOf: healthSectionRows(isAtRisk: RBManager.shared.isAtRisk))
+        rows.append(contentsOf: healthSectionRows())
         rows.append(contentsOf: infoSectionRows())
         if ParametersManager.shared.displayAttestation {
             rows.append(contentsOf: attestationSectionRows())
@@ -327,7 +327,7 @@ final class HomeViewController: CVTableViewController {
             cancelReactivationReminder()
             if RBManager.shared.isRegistered {
                 if RBManager.shared.currentEpoch == nil {
-                    processStatusV3()
+                    processStatus()
                 } else {
                     processRegistrationDone()
                     isChangingState = false
@@ -367,7 +367,7 @@ final class HomeViewController: CVTableViewController {
             switch result {
             case let .success(captcha):
                 self.showCaptchaChallenge(captcha, { id, answer in
-                    self.processRegisterV3(answer: answer, captchaId: id, activateProximityAfterRegistration: activateProximityAfterRegistration) { error in
+                    self.processRegister(answer: answer, captchaId: id, activateProximityAfterRegistration: activateProximityAfterRegistration) { error in
                         completion(error)
                     }
                 }, { [weak self] in
@@ -385,9 +385,9 @@ final class HomeViewController: CVTableViewController {
         }
     }
     
-    private func processStatusV3() {
+    private func processStatus() {
         HUD.show(.progress)
-        RBManager.shared.statusV3 { error in
+        StatusManager.shared.status(force: true) { error in
             HUD.hide()
             self.isChangingState = false
             if let error = error {
@@ -401,16 +401,14 @@ final class HomeViewController: CVTableViewController {
                                    okTitle: "common.ok".localized)
                 }
             } else {
-                NotificationsManager.shared.scheduleUltimateNotification(minHour: ParametersManager.shared.minHourContactNotif, maxHour: ParametersManager.shared.maxHourContactNotif)
                 self.processRegistrationDone()
             }
         }
-        VenuesManager.shared.status()
     }
     
-    private func processRegisterV3(answer: String, captchaId: String, activateProximityAfterRegistration: Bool = true, completion: @escaping (_ error: Error?) -> ()) {
+    private func processRegister(answer: String, captchaId: String, activateProximityAfterRegistration: Bool = true, completion: @escaping (_ error: Error?) -> ()) {
         HUD.show(.progress)
-        RBManager.shared.registerV3(captcha: answer, captchaId: captchaId) { error in
+        RBManager.shared.register(captcha: answer, captchaId: captchaId) { error in
             HUD.hide()
             if let error = error {
                 if (error as NSError).code == -1 {
@@ -579,65 +577,35 @@ extension HomeViewController {
         }
     }
     
-    private func healthSectionRows(isAtRisk: Bool) -> [CVRow] {
+    private func healthSectionRows() -> [CVRow] {
         var rows: [CVRow] = []
         
-        let showHealth: Bool = RBManager.shared.lastStatusReceivedDate != nil || RBManager.shared.isSick
-        let showDeclare: Bool = RBManager.shared.isRegistered && !RBManager.shared.isSick
-        
-        if showHealth {
-            let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
-            let notificationDateString: String = notificationDate?.relativelyFormatted() ?? "N/A"
-            
-            let header: String? = RBManager.shared.isSick ? nil : notificationDateString
-            let title: String
-            let subtitle: String?
-            let startColor: UIColor
-            let endColor: UIColor
-            
+        if !StatusManager.shared.hideStatus {
             if RBManager.shared.isSick {
-                title = "home.healthSection.isSick.standaloneTitle".localized
-                subtitle = nil
-                startColor = Asset.Colors.gradientStartBlue.color
-                endColor = Asset.Colors.gradientEndBlue.color
-            } else if isAtRisk {
-                title = "home.healthSection.contact.cellTitle".localized
-                subtitle = "home.healthSection.contact.cellSubtitle".localized
-                startColor = Asset.Colors.gradientStartRed.color
-                endColor = Asset.Colors.gradientEndRed.color
-            } else if VenuesManager.shared.lastWarningRiskReceivedDate != nil {
-                title = "home.healthSection.warningContact.cellTitle".localized
-                subtitle = "home.healthSection.warningContact.cellSubtitle".localized
-                startColor = Asset.Colors.gradientStartOrange.color
-                endColor = Asset.Colors.gradientEndOrange.color
-            } else {
-                title = "home.healthSection.noContact.cellTitle".localized
-                subtitle = "home.healthSection.noContact.cellSubtitle".localized
-                startColor = Asset.Colors.gradientStartGreen.color
-                endColor = Asset.Colors.gradientEndGreen.color
+                let row: CVRow = contactStatusRow(header: nil,
+                                                  title: "home.healthSection.isSick.standaloneTitle".localized,
+                                                  subtitle: nil,
+                                                  startColor: Asset.Colors.gradientStartBlue.color,
+                                                  endColor: Asset.Colors.gradientEndBlue.color)
+                rows.append(row)
+            } else if let currentRiskLevel = RisksUIManager.shared.currentLevel {
+                let notificationDate: Date? = RBManager.shared.lastStatusReceivedDate
+                let notificationDateString: String = notificationDate?.relativelyFormatted() ?? "N/A"
+                let row: CVRow = contactStatusRow(header: notificationDateString,
+                                                  title: currentRiskLevel.labels.homeTitle.localized,
+                                                  subtitle: currentRiskLevel.labels.homeSub.localized,
+                                                  startColor: currentRiskLevel.color.fromColor,
+                                                  endColor: currentRiskLevel.color.toColor)
+                rows.append(row)
             }
-            let contactStatusRow: CVRow = CVRow(title: title,
-                                                subtitle: subtitle,
-                                                accessoryText: header,
-                                                image: Asset.Images.healthCard.image,
-                                                xibName: .contactStatusCell,
-                                                theme: CVRow.Theme(topInset: 0.0,
-                                                                   bottomInset: (RBManager.shared.isSick && !ParametersManager.shared.displayIsolation) ? 0.0 : Appearance.Cell.leftMargin,
-                                                                   textAlignment: .natural,
-                                                                   titleColor: .white,
-                                                                   subtitleColor: .white),
-                                                associatedValue: (startColor, endColor),
-                                                selectionAction: { [weak self] in
-                                                    self?.didTouchHealth()
-                                                }, willDisplay: { cell in
-                                                    cell.selectionStyle = .none
-                                                    cell.accessoryType = .none
-                                                })
-            rows.append(contactStatusRow)
         }
+
+        let showDeclare: Bool = RBManager.shared.isRegistered && !RBManager.shared.isSick
+        let displayVaccination: Bool = ParametersManager.shared.displayVaccination
         if ParametersManager.shared.displayIsolation {
-            rows.append(contentsOf: isolationRows(isLastSectionBlock: !showDeclare))
+            rows.append(contentsOf: isolationRows(isLastSectionBlock: !showDeclare && !displayVaccination))
         }
+
         if showDeclare {
             let declareRow: CVRow = CVRow(title: "home.declareSection.cellTitle".localized,
                                           subtitle: "home.declareSection.cellSubtitle".localized,
@@ -656,7 +624,7 @@ extension HomeViewController {
             
             rows.append(declareRow)
         }
-        if ParametersManager.shared.displayVaccination {
+        if displayVaccination {
             let vaccinationRow: CVRow = CVRow(title: "home.vaccinationSection.cellTitle".localized,
                                               subtitle: "home.vaccinationSection.cellSubtitle".localized,
                                               image: Asset.Images.pharmacy.image,
@@ -682,10 +650,31 @@ extension HomeViewController {
                                                 theme: CVRow.Theme(topInset: 30.0,
                                                                    bottomInset: 10.0,
                                                                    textAlignment: .natural,
-                                                                   titleFont: { Appearance.Section.titleFont }))
+                                                                   titleFont: { Appearance.Cell.Text.headTitleFont }))
             rows.insert(healthSectionRow, at: 0)
         }
         return rows
+    }
+
+    private func contactStatusRow(header: String?, title: String, subtitle: String?, startColor: UIColor, endColor: UIColor) -> CVRow {
+        let contactStatusRow: CVRow = CVRow(title: title,
+                                            subtitle: subtitle,
+                                            accessoryText: header,
+                                            image: Asset.Images.healthCard.image,
+                                            xibName: .contactStatusCell,
+                                            theme: CVRow.Theme(topInset: 0.0,
+                                                               bottomInset: (RBManager.shared.isSick && !ParametersManager.shared.displayIsolation) ? 0.0 : Appearance.Cell.leftMargin,
+                                                               textAlignment: .natural,
+                                                               titleColor: .white,
+                                                               subtitleColor: .white),
+                                            associatedValue: (startColor, endColor),
+                                            selectionAction: { [weak self] in
+                                                self?.didTouchHealth()
+                                            }, willDisplay: { cell in
+                                                cell.selectionStyle = .none
+                                                cell.accessoryType = .none
+                                            })
+        return contactStatusRow
     }
     
     private func venuesSectionRows() -> [CVRow] {
@@ -695,7 +684,7 @@ extension HomeViewController {
                                              theme: CVRow.Theme(topInset: 30.0,
                                                                 bottomInset: 10.0,
                                                                 textAlignment: .natural,
-                                                                titleFont: { Appearance.Section.titleFont }))
+                                                                titleFont: { Appearance.Cell.Text.headTitleFont }))
         rows.append(venuesSectionRow)
         let recordRow: CVRow = CVRow(title: "home.venuesSection.recordCell.title".localized,
                                      subtitle: "home.venuesSection.recordCell.subtitle".localized,
@@ -747,7 +736,7 @@ extension HomeViewController {
                                           theme: CVRow.Theme(topInset: 30.0,
                                                              bottomInset: 10.0,
                                                              textAlignment: .natural,
-                                                             titleFont: { Appearance.Section.titleFont }))
+                                                             titleFont: { Appearance.Cell.Text.headTitleFont }))
         rows.append(infoSectionRow)
         
         let highlightedKeyFigure: KeyFigure? = KeyFiguresManager.shared.highlightedKeyFigure
@@ -761,7 +750,6 @@ extension HomeViewController {
                                                                           topInset: 0.0,
                                                                           bottomInset: Appearance.Cell.leftMargin,
                                                                           textAlignment: .natural,
-                                                                          titleFont: { Appearance.Cell.Text.titleFont },
                                                                           titleColor: highlightedKeyFigure.color,
                                                                           subtitleFont: { Appearance.Cell.Text.captionTitleFont },
                                                                           subtitleColor: Appearance.Cell.Text.captionTitleColor,
@@ -797,7 +785,28 @@ extension HomeViewController {
             rows.append(keyFiguresRow)
         }
         if KeyFiguresManager.shared.displayDepartmentLevel {
-            if KeyFiguresManager.shared.currentPostalCode == nil {
+            if let currentPostalCode = KeyFiguresManager.shared.currentPostalCode {
+                let title: String = String(format: "common.updatePostalCode".localized, currentPostalCode)
+                let updatePostalCodeRow: CVRow = CVRow(title: title,
+                                                       subtitle: "common.updatePostalCode.end".localized,
+                                                       image: Asset.Images.location.image,
+                                                       xibName: .standardCardHorizontalCell,
+                                                       theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
+                                                                           topInset: 0.0,
+                                                                           bottomInset: Appearance.Cell.leftMargin,
+                                                                           textAlignment: .natural,
+                                                                           subtitleFont: { Appearance.Cell.Text.standardFont },
+                                                                           subtitleColor: Appearance.Cell.Text.headerTitleColor,
+                                                                           imageTintColor: Appearance.Cell.Text.headerTitleColor),
+                                                       selectionAction: { [weak self] in
+                                                        self?.didTouchUpdateLocation()
+                                                       },
+                                                       willDisplay: { cell in
+                                                        cell.selectionStyle = .none
+                                                        cell.accessoryType = .none
+                                                       })
+                rows.append(updatePostalCodeRow)
+            } else {
                 let newPostalCodeRow: CVRow = CVRow(title: "home.infoSection.newPostalCode".localized,
                                                     subtitle: "home.infoSection.newPostalCode.subtitle".localized,
                                                     image: Asset.Images.location.image,
@@ -806,9 +815,7 @@ extension HomeViewController {
                                                                         topInset: 0.0,
                                                                         bottomInset: 0.0,
                                                                         textAlignment: .natural,
-                                                                        titleFont: { Appearance.Cell.Text.titleFont },
                                                                         titleColor: Appearance.Button.Primary.titleColor,
-                                                                        subtitleFont: { Appearance.Cell.Text.subtitleFont },
                                                                         subtitleColor: Appearance.Button.Primary.titleColor,
                                                                         imageTintColor: Appearance.Button.Primary.titleColor,
                                                                         separatorLeftInset: Appearance.Cell.leftMargin,
@@ -827,25 +834,6 @@ extension HomeViewController {
                     self?.didTouchUpdateLocation()
                 }
                 rows.append(addActionRow)
-            } else {
-                let updatePostalCodeRow: CVRow = CVRow(title: "home.infoSection.updatePostalCode".localized,
-                                                       image: Asset.Images.location.image,
-                                                       xibName: .standardCardCell,
-                                                       theme:  CVRow.Theme(backgroundColor: Appearance.Cell.cardBackgroundColor,
-                                                                           topInset: 0.0,
-                                                                           bottomInset: Appearance.Cell.leftMargin,
-                                                                           textAlignment: .natural,
-                                                                           titleFont: { Appearance.Cell.Text.standardFont },
-                                                                           titleColor: Appearance.Cell.Text.headerTitleColor,
-                                                                           imageTintColor: Appearance.Cell.Text.headerTitleColor),
-                                                       selectionAction: { [weak self] in
-                                                        self?.didTouchUpdateLocation()
-                                                       },
-                                                       willDisplay: { cell in
-                                                        cell.selectionStyle = .none
-                                                        cell.accessoryType = .none
-                                                       })
-                rows.append(updatePostalCodeRow)
             }
         }
         if let info = InfoCenterManager.shared.info.sorted(by: { $0.timestamp > $1.timestamp }).first {
@@ -879,7 +867,7 @@ extension HomeViewController {
                                              theme: CVRow.Theme(topInset: 30.0,
                                                                 bottomInset: 10.0,
                                                                 textAlignment: .natural,
-                                                                titleFont: { Appearance.Section.titleFont }))
+                                                                titleFont: { Appearance.Cell.Text.headTitleFont }))
         rows.append(attestationSectionRow)
         
         let attestationsCount: Int = AttestationsManager.shared.attestations.filter { !$0.isExpired }.count
@@ -924,7 +912,7 @@ extension HomeViewController {
                                           theme: CVRow.Theme(topInset: 30.0,
                                                              bottomInset: 10.0,
                                                              textAlignment: .natural,
-                                                             titleFont: { Appearance.Section.titleFont }))
+                                                             titleFont: { Appearance.Cell.Text.headTitleFont }))
         rows.append(moreSectionRow)
         
         var menuEntries: [GroupedMenuEntry] = [GroupedMenuEntry(image: Asset.Images.usefulLinks.image,
@@ -961,7 +949,6 @@ extension HomeViewController {
                                                          actionBlock: { [weak self] in
                                                              self?.didTouchAbout()
                                                          })])
-        
         rows.append(contentsOf: menuRowsForEntries(menuEntries))
         return rows
     }
@@ -1073,4 +1060,10 @@ extension HomeViewController: IsolationChangesObserver {
         reloadUI(animated: true)
     }
     
+}
+
+extension HomeViewController: RisksUIChangesObserver {
+    func risksUIChanged() {
+        reloadUI(animated: true)
+    }
 }

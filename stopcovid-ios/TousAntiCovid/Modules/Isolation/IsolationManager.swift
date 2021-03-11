@@ -35,7 +35,9 @@ final class IsolationManager {
     
     // MARK: - Public workable values -
     var currentState: State? { State(rawValue: isolationState ?? "") }
-    var currentRecommendationState: RecommendationState { calculateRecommendationState() }
+    var currentRecommendationState: RecommendationState {
+        return calculateRecommendationState()
+    }
     
     private var storageManager: StorageManager!
     private var canTriggerUpdateNotif: Bool = true
@@ -145,7 +147,9 @@ final class IsolationManager {
         return date?.roundingToBeginningOfDay()
     }
     
-    var stillHavingFeverNotificationTriggerDate: Date { currentIsolationEndDate ?? Date() }
+    var stillHavingFeverNotificationTriggerDate: Date {
+        return currentIsolationEndDate ?? Date()
+    }
     
     // MARK: - Contact case dates calculated values -
     private var contactCaseIsolationContactCalculatedDate: Date {
@@ -153,7 +157,7 @@ final class IsolationManager {
         if RBManager.shared.isSick {
             date = isolationLastContactDate ?? Date()
         } else {
-            date = isolationLastContactDate ?? storageManager.currentRiskScoringDate() ?? storageManager.currentWarningRiskScoringDate() ?? Date()
+            date = isolationLastContactDate ?? RBManager.shared.currentStatusRiskLevel?.lastRiskScoringDate ?? Date()
         }
         return date
     }
@@ -185,7 +189,7 @@ final class IsolationManager {
     private var positiveCaseIsolationStartDate: Date? { isolationSymptomsStartDate ?? isolationPositiveTestingDate }
     private var positiveCaseIsolationEndDate: Date? {
         guard let startDate = positiveCaseIsolationStartDate else { return nil }
-        let date: Date = startDate.addingTimeInterval(ParametersManager.shared.isolationDuration)
+        let date: Date = startDate.addingTimeInterval(ParametersManager.shared.isolationCovidDuration)
         return date.roundingToBeginningOfDay()
     }
     var isPositiveCaseIsolationEnded: Bool? {
@@ -194,7 +198,7 @@ final class IsolationManager {
     }
     private var positiveCasePostIsolationEndDate: Date? {
         guard let startDate = positiveCaseIsolationStartDate else { return nil }
-        let date: Date = startDate.addingTimeInterval(ParametersManager.shared.isolationDuration + ParametersManager.shared.postIsolationDuration)
+        let date: Date = startDate.addingTimeInterval(ParametersManager.shared.isolationCovidDuration + ParametersManager.shared.postIsolationDuration)
         return date.roundingToBeginningOfDay()
     }
     private var isPositiveCasePostIsolationEnded: Bool? {
@@ -206,7 +210,7 @@ final class IsolationManager {
     func start(storageManager: StorageManager) {
         self.storageManager = storageManager
     }
-    
+
     func updateState(_ state: State) {
         canTriggerUpdateNotif = false
         resetData()
@@ -215,19 +219,19 @@ final class IsolationManager {
         canTriggerUpdateNotif = true
         notifyObservers()
     }
-    
+
     func updateStateBasedOnAppMainStateIfNeeded() {
         guard currentState == nil else { return }
         var state: State? = nil
         if RBManager.shared.isSick {
             state = .positiveCase
-        } else if RBManager.shared.isAtRisk || VenuesManager.shared.isAtWarningRisk {
+        } else if StatusManager.shared.isAtRisk {
             state = .contactCase
         }
         guard let matchingState = state else { return }
         updateState(matchingState)
     }
-    
+
     func showSymptomsAlert(on controller: UIViewController, okHandler: @escaping () -> ()) {
         let alertController: UIAlertController = UIAlertController(title: "isolation.symptoms.alert.title".localized,
                                                                    message: "isolation.symptoms.alert.message".localized,
@@ -241,7 +245,7 @@ final class IsolationManager {
         }))
         controller.present(alertController, animated: true, completion: nil)
     }
-    
+
     func updateLastContactDate(_ date: Date, notifyChange: Bool) {
         if !notifyChange {
             canTriggerUpdateNotif = false
@@ -332,6 +336,8 @@ final class IsolationManager {
     // MARK: - Private methods -
     private func prefillNeededInfoFor(state: State) {
         switch state {
+        case .contactCase:
+            isolationLastContactDate = StatusManager.shared.currentStatusRiskLevel?.lastContactDate
         case .positiveCase:
             isolationPositiveTestingDate = RBManager.shared.reportPositiveTestDate
             isolationSymptomsStartDate = RBManager.shared.reportSymptomsStartDate
@@ -365,10 +371,8 @@ final class IsolationManager {
     }
     
     private func calculateInitialCase() -> RecommendationState {
-        let isAtRisk: Bool = RBManager.shared.isAtRisk
-        let isAtWarningRisk: Bool = VenuesManager.shared.lastWarningRiskReceivedDate != nil
         let isSick: Bool = RBManager.shared.isSick
-        return isAtRisk || isAtWarningRisk || isSick ? .initialCaseAtRiskOrSick : .initialCaseSafe
+        return StatusManager.shared.isAtRisk || isSick ? .initialCaseAtRiskOrSick : .initialCaseSafe
     }
     
     private func calculateSymptomsRecommendationState() -> RecommendationState {

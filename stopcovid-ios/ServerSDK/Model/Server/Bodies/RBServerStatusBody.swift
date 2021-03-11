@@ -16,5 +16,6 @@ struct RBServerStatusBody: RBServerBody {
     var ebid: String
     var time: String
     var mac: String
+    var pushInfo: RBServerPushInfo
     
 }

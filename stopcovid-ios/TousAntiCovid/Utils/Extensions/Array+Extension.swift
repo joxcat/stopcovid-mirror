@@ -16,4 +16,12 @@ extension Array {
         index < count ? self[index] : nil
     }
     
+    func max<T: Comparable>(_ keyPath: KeyPath<Element, T>) -> Element? {
+        self.max(by: { $0[keyPath: keyPath] < $1[keyPath: keyPath] })
+    }
+    
+    func maxValue<T: Comparable>(_ keyPath: KeyPath<Element, T>) -> T? {
+        self.max(by: { $0[keyPath: keyPath] < $1[keyPath: keyPath] })?[keyPath: keyPath]
+    }
+    
 }

@@ -24,7 +24,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @UserDefault(key: .isOnboardingDone)
     private var isOnboardingDone: Bool = false
     
-    private var lastStatusTriggerEventTimestamp: TimeInterval = 0.0
     private var backgroundFetchCompletionId: String?
     private var remoteNotificationCompletionId: String?
     
@@ -36,13 +35,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         InfoCenterManager.shared.start()
         KeyFiguresManager.shared.start()
         VaccinationCenterManager.shared.start()
+        RisksUIManager.shared.start()
         let storageManager: StorageManager = StorageManager()
         AttestationsManager.shared.start(storageManager: storageManager)
         VenuesManager.shared.start(storageManager: storageManager)
         IsolationManager.shared.start(storageManager: storageManager)
-        if #available(iOS 14.0, *) {
-            WidgetManager.shared.start()
-        }
         PrivacyManager.shared.start()
         LinksManager.shared.start()
         KeyFiguresExplanationsManager.shared.start()
@@ -52,7 +49,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         WarningServer.shared.start(baseUrl: { Constant.Server.warningBaseUrl },
-                                   certificateFile: Constant.Server.warningCertificate)
+                                   certificateFile: Constant.Server.warningCertificate,
+                                   requestLoggingHandler: { task, responseData, error in })
         
         RBManager.shared.start(isFirstInstall: !isAppAlreadyInstalled,
                                server: Server(baseUrl: { Constant.Server.baseUrl },
@@ -61,24 +59,24 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                                               configUrl: Constant.Server.configUrl,
                                               configCertificateFile: Constant.Server.resourcesCertificate,
                                               deviceTimeNotAlignedToServerTimeDetected: {
-                                    if UIApplication.shared.applicationState != .active {
-                                        NotificationsManager.shared.triggerDeviceTimeErrorNotification()
-                                    }
-                               }),
+                                                if UIApplication.shared.applicationState != .active {
+                                                    NotificationsManager.shared.triggerDeviceTimeErrorNotification()
+                                                }
+                                              }, requestLoggingHandler: { task, responseData, error in }),
                                storage: storageManager,
                                bluetooth: BluetoothManager(),
                                filter: FilteringManager(),
-                               isAtRiskDidChangeHandler: { isAtRisk in
-            if isAtRisk == true {
-                NotificationsManager.shared.scheduleAtRiskNotification(minHour: ParametersManager.shared.minHourContactNotif, maxHour: ParametersManager.shared.maxHourContactNotif)
-            }
-        }, didStopProximityDueToLackOfEpochsHandler: {
-            self.triggerStatusRequestIfNeeded()
-            NotificationsManager.shared.triggerRestartNotification()
-        }, didReceiveProximityHandler: {
-            self.triggerStatusRequestIfNeeded()
-        }, didSaveProximity: { _ in })
+                               didStopProximityDueToLackOfEpochsHandler: {
+                                    StatusManager.shared.status()
+                                    NotificationsManager.shared.triggerRestartNotification()
+                               }, didReceiveProximityHandler: {
+                                    StatusManager.shared.status()
+                               }, didSaveProximity: { proximity in })
         ParametersManager.shared.start()
+        if #available(iOS 14.0, *) {
+            WidgetManager.shared.start()
+        }
+        StatusManager.shared.start()
         isAppAlreadyInstalled = true
         rootCoordinator.start()
         initAppMaintenance()
@@ -103,7 +101,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func applicationWillEnterForeground(_ application: UIApplication) {
-        triggerStatusRequestIfNeeded { error in
+        StatusManager.shared.status { error in
             if let error = error, (error as NSError).code == -1 {
                 NotificationsManager.shared.triggerDeviceTimeErrorNotification()
             }
@@ -117,7 +115,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         let uuid: String = UUID().uuidString
         backgroundFetchCompletionId = uuid
-        triggerStatusRequestIfNeeded() { error in
+        StatusManager.shared.status() { error in
             if self.backgroundFetchCompletionId == uuid {
                 self.backgroundFetchCompletionId = nil
                 completionHandler(.newData)
@@ -135,7 +133,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         let uuid: String = UUID().uuidString
         remoteNotificationCompletionId = uuid
-        triggerStatusRequestIfNeeded(showNotifications: true) { error in
+        StatusManager.shared.status(showNotifications: true) { error in
             if self.remoteNotificationCompletionId == uuid {
                 self.remoteNotificationCompletionId = nil
                 completionHandler(.newData)
@@ -199,60 +197,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             shortcuts.append(venuesShortcut)
         }
         UIApplication.shared.shortcutItems = shortcuts
-    }
-
-    func triggerStatusRequestIfNeeded(showNotifications: Bool = false, force: Bool = false, completion: ((_ error: Error?) -> ())? = nil) {
-        let nowTimestamp: TimeInterval = Date().timeIntervalSince1970
-        guard nowTimestamp - lastStatusTriggerEventTimestamp > Constant.secondsBeforeStatusRetry || force else {
-            completion?(NSError.localizedError(message: "lastStatusTriggerEventTimestamp registered less than \(Int(Constant.secondsBeforeStatusRetry)) seconds ago", code: 0))
-            return
-        }
-        self.lastStatusTriggerEventTimestamp = nowTimestamp
-        if RBManager.shared.isRegistered {
-            let lastStatusErrorTimestamp: Double = RBManager.shared.lastStatusErrorDate?.timeIntervalSince1970 ?? 0.0
-            let lastStatusSuccessTimestamp: Double = RBManager.shared.lastStatusReceivedDate?.timeIntervalSince1970 ?? 0.0
-            let mostRecentResponseTimestamp: Double = max(lastStatusErrorTimestamp, lastStatusSuccessTimestamp)
-            let nowTimestamp: Double = Date().timeIntervalSince1970
-            if (nowTimestamp - mostRecentResponseTimestamp >= ParametersManager.shared.minStatusRetryTimeInterval && nowTimestamp - lastStatusSuccessTimestamp >= ParametersManager.shared.statusTimeInterval) || force {
-                switch ParametersManager.shared.apiVersion {
-                case .v3, .v4:
-                    RBManager.shared.statusV3 { error in
-                        if showNotifications {
-                            self.processStatusResponseNotification(error: error)
-                        }
-                        if error == nil {
-                            NotificationsManager.shared.scheduleUltimateNotification(minHour: ParametersManager.shared.minHourContactNotif, maxHour: ParametersManager.shared.maxHourContactNotif)
-                        }
-                        completion?(error)
-                    }
-                    VenuesManager.shared.status()
-                }
-            } else {
-                if showNotifications && [.v3, .v4].contains(ParametersManager.shared.apiVersion) {
-                    self.processStatusResponseNotification(error: nil)
-                }
-                let retryCriteria: String = "Current: \(Int(nowTimestamp - mostRecentResponseTimestamp)) | Expected: \(Int(ParametersManager.shared.minStatusRetryTimeInterval))"
-                let timeCriteria: String = "Current: \(Int(nowTimestamp - lastStatusSuccessTimestamp)) | Expected: \(Int(ParametersManager.shared.statusTimeInterval))"
-                completion?(NSError.localizedError(message: "Last status requested/received too recently:\n\n-----\nRetry\n-----\n\(retryCriteria)\n\n--------\nMin time\n--------\n\(timeCriteria)", code: 0))
-            }
-        } else {
-            completion?(nil)
-        }
-    }
-
-    private func processStatusResponseNotification(error: Error?) {
-        let minHoursBetweenNotif: Int = ParametersManager.shared.minHoursBetweenVisibleNotif
-        if error != nil {
-            NotificationsManager.shared.triggerRestartNotification()
-        } else {
-            guard ParametersManager.shared.pushDisplayAll else { return }
-            if RBManager.shared.isProximityActivated {
-                guard ParametersManager.shared.pushDisplayOnSuccess else { return }
-                NotificationsManager.shared.triggerProximityServiceRunningNotification(minHoursBetweenNotif: minHoursBetweenNotif)
-            } else {
-                NotificationsManager.shared.triggerProximityServiceNotRunningNotification(minHoursBetweenNotif: minHoursBetweenNotif)
-            }
-        }
     }
     
     private func processShortcutItem(_ shortcutItem: UIApplicationShortcutItem) {

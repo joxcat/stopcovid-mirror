@@ -330,7 +330,6 @@ extension IsolationFormViewController {
                                theme: CVRow.Theme(topInset: Appearance.Cell.leftMargin,
                                                   bottomInset: Appearance.Cell.leftMargin,
                                                   textAlignment: .natural,
-                                                  titleFont: { Appearance.Cell.Text.titleFont },
                                                   titleColor: Appearance.tintColor,
                                                   separatorLeftInset: 0.0,
                                                   separatorRightInset: 0.0))

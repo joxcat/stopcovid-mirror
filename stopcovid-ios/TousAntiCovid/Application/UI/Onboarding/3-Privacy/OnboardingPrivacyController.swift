@@ -66,6 +66,7 @@ final class OnboardingPrivacyController: OnboardingController {
                                                              topInset: Appearance.Cell.leftMargin,
                                                              bottomInset: Appearance.Cell.leftMargin,
                                                              textAlignment: .natural,
+                                                             titleFont: { Appearance.Cell.Text.smallHeadTitleFont },
                                                              separatorLeftInset: Appearance.Cell.leftMargin))
             let linkRows: [CVRow] = section.links?.map { link in
                 CVRow(title: link.label,

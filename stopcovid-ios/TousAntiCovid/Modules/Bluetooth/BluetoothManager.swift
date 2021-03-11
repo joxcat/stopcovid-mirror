@@ -31,14 +31,19 @@ final class BluetoothManager: RBBluetooth {
         let stateChangedHandler: StateChangedHandler = { [weak self] state in
             guard let self = self else { return }
             guard [.unsupported, .unknown].contains(state) else {
+                // If we're in an expected working state, we can reset the tries count as we stop the retries loop.
                 self.startTriesCount = 0
                 return
             }
+            // Then we stop the services.
             self.stop()
+            // We check here if we can still try to start the services.
             guard self.startTriesCount < self.maxStartTriesCount else {
+                // If we reached the maximum tries count, we can reset the tries count as we stop the retries loop.
                 self.startTriesCount = 0
                 return
             }
+            // If we didn't reach the maximum tries count, we can try to start the services again.
             self.startTriesCount += 1
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                 self.start(helloMessageCreationHandler: helloMessageCreationHandler, ebidExtractionHandler: ebidExtractionHandler, didReceiveProximity: didReceiveProximity)

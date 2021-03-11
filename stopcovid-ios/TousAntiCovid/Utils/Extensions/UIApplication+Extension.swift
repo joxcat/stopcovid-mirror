@@ -22,6 +22,10 @@ extension UIApplication {
         Bundle.main.bundleIdentifier!
     }
     
+    var displayName: String {
+        Bundle.main.infoDictionary!["CFBundleDisplayName"] as! String
+    }
+    
     func openSettings() {
         if let url = URL(string: UIApplication.openSettingsURLString), canOpenURL(url) {
             open(url)

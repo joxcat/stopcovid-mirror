@@ -12,6 +12,7 @@ import UIKit
 
 struct RBWarningServerStatusResponse: RBServerResponse {
 
-    var atRisk: Bool
+    let riskLevel: Double
+    let lastContactDate: String?
 
 }

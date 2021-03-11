@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "Assets_GestesBarriere_Distance.pdf",
+      "filename" : "GestesBarriere_distance.pdf",
       "idiom" : "universal"
     },
     {
@@ -11,7 +11,7 @@
           "value" : "light"
         }
       ],
-      "filename" : "Assets_GestesBarriere_Distance-1.pdf",
+      "filename" : "GestesBarriere_distance-1.pdf",
       "idiom" : "universal"
     },
     {
@@ -21,7 +21,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Distance_Dark.pdf",
+      "filename" : "GestesBarriere_distance Dark.pdf",
       "idiom" : "universal"
     }
   ],

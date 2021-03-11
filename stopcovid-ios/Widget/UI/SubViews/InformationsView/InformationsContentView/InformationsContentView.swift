@@ -16,17 +16,15 @@ struct InformationsContentView: View {
     
     var title: String
     var subtitle: String?
-    var isAtRisk: Bool
-    var isSick: Bool
-    var didReceiveStatus: Bool
-    
+    var content: WidgetContent
+
     var body: some View {
-        VStack(spacing: isAtRisk ? 3 : 6) {
+        VStack(spacing: content.currentRiskLevelIsNotZero ? 3 : 6) {
             if let subtitle = subtitle {
                 HStack {
                     Text(subtitle)
                         .font(.system(size: 13))
-                        .foregroundColor(didReceiveStatus ? .white : Color(.label))
+                        .foregroundColor(content.didReceiveStatus ? .white : Color(.label))
                         .opacity(0.8)
                     Spacer()
                 }
@@ -37,7 +35,7 @@ struct InformationsContentView: View {
                 Text(title)
                     .fixedSize(horizontal: false, vertical: true)
                     .font(font)
-                    .foregroundColor(didReceiveStatus || isSick ? .white : Color(.label))
+                    .foregroundColor(content.didReceiveStatus || content.isSick ? .white : Color(.label))
                     .lineLimit(maxLines)
                 Spacer()
             }
@@ -46,37 +44,19 @@ struct InformationsContentView: View {
 }
 
 struct SmallInformationsContentView_Previews: PreviewProvider {
+    static let content: WidgetContent = WidgetContent(isProximityActivated: true, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 0.0)
     static var previews: some View {
-        InformationsContentView(title: "Exposition à risque.", subtitle: "10/09 - 13:44", isAtRisk: true, isSick: false, didReceiveStatus: true)
+        InformationsContentView(title: "Exposition à risque.", subtitle: "10/09 - 13:44", content: content)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
             .background(Color.red)
-        InformationsContentView(title: "Pas de rencontre à risque.", subtitle: "10/09 - 13:44", isAtRisk: false, isSick: false, didReceiveStatus: true)
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
-        InformationsContentView(title: "Exposition à risque.", subtitle: "10/09 - 13:44", isAtRisk: true, isSick: false, didReceiveStatus: true)
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
-            .background(Color.red)
-            .environment(\.colorScheme, .dark)
-        InformationsContentView(title: "Pas de rencontre à risque.", subtitle: "10/09 - 13:44", isAtRisk: false, isSick: false, didReceiveStatus: true)
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
-            .background(Color.black)
-            .environment(\.colorScheme, .dark)
     }
 }
 
 struct MediumInformationsContentView_Previews: PreviewProvider {
+    static let content: WidgetContent = WidgetContent(isProximityActivated: true, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 0.0)
     static var previews: some View {
-        InformationsContentView(title: "Vous avez été exposé à au moins un utilisateur diagnostiqué comme un cas de COVID-19.", subtitle: "Le 10 septembre à 13:44", isAtRisk: true, isSick: false, didReceiveStatus: true)
+        InformationsContentView(title: "Vous avez été exposé à au moins un utilisateur diagnostiqué comme un cas de COVID-19.", subtitle: "Le 10 septembre à 13:44", content: content)
             .previewContext(WidgetPreviewContext(family: .systemMedium))
             .background(Color.red)
-        InformationsContentView(title: "Vous n’avez pas rencontré d’utilisateur diagnostiqué comme un cas de COVID-19.", subtitle: "Le 10 septembre à 13:44", isAtRisk: false, isSick: false, didReceiveStatus: true)
-            .previewContext(WidgetPreviewContext(family: .systemMedium))
-        InformationsContentView(title: "Vous avez été exposé à au moins un utilisateur diagnostiqué comme un cas de COVID-19.", subtitle: "Le 10 septembre à 13:44", isAtRisk: false, isSick: false, didReceiveStatus: true)
-            .previewContext(WidgetPreviewContext(family: .systemMedium))
-            .background(Color.black)
-            .environment(\.colorScheme, .dark)
-        InformationsContentView(title: "Vous n’avez pas rencontré d’utilisateur diagnostiqué comme un cas de COVID-19.", subtitle: "Le 10 septembre à 13:44", isAtRisk: true, isSick: false, didReceiveStatus: true)
-            .previewContext(WidgetPreviewContext(family: .systemMedium))
-            .background(Color.red)
-            .environment(\.colorScheme, .dark)
     }
 }

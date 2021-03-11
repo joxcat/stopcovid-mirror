@@ -78,8 +78,7 @@ final class FilteringManager: RBFiltering {
                                                 timeWindow: json["timeWindow"] as? Double ?? 120.0,
                                                 timeOverlap: json["timeOverlap"] as? Double ?? 60.0)
         } catch {
-            let error: Error = NSError.localizedError(message: error.localizedDescription, code: 0)
-            throw error
+            throw NSError.localizedError(message: error.localizedDescription, code: 0)
         }
     }
     

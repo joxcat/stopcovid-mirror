@@ -33,7 +33,7 @@ final class EnterCodeController: CVTableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "sickController.button.tap".localized
+        title = "declareController.button.tap".localized
         DeepLinkingManager.shared.enterCodeController = self
         initUI()
         reloadUI()

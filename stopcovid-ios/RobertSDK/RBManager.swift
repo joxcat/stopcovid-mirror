@@ -23,6 +23,7 @@ public final class RBManager {
     private var ka: Data? { storage.getKa() }
     private var kea: Data? { storage.getKea() }
     
+    public var isInitialized: Bool { storage != nil }
     public var isRegistered: Bool { storage.areKeysStored() && storage.getLastEpoch() != nil }
     public var isProximityActivated: Bool {
         get { storage.isProximityActivated() }
@@ -40,13 +41,24 @@ public final class RBManager {
         get { storage.pushToken() }
         set { storage.save(pushToken: newValue) }
     }
-    public var isAtRisk_OLD: Bool? { storage.isAtRisk() }
-    public var isAtRisk: Bool {
-        let riskStartingDate: Date? = lastRiskReceivedDate?.rbDateByAddingDays(-(lastExposureTimeFrame ?? 0))
-        let isolationEndDate: Date? = riskStartingDate?.rbDateByAddingDays(14)
-        let now: Date = Date()
-        return (isolationEndDate ?? now).timeIntervalSince1970 - now.timeIntervalSince1970 > 0.0
+    
+    public var currentStatusRiskLevel: RBStatusRiskLevelInfo? {
+        get { storage.currentStatusRiskLevel() }
+        set { storage.saveCurrentStatusRiskLevel(newValue) }
     }
+    public var lastRobertStatusRiskLevel: RBStatusRiskLevelInfo? {
+        get { storage.lastRobertStatusRiskLevel() }
+        set { storage.saveLastRobertStatusRiskLevel(newValue) }
+    }
+    public var lastWarningStatusRiskLevel: RBStatusRiskLevelInfo? {
+        get { storage.lastWarningStatusRiskLevel() }
+        set { storage.saveLastWarningStatusRiskLevel(newValue) }
+    }
+    public var declarationToken: String? {
+        get { storage.declarationToken() }
+        set { storage.saveDeclarationToken(newValue) }
+    }
+    
     public var lastStatusRequestDate: Date? {
         get { storage.lastStatusRequestDate() }
         set { storage.saveLastStatusRequestDate(newValue) }
@@ -55,22 +67,15 @@ public final class RBManager {
         get { storage.lastStatusReceivedDate() }
         set { storage.saveLastStatusReceivedDate(newValue) }
     }
-    public var lastStatusErrorDate: Date? { storage.lastStatusErrorDate() }
+    public var lastStatusErrorDate: Date? {
+        get { storage.lastStatusErrorDate() }
+        set { storage.saveLastStatusErrorDate(newValue) }
+    }
     public var lastRiskReceivedDate: Date? {
         get { storage.lastRiskReceivedDate() }
-        set {
-            let wasAlreadyAtRisk: Bool = isAtRisk
-            if newValue == nil {
-                if !wasAlreadyAtRisk {
-                    storage.saveCurrentRiskScoringDate(nil)
-                }
-            } else {
-                storage.saveCurrentRiskScoringDate(newValue)
-            }
-            storage.saveLastRiskReceivedDate(newValue)
-            isAtRiskDidChangeHandler?(isAtRisk)
-        }
+        set { storage.saveLastRiskReceivedDate(newValue) }
     }
+
     public var reportDate: Date? {
         get { storage.reportDate() }
         set { storage.saveReportDate(newValue) }
@@ -104,7 +109,6 @@ public final class RBManager {
     public var preSymptomsSpan: Int?
     public var positiveSampleSpan: Int?
     
-    private var isAtRiskDidChangeHandler: ((_ isAtRisk: Bool?) -> ())?
     private var didStopProximityDueToLackOfEpochsHandler: (() -> ())?
     private var didReceiveProximityHandler: (() -> ())?
     private var didSaveProximity: ((_ receivedProximity: RBReceivedProximity) -> ())?
@@ -113,12 +117,11 @@ public final class RBManager {
     // Prevent any other instantiations.
     private init() {}
     
-    public func start(isFirstInstall: Bool = false, server: RBServer, storage: RBStorage, bluetooth: RBBluetooth, filter: RBFiltering, restartProximityIfPossible: Bool = true, isAtRiskDidChangeHandler: @escaping (_ isAtRisk: Bool?) -> (), didStopProximityDueToLackOfEpochsHandler: @escaping () -> (), didReceiveProximityHandler: @escaping () -> (), didSaveProximity: ((_ receivedProximity: RBReceivedProximity) -> ())? = nil) {
+    public func start(isFirstInstall: Bool = false, server: RBServer, storage: RBStorage, bluetooth: RBBluetooth, filter: RBFiltering, restartProximityIfPossible: Bool = true, didStopProximityDueToLackOfEpochsHandler: @escaping () -> (), didReceiveProximityHandler: @escaping () -> (), didSaveProximity: ((_ receivedProximity: RBReceivedProximity) -> ())? = nil) {
         self.server = server
         self.storage = storage
         self.bluetooth = bluetooth
         self.filter = filter
-        self.isAtRiskDidChangeHandler = isAtRiskDidChangeHandler
         self.didStopProximityDueToLackOfEpochsHandler = didStopProximityDueToLackOfEpochsHandler
         self.didReceiveProximityHandler = didReceiveProximityHandler
         self.didSaveProximity = didSaveProximity
@@ -194,13 +197,6 @@ public final class RBManager {
         bluetooth.stop()
     }
     
-    private func migrateOldAtRiskStateIfNeeded() {
-        if isAtRisk_OLD == true && lastRiskReceivedDate == nil {
-            lastRiskReceivedDate = lastStatusReceivedDate
-            storage.clearIsAtRisk()
-        }
-    }
-    
     @objc private func applicationWillTerminate() {
         storage.stop()
     }
@@ -210,39 +206,53 @@ public final class RBManager {
 // MARK: - Server methods -
 extension RBManager {
     
-    public func statusV3(_ completion: @escaping (_ error: Error?) -> ()) {
+    public func status(_ completion: @escaping (_ result: Result<RBStatusRiskLevelInfo, Error>) -> ()) {
         guard let ka = ka else {
-            completion(NSError.rbLocalizedError(message: "No key found to make request", code: 0))
+            completion(.failure(NSError.rbLocalizedError(message: "No key found to make request", code: 0)))
             return
         }
         guard let epoch = currentEpochOrLast else {
-            completion(NSError.rbLocalizedError(message: "No epoch found to make request", code: 0))
+            completion(.failure(NSError.rbLocalizedError(message: "No epoch found to make request", code: 0)))
             return
         }
         do {
             let ntpTimestamp: Int = Date().timeIntervalSince1900
             let statusMessage: RBStatusMessage = try RBMessageGenerator.generateStatusMessage(for: epoch, ntpTimestamp: ntpTimestamp, key: ka)
             lastStatusRequestDate = Date()
-            server.statusV3(epochId: statusMessage.epochId, ebid: statusMessage.ebid, time: statusMessage.time, mac: statusMessage.mac) { result in
+            server.status(epochId: statusMessage.epochId, ebid: statusMessage.ebid, time: statusMessage.time, mac: statusMessage.mac) { result in
                 switch result {
                 case let .success(response):
                     do {
                         try self.processStatusResponse(response)
                         self.clearOldLocalProximities()
-                        completion(nil)
+                        
+                        var lastRiskScoringDate: Date?
+                        if let lastScoringDateTimestampString = response.lastRiskScoringDate {
+                            lastRiskScoringDate = Date(timeIntervalSince1900: Int(lastScoringDateTimestampString) ?? 0)
+                        }
+                        
+                        var lastContactDate: Date?
+                        if let lastContactDateTimestampString = response.lastContactDate {
+                            lastContactDate = Date(timeIntervalSince1900: Int(lastContactDateTimestampString) ?? 0)
+                        }
+                        
+                        let info: RBStatusRiskLevelInfo = RBStatusRiskLevelInfo(riskLevel: response.riskLevel,
+                                                                                lastContactDate: lastContactDate,
+                                                                                lastRiskScoringDate: lastRiskScoringDate)
+                        completion(.success(info))
                     } catch {
                         self.storage.saveLastStatusErrorDate(Date())
-                        completion(error)
+                        completion(.failure(error))
                     }
                 case let .failure(error):
                     if (error as NSError).code != NSError.lostConnectionCode {
                         self.storage.saveLastStatusErrorDate(Date())
                     }
-                    completion(error)
+                    completion(.failure(error))
                 }
             }
         } catch {
-            completion(error)
+            completion(.failure(error))
         }
     }
     
@@ -253,28 +263,7 @@ extension RBManager {
         let localHelloMessages: [RBLocalProximity] = storage.getLocalProximityList(from: origin, to: Date())
         do {
             let filteredProximities: [RBLocalProximity] = try filter.filter(proximities: localHelloMessages)
-            server.report(code: code, helloMessages: filteredProximities) { error in
-                if let error = error {
-                    completion(error)
-                } else {
-                    self.clearLocalProximityList()
-                    self.isSick = true
-                    completion(nil)
-                }
-            }
-        } catch {
-            completion(NSError.rbLocalizedError(message: "Filtering of hello messages failed: \(error.localizedDescription)", code: 0))
-        }
-    }
-    
-    public func reportV4(code: String, symptomsOrigin: Date?, positiveTestDate: Date?, completion: @escaping (_ error: Error?) -> ()) {
-        let originSymptoms: Date? = symptomsOrigin?.rbDateByAddingDays(-(preSymptomsSpan ?? 0))
-        let originPositiveTest: Date? = positiveTestDate?.rbDateByAddingDays(-(positiveSampleSpan ?? 0))
-        let origin: Date = originSymptoms ?? originPositiveTest ?? .distantPast
-        let localHelloMessages: [RBLocalProximity] = storage.getLocalProximityList(from: origin, to: Date())
-        do {
-            let filteredProximities: [RBLocalProximity] = try filter.filter(proximities: localHelloMessages)
-            server.reportV4(code: code, helloMessages: filteredProximities) { result in
+            server.report(code: code, helloMessages: filteredProximities) { result in
                 switch result {
                 case let .success(token):
                     self.reportToken = token
@@ -294,12 +283,12 @@ extension RBManager {
         }
     }
     
-    public func registerV3(captcha: String, captchaId: String, completion: @escaping (_ error: Error?) -> ()) {
+    public func register(captcha: String, captchaId: String, completion: @escaping (_ error: Error?) -> ()) {
         guard let keys: RBECKeys = try? RBKeysManager.generateKeys() else {
             completion(NSError.rbLocalizedError(message: "Impossible to set keys up.", code: 0))
             return
         }
-        server.registerV3(captcha: captcha, captchaId: captchaId, publicKey: keys.publicKeyBase64) { result in
+        server.register(captcha: captcha, captchaId: captchaId, publicKey: keys.publicKeyBase64) { result in
             switch result {
             case let .success(response):
                 do {
@@ -314,7 +303,7 @@ extension RBManager {
         }
     }
     
-    public func unregisterV3(_ completion: @escaping (_ error: Error?, _ isBlocking: Bool) -> ()) {
+    public func unregister(_ completion: @escaping (_ error: Error?, _ isBlocking: Bool) -> ()) {
         guard isRegistered else {
             isProximityActivated = false
             stopProximityDetection()
@@ -333,7 +322,7 @@ extension RBManager {
         do {
             let ntpTimestamp: Int = Date().timeIntervalSince1900
             let unregisterMessage: RBUnregisterMessage = try RBMessageGenerator.generateUnregisterMessage(for: epoch, ntpTimestamp: ntpTimestamp, key: ka)
-            server.unregisterV3(epochId: unregisterMessage.epochId, ebid: unregisterMessage.ebid, time: unregisterMessage.time, mac: unregisterMessage.mac, completion: { error in
+            server.unregister(epochId: unregisterMessage.epochId, ebid: unregisterMessage.ebid, time: unregisterMessage.time, mac: unregisterMessage.mac, completion: { error in
                 if let error = error, (error as NSError).code == -1001 {
                     completion(error, true)
                 } else {
@@ -381,7 +370,6 @@ extension RBManager {
     }
     
     public func clearAtRiskAlert() {
-        lastRiskReceivedDate = nil
         lastStatusReceivedDate = nil
     }
     
@@ -413,14 +401,10 @@ extension RBManager {
     
     private func processStatusResponse(_ response: RBStatusResponse) throws {
         let epochs: [RBEpoch] = try decrypt(tuples: response.tuples)
-        lastExposureTimeFrame = response.lastExposureTimeFrame
         let now: Date = Date()
-        storage.saveLastStatusReceivedDate(now)
-        storage.saveLastStatusErrorDate(nil)
-        let isLastRiskDateOldEnough: Bool = now.timeIntervalSince1970 - (lastRiskReceivedDate?.timeIntervalSince1970 ?? 0.0) > 24.0 * 3600.0
-        if response.atRisk && isLastRiskDateOldEnough {
-            lastRiskReceivedDate = now
-        }
+        lastStatusReceivedDate = now
+        lastStatusErrorDate = nil
+        declarationToken = response.declarationToken
         if !epochs.isEmpty {
             clearLocalEpochs()
             storage.save(epochs: epochs)

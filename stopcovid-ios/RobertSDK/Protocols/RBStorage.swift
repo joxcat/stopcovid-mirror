@@ -43,10 +43,6 @@ public protocol RBStorage {
     func getLocalProximityList(from: Date, to: Date) -> [RBLocalProximity]
     func clearProximityList(before date: Date)
     
-    // MARK: - Status: isAtRisk -
-    func clearIsAtRisk()
-    func isAtRisk() -> Bool?
-    
     // MARK: - Status: last exposure time frame -
     func save(lastExposureTimeFrame: Int?)
     func lastExposureTimeFrame() -> Int?
@@ -66,8 +62,6 @@ public protocol RBStorage {
     // MARK: - Status: last risk received date -
     func saveLastRiskReceivedDate(_ date: Date?)
     func lastRiskReceivedDate() -> Date?
-    func saveCurrentRiskScoringDate(_ date: Date?)
-    func currentRiskScoringDate() -> Date?
     
     // MARK: - Status: Is sick -
     func save(isSick: Bool)
@@ -91,9 +85,25 @@ public protocol RBStorage {
     func saveReportToken(_ token: String?)
     func reportToken() -> String?
     
+    // MARK: - Declaration token -
+    func saveDeclarationToken(_ token: String?)
+    func declarationToken() -> String?
+    
+    // MARK: - Status: Current risk level -
+    func saveCurrentStatusRiskLevel(_ statusRiskLevelInfo: RBStatusRiskLevelInfo?)
+    func currentStatusRiskLevel() -> RBStatusRiskLevelInfo?
+    
+    // MARK: - Status: Last Robert risk level -
+    func saveLastRobertStatusRiskLevel(_ statusRiskLevelInfo: RBStatusRiskLevelInfo?)
+    func lastRobertStatusRiskLevel() -> RBStatusRiskLevelInfo?
+    
+    // MARK: - Status: Last Warning risk level -
+    func saveLastWarningStatusRiskLevel(_ statusRiskLevelInfo: RBStatusRiskLevelInfo?)
+    func lastWarningStatusRiskLevel() -> RBStatusRiskLevelInfo?
+    
     // MARK: - Data cleraing -
     func clearLocalEpochs()
     func clearLocalProximityList()
     func clearAll(includingDBKey: Bool)
-    
+
 }

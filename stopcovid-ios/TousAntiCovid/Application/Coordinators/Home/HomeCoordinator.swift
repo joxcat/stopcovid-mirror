@@ -137,7 +137,7 @@ final class HomeCoordinator: WindowedCoordinator {
     }
     
     private func showMyHealth() {
-        let sickCoordinator: SickCoordinator = SickCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
+        let sickCoordinator: MyHealthCoordinator = MyHealthCoordinator(presentingController: navigationController?.topPresentedController, parent: self)
         addChild(coordinator: sickCoordinator)
     }
     

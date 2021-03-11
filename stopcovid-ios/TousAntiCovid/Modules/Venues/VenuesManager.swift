@@ -33,25 +33,13 @@ final class VenuesManager: NSObject {
     
     static let shared: VenuesManager = VenuesManager()
     
-    var isVenuesRecordingActivated: Bool { ParametersManager.shared.displayRecordVenues }
-    var isPrivateEventsActivated: Bool { ParametersManager.shared.displayPrivateEvent }
-    var venuesQrCodes: [VenueQrCode] { storageManager?.venuesQrCodes() ?? [] }
-    var isAtWarningRisk: Bool { lastWarningRiskReceivedDate != nil }
-    var lastWarningRiskReceivedDate: Date? {
-        get {
-            storageManager.lastWarningRiskReceivedDate()
-        }
-        set {
-            let wasRiskAlreadyExisting: Bool = lastWarningRiskReceivedDate != nil
-            if newValue == nil {
-                storageManager.saveCurrentWarningRiskScoringDate(nil)
-            } else if !wasRiskAlreadyExisting {
-                NotificationsManager.shared.scheduleAtWarningRiskNotification(minHour: ParametersManager.shared.minHourContactNotif, maxHour: ParametersManager.shared.maxHourContactNotif)
-                storageManager.saveCurrentWarningRiskScoringDate(newValue)
-            }
-            storageManager.saveLastWarningRiskReceivedDate(newValue)
-        }
+    var isVenuesRecordingActivated: Bool {
+        return ParametersManager.shared.displayRecordVenues
     }
+    var isPrivateEventsActivated: Bool {
+        return ParametersManager.shared.displayPrivateEvent
+    }
+    var venuesQrCodes: [VenueQrCode] { storageManager?.venuesQrCodes() ?? [] }
     var needPrivateEventQrCodeGeneration: Bool {
         let now: Date = Date()
         let currentQrCodeDate: Date = self.currentQrCodeDate ?? .distantPast
@@ -208,8 +196,8 @@ extension VenuesManager {
         guard let qrType = Int(info.item(at: 0) ?? "") else { return nil }
         guard let uuid = info.item(at: 1) else { return nil }
         guard let venueType = info.item(at: 2)?.uppercased() else { return nil }
-        let rawVenueCategory: Int? = info.item(at: 3) == "-" ? 0 : Int(info.item(at: 3) ?? "")
-        let rawVenueCapacity: Int? = info.item(at: 4) == "-" ? 0 : Int(info.item(at: 4) ?? "")
+        let rawVenueCategory: Int? = info.count < 4 ? 0 : (info.item(at: 3) == "-" ? 0 : Int(info.item(at: 3) ?? ""))
+        let rawVenueCapacity: Int? = info.count < 5 ? 0 : (info.item(at: 4) == "-" ? 0 : Int(info.item(at: 4) ?? ""))
         let timestamp: Double = Double(info.item(at: 5) ?? "") ?? Date().timeIntervalSince1970
 
         // Conditions
@@ -226,27 +214,6 @@ extension VenuesManager {
 
 // MARK: - Server requests -
 extension VenuesManager {
-    
-    func status(_ completion: ((_ error: Error?) -> ())? = nil) {
-        let now: Date = Date()
-        let qrCodes: [VenueQrCode] = venuesQrCodes.filter { $0.ntpTimestamp <= now.timeIntervalSince1900 }
-        guard !qrCodes.isEmpty else {
-            completion?(nil)
-            return
-        }
-        let staticQrCodePayloads: [(String, Int)] = qrCodes.filter { $0.qrType == VenueQrCode.QrCodeType.static.rawValue }.map { ($0.payload, $0.ntpTimestamp) }
-        let dynamicQrCodePayloads: [(String, Int)] = qrCodes.filter { $0.qrType == VenueQrCode.QrCodeType.dynamic.rawValue }.map { ($0.payload, $0.ntpTimestamp) }
-        WarningServer.shared.wstatus(staticQrCodePayloads: staticQrCodePayloads,
-                                     dynamicQrCodePayloads: dynamicQrCodePayloads) { result in
-            switch result {
-            case let .success(isAtWarningRisk):
-                self.lastWarningRiskReceivedDate = isAtWarningRisk ? Date() : nil
-                completion?(nil)
-            case let .failure(error):
-                completion?(error)
-            }
-        }
-    }
 
     func report(_ completion: ((_ error: Error?) -> ())? = nil) {
         guard let token = RBManager.shared.reportToken else {

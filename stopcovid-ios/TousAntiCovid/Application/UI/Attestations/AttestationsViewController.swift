@@ -123,7 +123,7 @@ final class AttestationsViewController: CVTableViewController {
                                                       theme: CVRow.Theme(topInset: 40.0,
                                                                          bottomInset: 20.0,
                                                                          textAlignment: .natural,
-                                                                         titleFont: { Appearance.Section.titleFont }))
+                                                                         titleFont: { Appearance.Cell.Text.headTitleFont }))
             rows.append(attestationsSectionRow)
             let attestationsExplanationRow: CVRow = CVRow(subtitle: "attestationsController.validAttestationsSection.subtitle".localized,
                                                           xibName: .textCell,
@@ -157,7 +157,7 @@ final class AttestationsViewController: CVTableViewController {
                                                       theme: CVRow.Theme(topInset: 40.0,
                                                                          bottomInset: 20.0,
                                                                          textAlignment: .natural,
-                                                                         titleFont: { Appearance.Section.titleFont }))
+                                                                         titleFont: { Appearance.Cell.Text.headTitleFont }))
             rows.append(attestationsSectionRow)
             let attestationsExplanationRow: CVRow = CVRow(subtitle: "attestationsController.expiredSection.subtitle".localized,
                                                           xibName: .textCell,

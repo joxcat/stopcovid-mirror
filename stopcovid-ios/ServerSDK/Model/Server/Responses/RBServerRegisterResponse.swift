@@ -12,7 +12,7 @@ import UIKit
 
 struct RBServerRegisterResponse: RBServerResponse {
 
-    var tuples: String
-    var timeStart: Int
+    let tuples: String
+    let timeStart: Int
 
 }

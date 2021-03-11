@@ -12,9 +12,11 @@ import UIKit
 
 struct RBServerStatusResponse: RBServerResponse {
 
-    var atRisk: Bool
-    var lastExposureTimeframe: Int?
-    var message: String?
-    var tuples: String
-
+    let riskLevel: Double
+    let lastContactDate: String?
+    let lastRiskScoringDate: String?
+    let message: String?
+    let tuples: String
+    let declarationToken: String?
+    
 }

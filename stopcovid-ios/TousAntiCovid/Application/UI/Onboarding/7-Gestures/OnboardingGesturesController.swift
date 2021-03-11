@@ -29,7 +29,8 @@ final class OnboardingGesturesController: OnboardingController {
                                    xibName: .textCell,
                                    theme: CVRow.Theme(topInset: 20.0,
                                                       bottomInset: 20.0,
-                                                      textAlignment: .natural))
+                                                      textAlignment: .natural,
+                                                      titleFont: { Appearance.Cell.Text.smallHeadTitleFont }))
         rows.append(textRow)
         let gesturesRows: [CVRow] = gestures().map { gesture in
             CVRow(title: gesture.title,

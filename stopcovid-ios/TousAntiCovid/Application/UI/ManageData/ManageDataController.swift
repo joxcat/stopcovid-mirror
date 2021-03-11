@@ -48,6 +48,12 @@ final class ManageDataController: CVTableViewController {
         }
         rows.append(contentsOf: showInfoNotificationsRows)
         rows.append(blockSeparatorRow())
+        let hideStatusRows: [CVRow] = switchRowsBlock(textPrefix: "manageDataController.hideStatus",
+                                                      isOn: StatusManager.shared.hideStatus) { isOn in
+            StatusManager.shared.hideStatus = isOn
+        }
+        rows.append(contentsOf: hideStatusRows)
+        rows.append(blockSeparatorRow())
         let attestationRows: [CVRow] = rowsBlock(textPrefix: "manageDataController.attestationsData") { [weak self] in
             self?.eraseAttestationDataButtonPressed()
         }
@@ -76,11 +82,6 @@ final class ManageDataController: CVTableViewController {
             self?.eraseContactsButtonPressed()
         }
         rows.append(contentsOf: contactRows)
-        rows.append(blockSeparatorRow())
-        let alertRows: [CVRow] = rowsBlock(textPrefix: "manageDataController.eraseRemoteAlert") { [weak self] in
-            self?.eraseAlertsButtonPressed()
-        }
-        rows.append(contentsOf: alertRows)
         rows.append(blockSeparatorRow())
         let quitRows: [CVRow] = rowsBlock(textPrefix: "manageDataController.quitStopCovid", isDestuctive: true) { [weak self] in
             self?.quitButtonPressed()
@@ -111,6 +112,7 @@ final class ManageDataController: CVTableViewController {
                                    theme: CVRow.Theme(topInset: Appearance.Cell.leftMargin,
                                                       bottomInset: Appearance.Cell.leftMargin,
                                                       textAlignment: .natural,
+                                                      titleFont: { Appearance.Cell.Text.smallHeadTitleFont },
                                                       separatorLeftInset: Appearance.Cell.leftMargin))
         textRow.theme.backgroundColor = Appearance.Cell.cardBackgroundColor
         var switchRow: CVRow = CVRow(title: "\(textPrefix).button".localized,
@@ -137,6 +139,7 @@ final class ManageDataController: CVTableViewController {
                                    theme: CVRow.Theme(topInset: Appearance.Cell.leftMargin,
                                                       bottomInset: Appearance.Cell.leftMargin,
                                                       textAlignment: .natural,
+                                                      titleFont: { Appearance.Cell.Text.smallHeadTitleFont },
                                                       separatorLeftInset: Appearance.Cell.leftMargin))
         textRow.theme.backgroundColor = Appearance.Cell.cardBackgroundColor
         var buttonRow: CVRow = CVRow(title: "\(textPrefix).button".localized,
@@ -246,17 +249,6 @@ final class ManageDataController: CVTableViewController {
                   })
     }
     
-    private func eraseAlertsButtonPressed() {
-        showAlert(title: "manageDataController.eraseRemoteAlert.confirmationDialog.title".localized,
-                  message: "manageDataController.eraseRemoteAlert.confirmationDialog.message".localized,
-                  okTitle: "common.yes".localized,
-                  isOkDestructive: true,
-                  cancelTitle: "common.no".localized, handler:  { [weak self] in
-                    RBManager.shared.clearAtRiskAlert()
-                    self?.showFlash()
-                  })
-    }
-    
     private func quitButtonPressed() {
         showAlert(title: "manageDataController.quitStopCovid.confirmationDialog.title".localized,
                   message: "manageDataController.quitStopCovid.confirmationDialog.message".localized,
@@ -264,9 +256,9 @@ final class ManageDataController: CVTableViewController {
                   isOkDestructive: true,
                   cancelTitle: "common.no".localized, handler:  {
                     switch ParametersManager.shared.apiVersion {
-                    case .v3, .v4:
+                    case .v5:
                         HUD.show(.progress)
-                        RBManager.shared.unregisterV3 { [weak self] error, isErrorBlocking in
+                        RBManager.shared.unregister { [weak self] error, isErrorBlocking in
                             HUD.hide()
                             self?.processPostUnregisterActions(error, isErrorBlocking: isErrorBlocking)
                         }

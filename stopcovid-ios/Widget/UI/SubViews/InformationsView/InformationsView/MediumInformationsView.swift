@@ -13,52 +13,44 @@ import WidgetKit
 
 struct MediumInformationsView: View {
     
-    var isAtRisk: Bool
-    var isSick: Bool
-    var isAtWarningRisk: Bool
-    var didReceiveStatus: Bool = true
-    
+    var content: WidgetContent
+
     private var statusDateString: String? {
-        if didReceiveStatus {
-            return WidgetManager.shared.widgetFullTitleDate
-        } else {
-            return nil
-        }
+        guard WidgetManager.shared.areStringsAvailable() else { return nil }
+        guard content.didReceiveStatus else { return nil }
+        return WidgetManager.shared.widgetFullTitleDate
     }
+
     private var informations: String {
-        if !WidgetManager.shared.areStringsAvailableToWidget {
+        if !WidgetManager.shared.areStringsAvailable() {
             return "TousAntiCovid"
-        } else if isSick {
+        } else if content.isSick {
             return WidgetManager.shared.widgetSickFullTitle
-        } else if !didReceiveStatus {
+        } else if !content.didReceiveStatus {
             return WidgetManager.shared.widgetNoStatusInfo
         } else {
-            return isAtRisk ? WidgetManager.shared.widgetFullTitleAtRisk : (isAtWarningRisk ? WidgetManager.shared.widgetWarningFullTitle : WidgetManager.shared.widgetFullTitleNoContact)
+            return  WidgetManager.shared.widgetFullTitle
         }
     }
     
     var body: some View {
         ZStack {
-            if isSick {
+            if content.isSick {
                 SickGradientView()
-            } else if isAtRisk {
-                AtRiskGradientView()
-            } else if isAtWarningRisk {
-                WarningRiskGradientView()
-            } else if didReceiveStatus && !isSick {
-                NoContactGradientView()
+            } else if content.didReceiveStatus {
+                GradientView()
             }
             VStack(spacing: 3) {
-                if isSick {
+                if content.isSick {
                     Spacer()
-                    InformationsContentView(title: informations, isAtRisk: false, isSick: isSick, didReceiveStatus: didReceiveStatus)
+                    InformationsContentView(title: informations, content: content)
                     Spacer()
-                } else if isAtRisk {
-                    InformationsContentView(title: informations, subtitle: statusDateString, isAtRisk: true, isSick: isSick, didReceiveStatus: didReceiveStatus)
+                } else if content.currentRiskLevelIsNotZero {
+                    InformationsContentView(title: informations, subtitle: statusDateString, content: content)
                     MoreInformationsView()
                 } else {
                     Spacer()
-                    InformationsContentView(title: informations, subtitle: statusDateString, isAtRisk: isAtRisk, isSick: isSick, didReceiveStatus: didReceiveStatus)
+                    InformationsContentView(title: informations, subtitle: statusDateString, content: content)
                     Spacer()
                 }
             }
@@ -68,19 +60,9 @@ struct MediumInformationsView: View {
 }
 
 struct MediumInformationsView_Previews: PreviewProvider {
+    static let content: WidgetContent = WidgetContent(isProximityActivated: true, isSick: false, lastStatusReceivedDate: Date(), currentRiskLevel: 0.0)
     static var previews: some View {
-        MediumInformationsView(isAtRisk: true, isSick: false, isAtWarningRisk: false)
+        MediumInformationsView(content: content)
             .previewContext(WidgetPreviewContext(family: .systemMedium))
-        MediumInformationsView(isAtRisk: false, isSick: false, isAtWarningRisk: false)
-            .previewContext(WidgetPreviewContext(family: .systemMedium))
-        
-        MediumInformationsView(isAtRisk: true, isSick: false, isAtWarningRisk: false)
-            .previewContext(WidgetPreviewContext(family: .systemMedium))
-            .background(Color.black)
-            .environment(\.colorScheme, .dark)
-        MediumInformationsView(isAtRisk: false, isSick: false, isAtWarningRisk: false)
-            .previewContext(WidgetPreviewContext(family: .systemMedium))
-            .background(Color.black)
-            .environment(\.colorScheme, .dark)
     }
 }

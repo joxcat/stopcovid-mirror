@@ -9,14 +9,20 @@ import UIKit
 
 public struct RBStatusResponse {
 
-    let atRisk: Bool
-    let lastExposureTimeFrame: Int?
+    let riskLevel: Double
+    let lastContactDate: String?
+    let lastRiskScoringDate: String?
+    let message: String?
     let tuples: String
+    let declarationToken: String?
     
-    public init(atRisk: Bool, lastExposureTimeFrame: Int?, tuples: String) {
-        self.atRisk = atRisk
-        self.lastExposureTimeFrame = lastExposureTimeFrame
+    public init(riskLevel: Double, lastContactDate: String?, lastRiskScoringDate: String?, message: String?, tuples: String, declarationToken: String?) {
+        self.riskLevel = riskLevel
+        self.lastContactDate = lastContactDate
+        self.lastRiskScoringDate = lastRiskScoringDate
+        self.message = message
         self.tuples = tuples
+        self.declarationToken = declarationToken
     }
-    
+
 }

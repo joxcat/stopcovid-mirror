@@ -43,8 +43,8 @@ enum Constant {
         
         static var resourcesCertificate: Data { Bundle.main.fileDataFor(fileName: "app.stopcovid.gouv.fr", ofType: "pem") ?? Data() }
 
-        static let jsonVersion: Int = 26
-        static let baseJsonUrl: String = "https://app.stopcovid.gouv.fr/json/version-\(jsonVersion)"
+        static let jsonVersion: Int = 28
+        static let baseJsonUrl: String = "https://app.stopcovid.gouv.fr/json/version-\(jsonVersion)/Config"
         static let configUrl: URL = URL(string: "\(baseJsonUrl)/config.json")!
 
     }
@@ -52,3 +52,4 @@ enum Constant {
 }
 
 typealias JSON = [String: Any]
+typealias Headers = [String: String]

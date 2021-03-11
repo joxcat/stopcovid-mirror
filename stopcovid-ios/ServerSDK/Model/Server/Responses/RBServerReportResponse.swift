@@ -12,8 +12,8 @@ import UIKit
 
 struct RBServerReportResponse: RBServerResponse {
 
-    var reportValidationToken: String
-    var success: Bool?
-    var message: String?
+    let reportValidationToken: String
+    let success: Bool?
+    let message: String?
     
 }
